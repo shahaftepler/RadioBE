@@ -66,6 +66,10 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
         }
     };
 
+
+    //test new branch
+
+
     BroadcastReceiver mediaBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -105,7 +109,7 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        playerView = findViewById(R.id.playerView);
+        playerView = findViewById(R.id.playerView1);
         // Setup Exoplayer instance
         simpleExoPlayer = ExoPlayerFactory.newSimpleInstance(this);
         playerView.setPlayer(simpleExoPlayer);
