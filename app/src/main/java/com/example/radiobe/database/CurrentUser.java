@@ -22,7 +22,7 @@ public class CurrentUser extends User {
 //    private String fireBaseID;
 //
 //    private String[] favoritesID = null;
-
+    boolean once = true;
 
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 
@@ -41,6 +41,7 @@ public class CurrentUser extends User {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null){
                     instance = dataSnapshot.getValue(CurrentUser.class);
+
 //                    instance.firstName = user.getFirstName();
 //                    instance.lastName = user.getLastName();
 //                    instance.email = user.getEmail();
@@ -58,23 +59,23 @@ public class CurrentUser extends User {
         });
     }
 
-    public void addFavorite(String itemID){
-        List<String> fav = this.getFavoritesID();
-        if (fav !=null) {
-            fav.add(itemID);
-            this.setFavoritesID(fav);
-        } else {
-            fav = new ArrayList<>();
-            fav.add(itemID);
-            this.setFavoritesID(fav);
-        }
-    }
-
-    public void removeFavorite(String itemID){
-        List<String> fav = this.getFavoritesID();
-        if (fav != null) {
-            fav.remove(itemID);
-            this.setFavoritesID(fav);
-        }
-    }
+//    public void addFavorite(String itemID){
+//        List<String> fav = this.getFavoritesID();
+//        if (fav !=null) {
+//            fav.add(itemID);
+//            this.setFavoritesID(fav);
+//        } else {
+//            fav = new ArrayList<>();
+//            fav.add(itemID);
+//            this.setFavoritesID(fav);
+//        }
+//    }
+//
+//    public void removeFavorite(String itemID){
+//        List<String> fav = this.getFavoritesID();
+//        if (fav != null) {
+//            fav.remove(itemID);
+//            this.setFavoritesID(fav);
+//        }
+//    }
 }

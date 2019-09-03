@@ -1,6 +1,7 @@
 package com.example.radiobe.models;
 
 import android.annotation.TargetApi;
+import android.graphics.Bitmap;
 import android.os.Build;
 
 import java.text.SimpleDateFormat;
@@ -20,6 +21,8 @@ public class User {
     private String _rev;
     private String fireBaseID;
     private List<String> favoritesID;
+    Bitmap profileImage;
+    Bitmap coverImage;
 
     public List<String> getFavoritesID() {
         return favoritesID;
