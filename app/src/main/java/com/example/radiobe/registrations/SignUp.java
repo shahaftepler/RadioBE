@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.example.radiobe.R;
 import com.example.radiobe.StreamDAO;
+import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,7 +41,7 @@ public class SignUp extends AppCompatActivity {
     boolean isUserInDatabase;
     FirebaseUser firebaseUser;
     User user;
-    DatabaseReference databaseReference;
+    DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +109,14 @@ public class SignUp extends AppCompatActivity {
     public void createUser(User newUser) {
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(newUser.getEmail(), newUser.getPassword()).addOnCompleteListener((task) -> {
             if (task.isSuccessful()) {
-                StreamDAO.getInstance().saveUserToDatabase(newUser);
+//                StreamDAO.getInstance().saveUserToDatabase(newUser);
+                firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                newUser.setPassword(null);  //not saving the password on the server.
+                newUser.setFireBaseID(firebaseUser.getUid());
+                ref.child("users").child(newUser.getFireBaseID()).setValue(newUser);
+                CurrentUser.getInstance().createUser(newUser.getFireBaseID());
+
+
                 Intent intent = new Intent(this, MainScreen.class);
                 startActivity(intent);
                 finish();

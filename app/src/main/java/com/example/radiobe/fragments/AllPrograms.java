@@ -15,7 +15,7 @@ import android.widget.ProgressBar;
 import com.example.radiobe.R;
 import com.example.radiobe.adapters.RadioItemsAdapter;
 import com.example.radiobe.database.FirebaseItemsDataSource;
-import com.example.radiobe.database.RadioItemsDataSource;
+//import com.example.radiobe.database.RadioItemsDataSource;
 import com.facebook.FacebookActivity;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
@@ -63,6 +63,7 @@ public class AllPrograms extends Fragment {
         adapter = new RadioItemsAdapter(FirebaseItemsDataSource.getInstance().getFireBaseStreams(), recyclerView,  getContext());
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter.updateLikes();
 
         searchView = view.findViewById(R.id.searchView);
         if (getActivity() != null) {
@@ -85,18 +86,18 @@ public class AllPrograms extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
 
-                if (source.adapter != null) {
+                if (adapter != null) {
                     System.out.println("Not Null");
-                    source.adapter.getFilter().filter(query);
+                    adapter.getFilter().filter(query);
                 }
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (source.adapter != null) {
+                if (adapter != null) {
                     System.out.println("Not Null");
-                    source.adapter.getFilter().filter(newText);
+                    adapter.getFilter().filter(newText);
                 }
                 return false;
             }

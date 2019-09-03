@@ -6,7 +6,7 @@ import android.os.Build;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-
+import java.util.List;
 
 
 public class User {
@@ -18,7 +18,16 @@ public class User {
     private String password;
     private String _id;
     private String _rev;
+    private String fireBaseID;
+    private List<String> favoritesID;
 
+    public List<String> getFavoritesID() {
+        return favoritesID;
+    }
+
+    public void setFavoritesID(List<String> favoritesID) {
+        this.favoritesID = favoritesID;
+    }
 
     public User(){}
 
@@ -41,6 +50,24 @@ public class User {
         this.birthDate = birthDate;
         this.password = password;
     }
+
+    public String getFireBaseID() {
+        return fireBaseID;
+    }
+
+    public void setFireBaseID(String fireBaseID) {
+        this.fireBaseID = fireBaseID;
+    }
+
+    public User(String firstName, String lastName, String email, String birthDate, String password, String fireBaseID) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.birthDate = birthDate;
+        this.password = password;
+        this.fireBaseID = fireBaseID;
+    }
+
 
     /*full Constructor with database data*/
     public User(String firstName, String lastName, String email, String birthDate, String password, String _id, String _rev) {

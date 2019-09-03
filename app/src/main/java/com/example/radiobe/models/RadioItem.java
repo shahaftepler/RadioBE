@@ -15,9 +15,9 @@ public class RadioItem {
     private String filePath;
     private Long creationDate;
     private long duration;
-    private int likes;
-    private int views;
-    private int comments;
+    private long likes;
+    private long views;
+    private long comments;
     private int resImage;
     private String _id;
     private String _rev;
@@ -42,7 +42,7 @@ public class RadioItem {
 
 
     //from Database ctor.
-    public RadioItem(long duration, String creationDateString, int likes, int views, int comments, int resImage , String _id, String _rev, String itemName , String filePath, String durationString ) {
+    public RadioItem(long duration, String creationDateString, long likes, long views, long comments, int resImage , String _id, String _rev, String itemName , String filePath, String durationString ) {
         this.duration = duration;
         this.creationDateString = creationDateString;
         this.likes = likes;
@@ -59,13 +59,12 @@ public class RadioItem {
     }
 
     //from firebase
-    public RadioItem(long duration, String creationDateString, int likes, int views, int comments, int resImage , String mUid, String itemName , String filePath, String durationString ) {
+    public RadioItem(long duration, String creationDateString, long likes, long views, long comments , String mUid, String itemName , String filePath, String durationString ) {
         this.duration = duration;
         this.creationDateString = creationDateString;
         this.likes = likes;
         this.views = views;
         this.comments = comments;
-        this.resImage = resImage;
         this.mUid = mUid;
         this.itemName = itemName;
         this.filePath = filePath;
@@ -85,7 +84,7 @@ public class RadioItem {
     }
 
     //from api after convert to string
-    public RadioItem(long duration, String vodName ,String itemName, Long creationDate , String creationDateString, String filePath, String durationString) {
+    public RadioItem(long duration, String vodName ,String itemName, Long creationDate , String creationDateString, String filePath, String durationString, String mUid) {
         this.vodName = vodName;
         this.duration = duration;
         this.itemName = itemName;
@@ -93,6 +92,7 @@ public class RadioItem {
         this.creationDateString = creationDateString;
         this.filePath = filePath;
         this.durationString = durationString;
+        this.mUid = mUid;
     }
 
 
@@ -104,22 +104,22 @@ public class RadioItem {
         this.duration = duration;
     }
 
-    public int getLikes() {
+    public long getLikes() {
         return likes;
     }
-    public void setLikes(int likes) {
+    public void setLikes(long likes) {
         this.likes = likes;
     }
-    public int getViews() {
+    public long getViews() {
         return views;
     }
-    public void setViews(int views) {
+    public void setViews(long views) {
         this.views = views;
     }
-    public int getComments() {
+    public long getComments() {
         return comments;
     }
-    public void setComments(int comments) {
+    public void setComments(long comments) {
         this.comments = comments;
     }
     public int getResImage() {
@@ -189,14 +189,6 @@ public class RadioItem {
         this.usersThatLiked = usersThatLiked;
     }
 
-//    public void changeLikeStatus(User user, boolean addLike){
-//
-//        if(addLike)
-//            usersThatLiked.add(user);
-//        else {
-//            usersThatLiked.remove(user);
-//        }
-//    }
 
     //for fire base
     public String getUid() {
@@ -271,9 +263,10 @@ public class RadioItem {
         String filePath = (String) snapshot.get("filePath");
         String itemName = (String) snapshot.get("itemName");
         String vodName = (String) snapshot.get("vodName");
+        String mUid = (String) snapshot.get("uid");
 
         System.out.println("NEW STATIC METHOD---> "+String.valueOf(count)+ itemName);
-        return  new RadioItem(duration, vodName, itemName, creationDate, creationDateString, filePath,durationString);
+        return  new RadioItem(duration, vodName, itemName, creationDate, creationDateString, filePath,durationString, mUid);
 //        return new RadioItem(duration, creationDateString, likes, views, comments, resImage , null, itemName, filePath, durationString);
     }
 

@@ -9,6 +9,7 @@ import com.example.radiobe.database.AddCommentListener;
 import com.example.radiobe.database.AddCommentsTask;
 import com.example.radiobe.database.ChangeLikesListener;
 import com.example.radiobe.database.ChangeLikesStatusTask;
+import com.example.radiobe.database.ChangeProgress;
 import com.example.radiobe.database.ChangeViewsListener;
 import com.example.radiobe.database.ChangeViewsTask;
 import com.example.radiobe.database.DatabaseReaderListener;
@@ -103,8 +104,8 @@ public class StreamDAO {
     private StreamDAO(){}
 
 
-    public void jsonParse(ParseJsonListener listener){
-        new FireBaseParseJson(listener).execute();
+    public void jsonParse(ParseJsonListener listener , ChangeProgress changeProgress){
+        new FireBaseParseJson(listener, changeProgress).execute();
 //        new ParseJsonTask(listener).execute();
     }
 

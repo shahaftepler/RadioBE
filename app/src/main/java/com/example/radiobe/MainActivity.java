@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
 import com.bumptech.glide.Glide;
+import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.generalScreens.ActivityRadio;
 import com.example.radiobe.registrations.Login;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (firebaseUser != null) {   //TODO : try to understand why it didn't work from the splash screen itself.
+            CurrentUser.getInstance().createUser(firebaseUser.getUid()); // todo: create a listener for that.
             Intent intent = new Intent(this, MainScreen.class);
             startActivity(intent);
         }

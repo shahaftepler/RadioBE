@@ -22,6 +22,8 @@ import com.example.radiobe.database.AddCommentListener;
 import com.example.radiobe.database.ChangeLikesListener;
 import com.example.radiobe.database.ChangeViewsListener;
 import com.example.radiobe.database.ChangeViewsTask;
+import com.example.radiobe.database.FirebaseItemsDataSource;
+import com.example.radiobe.database.UpdateServer;
 import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.Comment;
 import com.example.radiobe.models.RadioItem;
@@ -50,6 +52,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     Context context;
     List<RadioItem> filteredStreams;
+    UpdateServer updateServer;
 
     public RadioItemsAdapter(List<RadioItem> streams, RecyclerView recyclerView, Context context) {
         this.streams = streams;
@@ -59,6 +62,8 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 //        this.progressBar = pb;
         this.context = context;
     }
+
+
 
 
     @NonNull
@@ -80,7 +85,9 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
     @Override
     public void onBindViewHolder(@NonNull RadioViewHolder holder, int position) {
         //change 2
+
         RadioItem radioItem = filteredStreams.get(position);
+        holder.radioItem = radioItem;
 //        RadioItem radioItem = streams.get(position);
         holder.tvFileName.setText(radioItem.getItemName());
 //        holder.tvDuration.setText(String.valueOf(radioItem.getDuration()));
@@ -95,16 +102,23 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 
 
         holder.addLike.setOnClickListener((v) -> {
-            System.out.println("Clicked");
-            holder.addLike.setOnClickListener(null);
-            StreamDAO.getInstance().handleLikes(firebaseUser, radioItem, new ChangeLikesListener() {
-                @Override
-                public void done() {
-                    holder.tvLikes.setText(String.valueOf(radioItem.getLikes()));
-                    notifyItemChanged(position);
+//            System.out.println("Clicked");
+//            holder.addLike.setOnClickListener(null);
+//            StreamDAO.getInstance().handleLikes(firebaseUser, radioItem, new ChangeLikesListener() {
+//                @Override
+//                public void done() {
+//                    holder.tvLikes.setText(String.valueOf(radioItem.getLikes()));
+//                    notifyItemChanged(position);
+//
+//                }
+//            });
 
-                }
-            });
+            FirebaseItemsDataSource.getInstance().addLikes(radioItem);
+
+
+//            //TODO: firebaseitemsDatasource.getInstance().addLike();
+//            FirebaseItemsDataSource.getInstance().addLikes(radioItem,updateLikes);
+//            updateLikes();
 
 
         });
@@ -118,15 +132,15 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             holder.sendButton.setOnClickListener((button) -> {
                 String description = holder.addCommentEditText.getText().toString();
                 if (description.length() > 0) {
-                    Comment comment = new Comment(firebaseUser.getEmail(), LocalDate.now(), description);
-                    StreamDAO.getInstance().handleComments(firebaseUser, radioItem, comment, new AddCommentListener() {
-                        @Override
-                        public void done() {
-                            holder.tvComments.setText(String.valueOf(radioItem.getComments()));
-                            notifyItemChanged(position);
-                        }
-                    });
-
+                    Comment comment = new Comment(firebaseUser.getUid(), new Date().getTime(), description);
+//                    StreamDAO.getInstance().handleComments(firebaseUser, radioItem, comment, new AddCommentListener() {
+//                        @Override
+//                        public void done() {
+//                            holder.tvComments.setText(String.valueOf(radioItem.getComments()));
+//                            notifyItemChanged(position);
+//                        }
+//                    });
+                    FirebaseItemsDataSource.getInstance().addComment(comment, radioItem);
                     holder.addCommentEditText.setVisibility(View.GONE);
                     holder.addCommentEditText.setText("");
                     holder.addCommentEditText.setEnabled(false);
@@ -158,15 +172,17 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             intent.putExtra("play", b);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             changeToggles();
-            System.out.println("Viewed");
+            if (b) {
+                FirebaseItemsDataSource.getInstance().addView(radioItem);
+                System.out.println("Viewed");
+            }
 
-
-            StreamDAO.getInstance().handleViews(firebaseUser, radioItem, new ChangeViewsListener() {
-                @Override
-                public void done() {
-                    holder.tvViews.setText(String.valueOf(radioItem.getViews()));
-                }
-            });
+//            StreamDAO.getInstance().handleViews(firebaseUser, radioItem, new ChangeViewsListener() {
+//                @Override
+//                public void done() {
+//                    holder.tvViews.setText(String.valueOf(radioItem.getViews()));
+//                }
+//            });
         });
 
         holder.shareFacebook.setOnClickListener((v)->{
@@ -177,6 +193,10 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 
         //holder.tb.setBackgroundResource(radioItem.getResImage());
 
+
+        holder.addFavorites.setOnClickListener((v)->{
+            FirebaseItemsDataSource.getInstance().addFavorites(radioItem);
+        });
 
     }
 
@@ -195,6 +215,61 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
                 notifyItemChanged(i);
             }
         }
+    }
+
+    public void updateLikes(){
+        updateServer = new UpdateServer() {
+            @Override
+            public void updateLikes(RadioItem item) {
+                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+
+                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                    //holder.radioItem.getItemName()
+                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
+
+                        holder.tvLikes.setText(String.valueOf(item.getLikes()));
+                        holder.tvViews.setText(String.valueOf(item.getViews()));
+                        notifyItemChanged(i);
+                        return;
+                    }
+                }
+            }
+
+            @Override
+            public void updateComments(RadioItem item) {
+                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+
+                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                    //holder.radioItem.getItemName()
+                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
+                        holder.tvComments.setText(String.valueOf(item.getComments()));
+                        notifyItemChanged(i);
+                        return;
+                    }
+                }
+            }
+
+            @Override
+            public void updateViews(RadioItem item) {
+                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+
+                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                    //holder.radioItem.getItemName()
+                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
+                        holder.tvViews.setText(String.valueOf(item.getViews()));
+                        notifyItemChanged(i);
+                        return;
+                    }
+                }
+            }
+
+
+            };
+
+        FirebaseItemsDataSource.getInstance().setUpdateLikes(updateServer);
     }
 
 //change 3
@@ -256,6 +331,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         EditText addCommentEditText;
         ImageButton sendButton;
         ImageButton closeCommentButton;
+        RadioItem radioItem;
 //        TextView tvCloudID;
 
 
@@ -281,3 +357,4 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         }
     }
 }
+

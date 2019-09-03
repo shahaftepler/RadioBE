@@ -2,6 +2,7 @@ package com.example.radiobe.database;
 
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.text.format.DateFormat;
 
 import androidx.annotation.NonNull;
@@ -34,6 +35,8 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
     DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
     private List<RadioItem> streams = new ArrayList<>();
     ParseJsonListener listener;
+    int idCount = 0;
+    ChangeProgress changeProgress;
 
     @Override
     protected List<RadioItem> doInBackground(Void... voids) {
@@ -73,8 +76,8 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
 
                     long duration = getDurationFromFile(filePath);
                     String durationString = convertDuration(duration);
-
-                    RadioItem item = new RadioItem(duration, vodName, itemName, creationDate, creationDateString, filePath, durationString, null );
+                    String mUid = radioItem.getString("vodId");
+                    RadioItem item = new RadioItem(duration, vodName, itemName, creationDate, creationDateString, filePath, durationString, mUid);
                     streams.add(item);
 
 //                    myDatabase.child("streams").setValue(item);
@@ -100,7 +103,8 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
     @Override
     protected void onPostExecute(List<RadioItem> jsonStreams) {
 
-        FirebaseItemsDataSource.getInstance().setStreams(jsonStreams);
+//        if (idCount == jsonStreams.size() - 1)
+            FirebaseItemsDataSource.getInstance().setStreams(jsonStreams);
 
         FirebaseItemsDataSource.getInstance().loadData(()->{
             if (listener != null) {
@@ -108,12 +112,18 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
 
 //        new FirebaseItemsDataSource(null, null, jsonStreams);
             }
-        });
+        }, ()->{
+            if(changeProgress != null){
+                changeProgress.change();
+            }
+        } );
 
     }
 
-    public FireBaseParseJson(ParseJsonListener listener) {
+    public FireBaseParseJson(ParseJsonListener listener, ChangeProgress changeProgress) {
         this.listener = listener;
+        this.changeProgress = changeProgress;
+//        idCount = 0;
     }
 
     //}
@@ -133,10 +143,16 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
                             boolean shouldWrite = true;
 
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                RadioItem item = RadioItem.getItemFromHashMap((HashMap<String, Object>) snapshot.getValue());
-                                if (jsonStream.getVodName().equals(item.getVodName())) {
+//                                RadioItem item = RadioItem.getItemFromHashMap((HashMap<String, Object>) snapshot.getValue());
+                                    RadioItem item = snapshot.getValue(RadioItem.class);
+                                if (jsonStream.getUid().equals(item.getUid())) {
                                     shouldWrite = false;
                                     System.out.println("Don't Save the item.");
+
+                                    //it does have an id! so why in the datasource the items doesn't have??
+                                    System.out.println("NEW ITEM ID -----> :::: )))) "+ item.getUid());
+//                                    jsonStream.setUid(item.getUid());
+                                    idCount++;
 
                             }
                         }
@@ -144,18 +160,18 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
                         if (shouldWrite){
                             System.out.println("Save the item!");
                             String key = myDatabase.child("streams").push().getKey();
-                            jsonStream.setUid(key);
+//                            jsonStream.setUid(key);
                             System.out.println(key);
-                            myDatabase.child("streams").child(key).setValue(jsonStream);
+                            myDatabase.child("streams").child(jsonStream.getUid()).setValue(jsonStream);
                         }
                     }
                 }
                     else{
                         for (RadioItem jsonStream : jsonStreams) {
                             String key = myDatabase.child("streams").push().getKey();
-                            jsonStream.setUid(key);
+//                            jsonStream.setUid(key);
                             System.out.println(key);
-                            myDatabase.child("streams").child(key).setValue(jsonStream);
+                            myDatabase.child("streams").child(jsonStream.getUid()).setValue(jsonStream);
                         }
                     }
 
