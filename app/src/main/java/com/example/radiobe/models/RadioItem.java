@@ -95,6 +95,16 @@ public class RadioItem {
         this.mUid = mUid;
     }
 
+    //from api after convert to string
+    public RadioItem(String vodName ,String itemName, Long creationDate , String creationDateString, String filePath, String mUid) {
+        this.vodName = vodName;
+        this.itemName = itemName;
+        this.creationDate = creationDate;
+        this.creationDateString = creationDateString;
+        this.filePath = filePath;
+        this.mUid = mUid;
+    }
+
 
     //getters setters
     public long getDuration() {
@@ -102,6 +112,22 @@ public class RadioItem {
     }
     public void setDuration(long duration) {
         this.duration = duration;
+        String durationString;
+        if (duration > 3_600_000) {
+            durationString = String.format("%02d:%02d:%02d",
+                    TimeUnit.MILLISECONDS.toHours(duration),
+                    TimeUnit.MILLISECONDS.toMinutes(duration) -
+                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(duration)), // The change is in this line
+                    TimeUnit.MILLISECONDS.toSeconds(duration) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
+        } else {
+            durationString = String.format("%02d:%02d",
+                    TimeUnit.MILLISECONDS.toMinutes(duration) -
+                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(duration)), // The change is in this line
+                    TimeUnit.MILLISECONDS.toSeconds(duration) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
+        }
+        setDurationString(durationString);
     }
 
     public long getLikes() {

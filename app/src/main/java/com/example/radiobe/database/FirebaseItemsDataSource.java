@@ -101,15 +101,16 @@ public class FirebaseItemsDataSource{
         //boolean once = true;
         if (fireBaseStreams.size() > 0) {
             for (int i = 0; i < fireBaseStreams.size(); i++) {
-                int finalI = i;
+                RadioItem item = fireBaseStreams.get(i);
                 //still empty. so won't crash but don't recognize.
-                System.out.println("--------------------->" + fireBaseStreams.get(finalI).getUid());
-                ref.child("likes").child(fireBaseStreams.get(finalI).getUid()).addValueEventListener(new ValueEventListener() {
+                System.out.println("--------------------->" + item.getUid());
+                ref.child("likes").child(item.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                         if (dataSnapshot.getValue() != null) {
-                            fireBaseStreams.get(finalI).setLikes(dataSnapshot.getChildrenCount());
+                            item.setLikes(dataSnapshot.getChildrenCount());
+                            ref.child("streams").child(item.getUid()).child("likes").setValue(item.getLikes());
 
                             if (once) {
                                 //update adapter
@@ -117,19 +118,21 @@ public class FirebaseItemsDataSource{
                                 changeProgress.change();
                             } else {
                                 if (updateServer != null) {
-                                    updateServer.updateLikes(fireBaseStreams.get(finalI));
+                                    updateServer.updateLikes(item);
                                 }
                             }
 
                         } else {
-                            fireBaseStreams.get(finalI).setLikes(0);
+                            item.setLikes(0);
+                            ref.child("streams").child(item.getUid()).child("likes").setValue(item.getLikes());
+
                             if(once) {
                                 isDoneAll.add(true);
                                 changeProgress.change();
 
                             }   else{
                                 if(updateServer != null){
-                                    updateServer.updateLikes(fireBaseStreams.get(finalI));
+                                    updateServer.updateLikes(item);
                                 }
                             }
                         }
@@ -151,11 +154,13 @@ public class FirebaseItemsDataSource{
                 });
 
 
-                ref.child("views").child(fireBaseStreams.get(finalI).getUid()).addValueEventListener(new ValueEventListener() {
+                ref.child("views").child(item.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() != null) {
-                            fireBaseStreams.get(finalI).setViews(dataSnapshot.getChildrenCount());
+                            item.setViews(dataSnapshot.getChildrenCount());
+                            ref.child("streams").child(item.getUid()).child("views").setValue(item.getViews());
+
 
                             if (once) {
                                 //update adapter
@@ -164,19 +169,21 @@ public class FirebaseItemsDataSource{
 
                             } else {
                                 if (updateServer != null) {
-                                    updateServer.updateViews(fireBaseStreams.get(finalI));
+                                    updateServer.updateViews(item);
                                 }
                             }
 
                         } else {
-                            fireBaseStreams.get(finalI).setViews(0);
+                            item.setViews(0);
+                            ref.child("streams").child(item.getUid()).child("views").setValue(item.getViews());
+
                             if(once) {
                                 isDoneAll.add(true);
                                 changeProgress.change();
 
                             }   else{
                                 if(updateServer != null){
-                                    updateServer.updateViews(fireBaseStreams.get(finalI));
+                                    updateServer.updateViews(item);
                                 }
                             }
                         }
@@ -188,11 +195,13 @@ public class FirebaseItemsDataSource{
                     }
                 });
 
-                ref.child("comments").child(fireBaseStreams.get(finalI).getUid()).addValueEventListener(new ValueEventListener() {
+                ref.child("comments").child(item.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() != null) {
-                            fireBaseStreams.get(finalI).setComments(dataSnapshot.getChildrenCount());
+                            item.setComments(dataSnapshot.getChildrenCount());
+                            ref.child("streams").child(item.getUid()).child("comments").setValue(item.getComments());
+
 
                             if (once) {
                                 //update adapter
@@ -201,19 +210,21 @@ public class FirebaseItemsDataSource{
 
                             } else {
                                 if (updateServer != null) {
-                                    updateServer.updateComments(fireBaseStreams.get(finalI));
+                                    updateServer.updateComments(item);
                                 }
                             }
 
                         } else {
-                            fireBaseStreams.get(finalI).setComments(0);
+                            item.setComments(0);
+                            ref.child("streams").child(item.getUid()).child("comments").setValue(item.getComments());
+
                             if(once) {
                                 isDoneAll.add(true);
                                 changeProgress.change();
 
                             }   else{
                                 if(updateServer != null){
-                                    updateServer.updateComments(fireBaseStreams.get(finalI));
+                                    updateServer.updateComments(item);
                                 }
                             }
                         }
@@ -283,12 +294,16 @@ public class FirebaseItemsDataSource{
 
     public void addView(RadioItem radioItem){
         ref.child("views").child(radioItem.getUid()).child(firebaseUser.getUid()).setValue(ServerValue.TIMESTAMP);
+//        ref.child("streams").child(radioItem.getUid()).child("views").setValue(radioItem.getViews());
+
     }
 
     public void addComment(Comment comment, RadioItem radioItem){
         String key = ref.child("comments").child(radioItem.getUid()).child(firebaseUser.getUid()).push().getKey();
         comment.setUid(key);
         ref.child("comments").child(radioItem.getUid()).child(comment.getUid()).setValue(comment);
+//        ref.child("streams").child(radioItem.getUid()).child("comments").setValue(radioItem.getComments());
+
     }
 
     public void addLikes(RadioItem radioItem){

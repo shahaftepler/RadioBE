@@ -37,6 +37,7 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
     ParseJsonListener listener;
     int idCount = 0;
     ChangeProgress changeProgress;
+    private List<RadioItem> noDurationStreams = new ArrayList<>();
 
     @Override
     protected List<RadioItem> doInBackground(Void... voids) {
@@ -74,10 +75,9 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
 //                    String filePath = "http://be.repoai.com:5080/WebRTCAppEE/streams/home/" + vodName;              //todo: notice that i changed the duration to long if there's any problem
                     String filePath = "https://be.repoai.com:5443/LiveApp/streams/vod/" + vodName;
 
-                    long duration = getDurationFromFile(filePath);
-                    String durationString = convertDuration(duration);
                     String mUid = radioItem.getString("vodId");
-                    RadioItem item = new RadioItem(duration, vodName, itemName, creationDate, creationDateString, filePath, durationString, mUid);
+//                    RadioItem item = new RadioItem(duration, vodName, itemName, creationDate, creationDateString, filePath, durationString, mUid);
+                    RadioItem item = new RadioItem(vodName , itemName, creationDate , creationDateString , filePath , mUid);
                     streams.add(item);
 
 //                    myDatabase.child("streams").setValue(item);
@@ -161,13 +161,16 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
                             System.out.println("Save the item!");
                             String key = myDatabase.child("streams").push().getKey();
 //                            jsonStream.setUid(key);
+                            setDurationFromFile(jsonStream);
                             System.out.println(key);
                             myDatabase.child("streams").child(jsonStream.getUid()).setValue(jsonStream);
                         }
                     }
                 }
                     else{
+//                        setDurationsForList(jsonStreams);
                         for (RadioItem jsonStream : jsonStreams) {
+                            setDurationFromFile(jsonStream);
                             String key = myDatabase.child("streams").push().getKey();
 //                            jsonStream.setUid(key);
                             System.out.println(key);
@@ -185,41 +188,26 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
 
 
     }
+
+//    private void setDurationsForList(List<RadioItem> streams){
+//        MediaMetadataRetriever newRetriever = new MediaMetadataRetriever();
+//        for (RadioItem stream : streams) {
+//            newRetriever.setDataSource(stream.getFilePath() , new HashMap<>());
+//            stream.setDuration(Long.parseLong(newRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)));
 //
-//    private void accessDb() {
-//        client = ClientBuilder.account(DB_USER_NAME)
-//                .username(API_KEY)
-//                .password(API_PASS)
-//                .build();
-//        streamsDataBase = client.database(DB_STREAMS, false);
+//        }
+//
+//        newRetriever.release();
 //    }
 
-    private long getDurationFromFile(String filePath) {
+    private void setDurationFromFile(RadioItem radioItem) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(filePath, new HashMap<>());
-        long l = Long.parseLong(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+        retriever.setDataSource(radioItem.getFilePath(), new HashMap<>());
+        long duration = Long.parseLong(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+        radioItem.setDuration(duration);
         retriever.release();
-        return l;
     }
 
-    private String convertDuration(long duration) {
-        String durationString;
-        if (duration > 3_600_000) {
-            durationString = String.format("%02d:%02d:%02d",
-                    TimeUnit.MILLISECONDS.toHours(duration),
-                    TimeUnit.MILLISECONDS.toMinutes(duration) -
-                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(duration)), // The change is in this line
-                    TimeUnit.MILLISECONDS.toSeconds(duration) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
-        } else {
-            durationString = String.format("%02d:%02d",
-                    TimeUnit.MILLISECONDS.toMinutes(duration) -
-                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(duration)), // The change is in this line
-                    TimeUnit.MILLISECONDS.toSeconds(duration) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
-        }
 
-        return durationString;
-    }
 }
 
