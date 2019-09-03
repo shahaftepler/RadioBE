@@ -52,9 +52,11 @@ dependencies {
 
 
     //FireBase
-    implementation 'com.google.firebase:firebase-core:17.1.0'
+    implementation 'com.google.firebase:firebase-core:17.2.0'
     implementation 'com.google.firebase:firebase-auth:19.0.0'
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
+    implementation 'com.google.firebase:firebase-storage:19.0.0'
+    implementation 'com.firebaseui:firebase-ui-storage:4.3.1'
 
 
     //DataBase
@@ -64,5 +66,4 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
 }
-
 apply plugin: 'com.google.gms.google-services'

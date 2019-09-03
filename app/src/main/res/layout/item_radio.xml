@@ -177,15 +177,14 @@
 
         <ImageButton
             android:id="@+id/sendButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginEnd="8dp"
-            android:visibility="gone"
             android:background="@drawable/shape_radius_border_white"
             app:layout_constraintBottom_toBottomOf="@+id/commentEditText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/commentEditText"
-            app:srcCompat="@drawable/sent"
+            android:src="@drawable/logout_icon"
             tools:visibility="visible" />
 
         <ImageButton
@@ -198,7 +197,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/commentEditText"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/commentEditText"
-            app:srcCompat="@drawable/ic_close" />
+            android:src="@drawable/logout_icon" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

@@ -57,6 +57,10 @@
     <string name="my_lists">My Lists</string>
     <string name="title_notification">title notification</string>
     <string name="time_date">time/date</string>
+    <string name="profile_name">Profile Name</string>
+    <string name="description_profile">Description Profile</string>
+    <string name="change_name">Change Name</string>
+    <string name="change_description">Change Description</string>
 
 
 </resources>

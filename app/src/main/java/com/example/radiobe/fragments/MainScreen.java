@@ -252,6 +252,9 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.profile_menu) {
+            Intent intent = new Intent(MainScreen.this, Profile.class);
+            startActivity(intent);
+
             return true;
         } else if (id == R.id.logout_menu) {
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {

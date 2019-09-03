@@ -2,6 +2,7 @@ package com.example.radiobe.registrations;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,25 +52,19 @@ public class SignUp extends AppCompatActivity {
 
         btnSignUp.setOnClickListener(v -> {
 
-            String firstName = etFirst.getText().toString();
-            String lastName = etLast.getText().toString();
-//            String date = etDate.getText().toString();
             int day = datePicker.getDayOfMonth();
             int month = datePicker.getMonth();
             int year = datePicker.getYear();
-
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            Calendar calendar = Calendar.getInstance();
-                    calendar.set(year, month, day);
-            System.out.println(month);
-            Date date = calendar.getTime();
-            String formated = simpleDateFormat.format(date);
-            System.out.println(formated);
+            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 
 
+            String firstName = etFirst.getText().toString();
+            String lastName = etLast.getText().toString();
             String userName = etEmail.getText().toString();
+            String birthDay = getStringDate(year, month, day);
             String password = etPassword.getText().toString();
             String password2 = etPassAgain.getText().toString();
+
 
             if (firstName.length() < 1)
                 etFirst.setError("Enter your first name");
@@ -77,32 +72,45 @@ public class SignUp extends AppCompatActivity {
                 etLast.setError("Enter your last name");
             if (userName.length() < 1)
                 etEmail.setError("Enter your user name");
+
+            System.out.println("user over 16?: " + (currentYear - year));
+            if ((currentYear - year) < 16) {
+                Toast.makeText(this, "Your age must be over 16 old.", Toast.LENGTH_SHORT).show();
+            }
+
             if (password.length() < 6)
                 etPassword.setError("Your password must be at least 6 characters");
-
-//            if (password2.length() < 1 && password.length() > 10)
-//                etPassAgain.setError("Your password must be between 1 - 10 characters");
 
             if (!(password2.equals(password)))
                 etPassAgain.setError("Passwords must be the same");
 
 
             if (etFirst.getError() == null && etLast.getError() == null &&
-                    etEmail.getError() == null && etPassword.getError() == null &&
+                    etEmail.getError() == null && (currentYear - year) > 16 &&
+                    etPassword.getError() == null &&
                     etPassAgain.getError() == null) {
 
                 user = new User(etFirst.getText().toString(),
                         etLast.getText().toString(),
                         etEmail.getText().toString(),
-                        null,
+                        birthDay,
                         etPassword.getText().toString()
                 );
                 createUser(user);
-
             }
+            System.out.println("Created User: " + user);
         });
 
 
+    }
+
+    private String getStringDate(int year, int month, int day) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month, day);
+        Date date = calendar.getTime();
+
+        return simpleDateFormat.format(date);
     }
 
     public void createUser(User newUser) {
@@ -132,7 +140,6 @@ public class SignUp extends AppCompatActivity {
     private void findView() {
         etFirst = findViewById(R.id.etFirst);
         etLast = findViewById(R.id.etLast);
-//        etDate = findViewById(R.id.etDate);
         datePicker = findViewById(R.id.datePicker);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
