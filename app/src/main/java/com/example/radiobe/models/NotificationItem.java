@@ -2,41 +2,74 @@ package com.example.radiobe.models;
 
 public class NotificationItem {
     /*Properties*/
-    private int imageURL;       //not int. picutre from server
-    private String title;
-    private String description;
-    private String date;        //date from the server.
+    String uid;
+    String senderID;
+    long creationDate;
+    String title;
+    String description;
+
 
     /*Constructor*/
-    public NotificationItem(int imageURL, String title, String description, String date) {
-        this.imageURL = imageURL;
+    public NotificationItem(String uid, String senderID, long creationDate, String title, String description) {
+        this.uid = uid;
+        this.senderID = senderID;
+        this.creationDate = creationDate;
         this.title = title;
         this.description = description;
-        this.date = date;
     }
 
     /*Getters*/
-    public int getImageURL() {
-        return imageURL;
+
+    public String getUid() {
+        return uid;
     }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getSenderID() {
+        return senderID;
+    }
+
+    public void setSenderID(String senderID) {
+        this.senderID = senderID;
+    }
+
+    public long getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(long creationDate) {
+        this.creationDate = creationDate;
+    }
+
     public String getTitle() {
         return title;
     }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public String getDescription() {
         return description;
     }
-    public String getDate() {
-        return date;
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /*ToString*/
+
     @Override
     public String toString() {
         return "NotificationItem{" +
-                "imageURL='" + imageURL + '\'' +
+                "uid='" + uid + '\'' +
+                ", senderID='" + senderID + '\'' +
+                ", creationDate=" + creationDate +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", date='" + date + '\'' +
                 '}';
     }
 }

@@ -141,6 +141,9 @@ public class FirebaseItemsDataSource{
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
+
+
+                        System.out.println("ERROR");
                         //if can't read, no likes
 //                        fireBaseStreams.get(finalI).setLikes(0);
 //                        if(once) {

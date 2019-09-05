@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.example.radiobe.MainActivity;
 import com.example.radiobe.R;
 import com.example.radiobe.adapters.MainScreenAdapter;
+import com.example.radiobe.generalScreens.Profile;
 import com.example.radiobe.generalScreens.Settings;
 import com.facebook.login.LoginManager;
 import com.facebook.share.model.ShareLinkContent;
@@ -227,6 +228,8 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.profile_menu) {
+            Intent intent = new Intent(this, Profile.class);
+            startActivity(intent);
             return true;
         } else if (id == R.id.logout_menu) {
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {

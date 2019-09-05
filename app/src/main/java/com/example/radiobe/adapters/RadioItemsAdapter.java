@@ -145,6 +145,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
                     holder.addCommentEditText.setText("");
                     holder.addCommentEditText.setEnabled(false);
                     holder.sendButton.setVisibility(View.GONE);
+                    holder.closeCommentButton.setVisibility(View.GONE);
 
                 } else {
                     holder.addCommentEditText.setError("Your comment must include more than 0 characters");

@@ -1,6 +1,7 @@
 package com.example.radiobe.adapters;
 
 import android.content.Context;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import com.example.radiobe.R;
 import com.example.radiobe.models.NotificationItem;
 
+import java.util.Date;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -41,10 +43,10 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
         NotificationItem notificationItem = notificationItemList.get(position);
 
-        holder.tvNotificationTime.setText(notificationItem.getDate());
+        holder.tvNotificationTime.setText(DateFormat.format("dd/MM/yyyy", new Date(notificationItem.getCreationDate())).toString());
         holder.tvDescription.setText(notificationItem.getDescription());
         holder.tvTitle.setText(notificationItem.getTitle());
-        holder.ivNotification.setImageResource(notificationItem.getImageURL());
+//        holder.ivNotification.setImageResource(notificationItem.getImageURL());
 
     }
 

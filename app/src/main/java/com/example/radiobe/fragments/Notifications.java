@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.radiobe.adapters.NotificationsAdapter;
-import com.example.radiobe.database.NotificationsDataSource;
+import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.R;
 
 import androidx.annotation.NonNull;
@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
  * A simple {@link Fragment} subclass.
  */
 public class Notifications extends Fragment {
+    NotificationsAdapter adapter;
+    RecyclerView recyclerView;
 
     public Notifications() {
         // Required empty public constructor
@@ -38,9 +40,9 @@ public class Notifications extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        RecyclerView recyclerView = view.findViewById(R.id.rvNotifications);
+        recyclerView = view.findViewById(R.id.rvNotifications);
 
-        NotificationsAdapter adapter = new NotificationsAdapter(NotificationsDataSource.getNotificationItems(), getContext());
+        adapter = new NotificationsAdapter(CurrentUser.getInstance().getNotifications(), getContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
