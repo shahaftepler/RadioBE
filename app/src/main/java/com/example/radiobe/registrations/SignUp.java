@@ -122,7 +122,9 @@ public class SignUp extends AppCompatActivity {
                 newUser.setPassword(null);  //not saving the password on the server.
                 newUser.setFireBaseID(firebaseUser.getUid());
                 ref.child("users").child(newUser.getFireBaseID()).setValue(newUser);
-                CurrentUser.getInstance().createUser(newUser.getFireBaseID());
+
+                //todo: create listener
+                CurrentUser.getInstance().createUser(newUser.getFireBaseID() , null);
 
 
                 Intent intent = new Intent(this, MainScreen.class);

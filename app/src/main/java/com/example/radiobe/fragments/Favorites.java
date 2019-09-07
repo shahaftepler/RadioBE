@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.radiobe.R;
+import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.favorites.MyList.FavoriteDataSourceMyList;
 import com.example.radiobe.favorites.MyList.FavoriteMyListAdapter;
 import com.example.radiobe.favorites.RecentlyAdd.FavoriteRecentlyAddDataSource;
@@ -47,7 +48,7 @@ public class Favorites extends Fragment {
         RecyclerView recyclerViewTop = view.findViewById(R.id.rvFavoriteTop);
 
         FavoritesRecommendedAdapter favoritesRecommendedAdapter = new FavoritesRecommendedAdapter(
-                FavoritesRecommendedDataSource.getFavoritesItems(), getContext());
+        CurrentUser.getInstance().getFavorites(), getContext());
         LinearLayoutManager layoutManagerTop = new LinearLayoutManager(getContext(),
                 LinearLayoutManager.HORIZONTAL,false);
 

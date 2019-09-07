@@ -1,5 +1,7 @@
 package com.example.radiobe.models;
 
+import com.google.android.exoplayer2.ui.PlayerNotificationManager;
+
 public class NotificationItem {
     /*Properties*/
     String uid;
@@ -8,6 +10,8 @@ public class NotificationItem {
     String title;
     String description;
 
+
+    public NotificationItem(){}
 
     /*Constructor*/
     public NotificationItem(String uid, String senderID, long creationDate, String title, String description) {

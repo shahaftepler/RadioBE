@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.radiobe.R;
+import com.example.radiobe.models.RadioItem;
 
 import java.util.List;
 
@@ -16,11 +17,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class FavoritesRecommendedAdapter extends RecyclerView.Adapter<FavoritesRecommendedAdapter.FavoritesViewHolder> {
     /*Properties*/
-    private List<FavoriteRecommendedItem> favoriteItemList;
+    private List<RadioItem> favoriteItemList;
     private Context context;
 
     /*Constructor*/
-    public FavoritesRecommendedAdapter(List<FavoriteRecommendedItem> favoriteItemList, Context context) {
+    public FavoritesRecommendedAdapter(List<RadioItem> favoriteItemList, Context context) {
         this.favoriteItemList = favoriteItemList;
         this.context = context;
     }
@@ -36,11 +37,11 @@ public class FavoritesRecommendedAdapter extends RecyclerView.Adapter<FavoritesR
 
     @Override
     public void onBindViewHolder(@NonNull FavoritesViewHolder holder, int position) {
-        FavoriteRecommendedItem favoriteRecommendedItem = favoriteItemList.get(position);
+        RadioItem favoriteRecommendedItem = favoriteItemList.get(position);
 
-        holder.ivFavoriteItemImage.setImageResource(favoriteRecommendedItem.getImageURL());
-        holder.tvFavoriteTitle.setText(favoriteRecommendedItem.getTitle());
-        holder.tvFavoriteDescription.setText(favoriteRecommendedItem.getDescription());
+        holder.ivFavoriteItemImage.setImageResource(favoriteRecommendedItem.getResImage());
+        holder.tvFavoriteTitle.setText(favoriteRecommendedItem.getItemName());
+        holder.tvFavoriteDescription.setText(favoriteRecommendedItem.getItemName());
     }
 
     @Override

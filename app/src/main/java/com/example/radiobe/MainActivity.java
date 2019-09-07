@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (firebaseUser != null) {   //TODO : try to understand why it didn't work from the splash screen itself.
+            CurrentUser.getInstance().setContext(getApplicationContext());
             CurrentUser.getInstance().createUser(firebaseUser.getUid(), ()->{
                 Intent intent = new Intent(this, MainScreen.class);
                 startActivity(intent);

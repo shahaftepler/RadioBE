@@ -24,6 +24,22 @@ public class User {
     Bitmap profileImage;
     Bitmap coverImage;
 
+    public Bitmap getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(Bitmap profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public Bitmap getCoverImage() {
+        return coverImage;
+    }
+
+    public void setCoverImage(Bitmap coverImage) {
+        this.coverImage = coverImage;
+    }
+
     public List<String> getFavoritesID() {
         return favoritesID;
     }

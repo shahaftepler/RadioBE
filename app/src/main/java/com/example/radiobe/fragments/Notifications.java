@@ -9,12 +9,15 @@ import android.view.ViewGroup;
 import com.example.radiobe.adapters.NotificationsAdapter;
 import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.R;
+import com.example.radiobe.models.User;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.HashMap;
 
 
 /**
@@ -41,11 +44,13 @@ public class Notifications extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView = view.findViewById(R.id.rvNotifications);
-
-        adapter = new NotificationsAdapter(CurrentUser.getInstance().getNotifications(), getContext());
-
+        System.out.println(CurrentUser.getInstance().getNotifications());
+        System.out.println(CurrentUser.getInstance().getNotificationSenders());
+        adapter = new NotificationsAdapter(CurrentUser.getInstance().getNotifications(),  CurrentUser.getInstance().getNotificationSenders(),getContext());
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
+        adapter.initNotificationListener();
+
 
     }
 }

@@ -276,6 +276,8 @@ public class FirebaseItemsDataSource{
 //                    CurrentUser.getInstance().addFavorite(radioItem.getUid());
 //                    ref.child("favorites").child(firebaseUser.getUid()).setValue(CurrentUser.getInstance().getFavoritesID());
                     ref.child("favorites").child(firebaseUser.getUid()).child(radioItem.getUid()).setValue(ServerValue.TIMESTAMP);
+                    CurrentUser.getInstance().addFavorite(radioItem);
+
                 }
 
 
