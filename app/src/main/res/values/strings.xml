@@ -61,6 +61,7 @@
     <string name="description_profile">Description Profile</string>
     <string name="change_name">Change Name</string>
     <string name="change_description">Change Description</string>
+    <string name="your_favorites">Your Favorites</string>
 
 
 </resources>

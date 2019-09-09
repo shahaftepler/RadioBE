@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.radiobe.R;
+import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.User;
 import com.facebook.AccessToken;
@@ -165,9 +166,15 @@ public class Login extends AppCompatActivity {
 
                         System.out.println("signInWithEmail:success");
                         //handle getting UserCredentials from server;
-                        Intent intent = new Intent(this, MainScreen.class);
-                        startActivity(intent);
-                        finish();
+
+                        CurrentUser.getInstance().setContext(getApplicationContext());
+                        CurrentUser.getInstance().createUser(firebaseUser.getUid(), ()-> {
+                            Intent intent = new Intent(this, MainScreen.class);
+                            startActivity(intent);
+
+                            finish();
+
+                        });
                     } else {
                         // If sign in fails, display a message to the user.
                         System.out.println("signInWithEmail:failure" + task.getException());

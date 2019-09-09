@@ -17,11 +17,8 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.example.radiobe.R;
-import com.example.radiobe.StreamDAO;
-import com.example.radiobe.database.AddCommentListener;
-import com.example.radiobe.database.ChangeLikesListener;
-import com.example.radiobe.database.ChangeViewsListener;
-import com.example.radiobe.database.ChangeViewsTask;
+//import com.example.radiobe.StreamDAO;
+
 import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.database.FirebaseItemsDataSource;
 import com.example.radiobe.database.UpdateServer;
@@ -173,10 +170,11 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             intent.putExtra("stream_url", radioItem.getFilePath());
             intent.putExtra("play", b);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            changeToggles();
             if (b) {
                 FirebaseItemsDataSource.getInstance().addView(radioItem);
                 System.out.println("Viewed");
+                changeToggles();
+
             }
 
 //            StreamDAO.getInstance().handleViews(firebaseUser, radioItem, new ChangeViewsListener() {
@@ -209,8 +207,8 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 
             RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
 
-            if (MainScreen.simpleExoPlayer.getPlaybackState() == Player.STATE_READY &&
-                    MainScreen.simpleExoPlayer.getCurrentTag() != holder.tvFileName){
+            if (MainScreen.simpleExoPlayer.getPlaybackState() == Player.STATE_READY && holder != null &&
+                    MainScreen.simpleExoPlayer.getCurrentTag() != holder.tvFileName.getText()){
                 System.out.println("NEW IF");
 
                 holder.tb.setChecked(false);

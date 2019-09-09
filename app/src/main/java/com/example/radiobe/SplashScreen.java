@@ -9,6 +9,7 @@ import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
 import com.example.radiobe.database.ChangeProgress;
+import com.example.radiobe.database.FireBaseParseJson;
 import com.facebook.AccessToken;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,19 +39,30 @@ public class SplashScreen extends AppCompatActivity {
 
 
         //the listener is passed to stream dao method json parse and then to the task. as soon as the task finished it returns done, and it goes all the way back.
-        StreamDAO.getInstance().jsonParse(
-                () -> {
-                    Intent intent = new Intent(this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                }, new ChangeProgress() {
-                    @Override
-                    public void change() {
-                        progressBar.setProgress(progressBar.getProgress() + 1);
-                    }
-                }
+//        StreamDAO.getInstance().jsonParse(
+//                () -> {
+//                    Intent intent = new Intent(this, MainActivity.class);
+//                    startActivity(intent);
+//                    finish();
+//                }, new ChangeProgress() {
+//                    @Override
+//                    public void change() {
+//                        progressBar.setProgress(progressBar.getProgress() + 1);
+//                    }
+//                }
+//
+//        );
 
-        );
+        new FireBaseParseJson(() -> {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }, new ChangeProgress() {
+            @Override
+            public void change() {
+                progressBar.setProgress(progressBar.getProgress() + 1);
+            }
+        }).execute();
 
 
     }

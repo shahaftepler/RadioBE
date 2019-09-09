@@ -1,4 +1,4 @@
-package com.example.radiobe.favorites.Recommended;
+package com.example.radiobe.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -15,13 +15,13 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class FavoritesRecommendedAdapter extends RecyclerView.Adapter<FavoritesRecommendedAdapter.FavoritesViewHolder> {
+public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.FavoritesViewHolder> {
     /*Properties*/
     private List<RadioItem> favoriteItemList;
     private Context context;
 
     /*Constructor*/
-    public FavoritesRecommendedAdapter(List<RadioItem> favoriteItemList, Context context) {
+    public FavoritesAdapter(List<RadioItem> favoriteItemList, Context context) {
         this.favoriteItemList = favoriteItemList;
         this.context = context;
     }
@@ -30,7 +30,7 @@ public class FavoritesRecommendedAdapter extends RecyclerView.Adapter<FavoritesR
     @Override
     public FavoritesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        View view = layoutInflater.inflate(R.layout.item_favorite_recommend, parent, false);
+        View view = layoutInflater.inflate(R.layout.item_favorite, parent, false);
 
         return new FavoritesViewHolder(view);
     }

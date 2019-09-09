@@ -8,12 +8,7 @@ import android.view.ViewGroup;
 
 import com.example.radiobe.R;
 import com.example.radiobe.database.CurrentUser;
-import com.example.radiobe.favorites.MyList.FavoriteDataSourceMyList;
-import com.example.radiobe.favorites.MyList.FavoriteMyListAdapter;
-import com.example.radiobe.favorites.RecentlyAdd.FavoriteRecentlyAddDataSource;
-import com.example.radiobe.favorites.RecentlyAdd.FavoriteLastAddAdapter;
-import com.example.radiobe.favorites.Recommended.FavoritesRecommendedAdapter;
-import com.example.radiobe.favorites.Recommended.FavoritesRecommendedDataSource;
+import com.example.radiobe.adapters.FavoritesAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
  * A simple {@link Fragment} subclass.
  */
 public class Favorites extends Fragment {
-
+    RecyclerView recyclerView;
 
     public Favorites() {
         // Required empty public constructor
@@ -44,38 +39,17 @@ public class Favorites extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //recycleView Top
-        RecyclerView recyclerViewTop = view.findViewById(R.id.rvFavoriteTop);
+        recyclerView = view.findViewById(R.id.rvFavoriteTop);
 
-        FavoritesRecommendedAdapter favoritesRecommendedAdapter = new FavoritesRecommendedAdapter(
+        FavoritesAdapter favoritesAdapter = new FavoritesAdapter(
         CurrentUser.getInstance().getFavorites(), getContext());
         LinearLayoutManager layoutManagerTop = new LinearLayoutManager(getContext(),
                 LinearLayoutManager.HORIZONTAL,false);
 
-        recyclerViewTop.setLayoutManager(layoutManagerTop);
-        recyclerViewTop.setAdapter(favoritesRecommendedAdapter);
+        recyclerView.setLayoutManager(layoutManagerTop);
+        recyclerView.setAdapter(favoritesAdapter);
 
-        //recycleView Middle
-        RecyclerView recyclerViewMiddle = view.findViewById(R.id.rvFavoriteMiddle);
 
-        FavoriteLastAddAdapter favoriteLastAddAdapter = new FavoriteLastAddAdapter(
-                FavoriteRecentlyAddDataSource.lastAddItems(), getContext());
-        LinearLayoutManager layoutManagerMiddle = new LinearLayoutManager(getContext(),
-                LinearLayoutManager.HORIZONTAL,false);
-
-        recyclerViewMiddle.setLayoutManager(layoutManagerMiddle);
-        recyclerViewMiddle.setAdapter(favoriteLastAddAdapter);
-
-        //recycleView Bottom
-        RecyclerView recyclerViewBottom = view.findViewById(R.id.rvFavoriteBottom);
-
-        FavoriteMyListAdapter favoriteMyListAdapter = new FavoriteMyListAdapter(
-                FavoriteDataSourceMyList.myListItems(),getContext());
-        LinearLayoutManager layoutManagerBottom = new LinearLayoutManager(getContext(),
-                LinearLayoutManager.HORIZONTAL,false);
-
-        recyclerViewBottom.setLayoutManager(layoutManagerBottom);
-        recyclerViewBottom.setAdapter(favoriteMyListAdapter);
 
 
 

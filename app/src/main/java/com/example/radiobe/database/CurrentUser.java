@@ -147,6 +147,9 @@ public class CurrentUser extends User {
                                             if (dataSnapshot.getChildrenCount() > 0) {
                                                 notificationsCount = dataSnapshot.getChildrenCount();
                                                 System.out.println(notificationsCount);
+
+                                                if(!once)
+                                                    instance.notifications.clear();
                                                 for (DataSnapshot snap : dataSnapshot.getChildren()) {
                                                     instance.notifications.add(snap.getValue(NotificationItem.class));
                                                     System.out.println("Notification Added");

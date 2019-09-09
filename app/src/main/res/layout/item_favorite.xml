@@ -3,35 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cvFavorite"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center|top"
     android:layout_marginStart="32dp"
     android:layout_marginTop="16dp"
     android:layout_marginEnd="32dp"
-    android:padding="8dp"
     android:descendantFocusability="blocksDescendants"
-    app:cardCornerRadius="10dp"
-    >
+    app:cardCornerRadius="10dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clFavorite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/shape_radius_border_white"
-        >
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/civFavoriteItemImage"
-            android:layout_width="150dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:src="@mipmap/ic_launcher"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        android:background="@drawable/shape_radius_border_white">
 
         <TextView
             android:id="@+id/tvItemFavoriteTitle"
@@ -40,6 +25,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="Title"
+            android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="@+id/civFavoriteItemImage"
             app:layout_constraintStart_toStartOf="@+id/civFavoriteItemImage"
@@ -50,15 +36,28 @@
             android:id="@+id/tvItemFavoriteDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:text="Description"
+            android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/civFavoriteItemImage"
             app:layout_constraintStart_toStartOf="@+id/civFavoriteItemImage"
             app:layout_constraintTop_toBottomOf="@+id/tvItemFavoriteTitle"
             tools:ignore="HardcodedText" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/civFavoriteItemImage"
+            android:layout_width="204dp"
+            android:layout_height="236dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@mipmap/ic_launcher"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>
