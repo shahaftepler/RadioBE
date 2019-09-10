@@ -24,7 +24,7 @@ import java.util.Map;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.NotificationViewHolder>{
+public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.NotificationViewHolder> implements RefreshNotificationsListener{
     /*Properties*/
     List<NotificationItem> notificationItemList;
     Context context;
@@ -67,7 +67,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     public int getItemCount() {
         return notificationItemList.size();
     }
-    
+
 
     public void initNotificationListener(Activity activity){
         refreshNotificationsListener = new RefreshNotificationsListener() {
@@ -88,6 +88,11 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         };
 
         CurrentUser.getInstance().setNotificationsListener(refreshNotificationsListener);
+    }
+
+    @Override
+    public void refresh(List<NotificationItem> notifications, HashMap<String, User> senders) {
+        System.out.println("HELLO FROM LISTENER");
     }
 
     class NotificationViewHolder extends RecyclerView.ViewHolder{

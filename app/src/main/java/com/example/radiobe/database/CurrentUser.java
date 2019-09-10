@@ -29,23 +29,23 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class CurrentUser extends User {
-       private static CurrentUser instance;
-        List<String> favoritesID;
-        List<String> messagesID;
-        HashMap<String, User> notificationSenders;
-        List<RadioItem> favorites;
-        List<NotificationItem> notifications;
-        Context context;
-        RefreshNotificationsListener refreshNotificationsListener;
-        RefreshFavorites refreshFavoritesListener;
+    private static CurrentUser instance;
+    List<String> favoritesID;
+    List<String> messagesID;
+    HashMap<String, User> notificationSenders;
+    List<RadioItem> favorites;
+    List<NotificationItem> notifications;
+    Context context;
+    RefreshNotificationsListener refreshNotificationsListener;
+    RefreshFavorites refreshFavoritesListener;
 
-        long favoriteCount = -1;
-        long notificationsCount = -1;
-        Timer t = new Timer();
-        Timer newTimer = new Timer();
-        Timer favoritesTimer = new Timer();
-        boolean once = true;
-
+    long favoriteCount = -1;
+    long notificationsCount = -1;
+    Timer t = new Timer();
+    Timer newTimer = new Timer();
+    Timer favoritesTimer = new Timer();
+    boolean once = true;
+    List<Boolean> photosUpload;
     public HashMap<String, User> getNotificationSenders() {
         return notificationSenders;
     }
@@ -74,6 +74,7 @@ public class CurrentUser extends User {
         favoritesID = new ArrayList<>();
         notifications = new ArrayList<>();
         notificationSenders = new HashMap<>();
+        photosUpload = new ArrayList<>();
     }
 
     public void setContext(Context context) {
@@ -81,98 +82,141 @@ public class CurrentUser extends User {
     }
 
 
-        public void createUser(String fireBaseID , FinishedCurrentUserInit finishedCurrentUserInit){
-            System.out.println("Started Create User");
-            ref.child("users").child(fireBaseID).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.getValue() != null){
-                        instance = dataSnapshot.getValue(CurrentUser.class);
-                        System.out.println("Created instance");
-                        System.out.println(instance);
+    public void createUser(String fireBaseID, FinishedCurrentUserInit finishedCurrentUserInit) {
+        System.out.println("Started Create User");
+        ref.child("users").child(fireBaseID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    instance = dataSnapshot.getValue(CurrentUser.class);
+                    System.out.println("Created instance");
+                    System.out.println(instance);
 
 
-                        ref.child("favorites").child(fireBaseID).addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                                if (dataSnapshot.getChildrenCount() > 0) {
-                                    favoriteCount = dataSnapshot.getChildrenCount();
-
-                                        System.out.println("CLEAR");
-                                        instance.favoritesID.clear();
-                                        instance.favorites.clear();
-
-                                    for (DataSnapshot snap : dataSnapshot.getChildren()) {
-                                        instance.favoritesID.add(snap.getKey());
-//                                        favorites.add(snap.getValue(RadioItem.class));
-                                        System.out.println("Favorite Added");
-                                    }
-
-
-                                    System.out.println("--------------------- BEFORE INIT FAVORITES");
-                                    System.out.println("FAVORITES" + instance.favorites.size());
-                                    System.out.println("FAVORITES ID" + instance.favoritesID.size());
-                                    initFavorites();
-
-                                } else{
-                                    System.out.println("NO FAVORITES");
-                                }
-
-                            }
-
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
-
-                        ref.child("notifications").child(fireBaseID).addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                                if (dataSnapshot.getChildrenCount() > 0) {
-                                    notificationsCount = dataSnapshot.getChildrenCount();
-                                    System.out.println(notificationsCount);
-
-                                    if(!once)
-                                        instance.notifications.clear();
-                                        instance.notificationSenders.clear();
-                                    for (DataSnapshot snap : dataSnapshot.getChildren()) {
-                                        instance.notifications.add(snap.getValue(NotificationItem.class));
-                                        System.out.println("Notification Added");
-                                    }
-
-                                    initNotifications();
-
-                                }
-
-                            }
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
-
-                    }
-                    t.scheduleAtFixedRate(new TimerTask() {
+                    ref.child("favorites").child(fireBaseID).addValueEventListener(new ValueEventListener() {
                         @Override
-                        public void run() {
-                            checkLoadingComplete(finishedCurrentUserInit);
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                            if (dataSnapshot.getChildrenCount() > 0) {
+                                favoriteCount = dataSnapshot.getChildrenCount();
+
+                                System.out.println("CLEAR");
+                                instance.favoritesID.clear();
+                                instance.favorites.clear();
+
+                                for (DataSnapshot snap : dataSnapshot.getChildren()) {
+                                    instance.favoritesID.add(snap.getKey());
+//                                        favorites.add(snap.getValue(RadioItem.class));
+                                    System.out.println("Favorite Added");
+                                }
+
+
+                                System.out.println("--------------------- BEFORE INIT FAVORITES");
+                                System.out.println("FAVORITES" + instance.favorites.size());
+                                System.out.println("FAVORITES ID" + instance.favoritesID.size());
+                                initFavorites();
+
+                            } else {
+                                System.out.println("NO FAVORITES");
+                                favoriteCount = 0;
+                            }
+
                         }
-                    }, 0 , 250);
+
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    ref.child("notifications").child(fireBaseID).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                            if (dataSnapshot.getChildrenCount() > 0) {
+                                notificationsCount = dataSnapshot.getChildrenCount();
+                                System.out.println(notificationsCount);
+
+                                if (!once)
+                                    instance.notifications.clear();
+//                                    instance.notificationSenders.clear();
+
+                                for (DataSnapshot snap : dataSnapshot.getChildren()) {
+                                    instance.notifications.add(snap.getValue(NotificationItem.class));
+                                    System.out.println("Notification Added");
+                                }
+
+                                initNotifications();
+
+                            } else {
+                                notificationsCount = 0;
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    storageRef.child("profile").child(fireBaseID)
+                            .getBytes(2048 * 2048)
+                            .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                @Override
+                                public void onSuccess(byte[] bytes) {
+                                    instance.setProfileImage(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+                                    System.out.println("Got Current User Profile Image");
+                                    photosUpload.add(true);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            instance.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
+                            System.out.println("Got fake profile picture");
+                            photosUpload.add(true);
+                        }
+                    });
+
+                    storageRef.child("cover").child(fireBaseID)
+                            .getBytes(2048 * 2048)
+                            .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                @Override
+                                public void onSuccess(byte[] bytes) {
+                                    instance.setCoverImage(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+                                    System.out.println("COVER");
+                                    photosUpload.add(true);
+
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            instance.setCoverImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
+                            System.out.println("Got fake COVER");
+                            photosUpload.add(true);
+
+                        }
+                    });
 
                 }
+                t.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        checkLoadingComplete(finishedCurrentUserInit);
+                    }
+                }, 0, 250);
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
 
-                }
-            });
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
 
-        }
+    }
 
     private void initFavorites() {
         instance.favorites = new ArrayList<>();
@@ -189,40 +233,14 @@ public class CurrentUser extends User {
             }, 0, 250);
         }
 
-        for (String key : instance.favoritesID){
-            for (RadioItem stream : FirebaseItemsDataSource.getInstance().getFireBaseStreams()){
-                if (key.equals(stream.getUid())){
+        for (String key : instance.favoritesID) {
+            for (RadioItem stream : FirebaseItemsDataSource.getInstance().getFireBaseStreams()) {
+                if (key.equals(stream.getUid())) {
                     System.out.println("ABOUT TO ADD FAVORITE" + instance.favorites.size());
                     instance.favorites.add(stream);
                 }
             }
 
-
-
-
-
-//            ref.child("streams").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                    if (dataSnapshot.getValue() != null) {
-//
-//                        System.out.println("ABOUT TO ADD FAVORITE" + instance.favorites.size());
-//
-//                        instance.favorites.add(dataSnapshot.getValue(RadioItem.class));
-//                        System.out.println("Favorite converted");
-//                    } else {
-//                        System.out.println("Something is wrong");
-//                    }
-//
-//
-//
-//                }
-//
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                }
-//            });
         }
 
 
@@ -264,36 +282,39 @@ public class CurrentUser extends User {
     }
 
 
-    //todo: check if new arraylist size is 0
-        public void checkLoadingComplete(FinishedCurrentUserInit finishedCurrentUserInit){
+    public void checkLoadingComplete(FinishedCurrentUserInit finishedCurrentUserInit) {
+        System.out.println(instance.photosUpload.size() + "BOOLEAN");
+        if(instance.notifications.size() > 0) {
 
-            if(instance.notifications != null) {
-                if (instance.favorites.size() == favoriteCount && instance.notifications.size() == notificationsCount &&
-                        instance.notificationSenders.keySet().size() == notificationsCount) {
-                    t.cancel();
-                    t.purge();
-                    once = false;
-                    if (finishedCurrentUserInit != null)
-                        finishedCurrentUserInit.done();
-                    //stop the timer and update th elistener
+            System.out.println(instance.favorites.size() + "FAVORITES SIZe");
+            System.out.println(favoriteCount + "FAVORITE COUNT");
+            System.out.println(instance.notificationSenders.keySet().size() + "SENDERS SIZE");
 
-                }
-            }else {
-                System.out.println("WTF");
+            if ((instance.favorites.size() == favoriteCount) && (instance.notifications.size() == notificationsCount) &&
+                    (instance.notificationSenders.keySet().size() == notificationsCount) && (photosUpload.size() == 2)) {
+                t.cancel();
+                t.purge();
+                once = false;
+                if (finishedCurrentUserInit != null)
+                    finishedCurrentUserInit.done();
+                //stop the timer and update th elistener
 
             }
+        } else {
+            System.out.println("WTF?");
         }
+    }
 
-        public void setNotificationsListener(RefreshNotificationsListener refreshNotificationsListener ){
-            this.refreshNotificationsListener = refreshNotificationsListener;
-        }
+    public void setNotificationsListener(RefreshNotificationsListener refreshNotificationsListener) {
+        this.refreshNotificationsListener = refreshNotificationsListener;
+    }
 
     public void setRefreshFavoritesListener(RefreshFavorites refreshFavoritesListener) {
         this.refreshFavoritesListener = refreshFavoritesListener;
         System.out.println(this.refreshFavoritesListener + "Current User listener");
     }
 
-    public void initNotifications(){
+    public void initNotifications() {
 
         if (!once) {
             newTimer = new Timer();
@@ -307,51 +328,50 @@ public class CurrentUser extends User {
             }, 0, 250);
         }
 
-            for (NotificationItem notification : instance.notifications) {
-                System.out.println(notifications);
-                System.out.println(notification);
-                //get sender profile and name for the notification
-                ref.child("users").child(notification.getSenderID()).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        User sender = dataSnapshot.getValue(User.class);
-                        System.out.println("Sender created!"+sender.getFirstName());
-                        storageRef.child("profile/").child(sender.getFireBaseID())
-                                .getBytes(2048*2048)
-                                .addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                    @Override
-                                    public void onSuccess(byte[] bytes) {
-                                        sender.setProfileImage(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-                                        System.out.println("Got sender Profile image");
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            sender.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
-                                            System.out.println("Got fake picture");
-                                        }
-                        });
 
-                        //putting in a dictionary.
-                        instance.notificationSenders.put(notification.getUid() , sender);
-                        System.out.println("User added to dictionary");
+        for (NotificationItem notification : instance.notifications) {
+            System.out.println(notification);
+            //get sender profile and name for the notification
+            ref.child("users").child(notification.getSenderID()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    User sender = dataSnapshot.getValue(User.class);
+                    System.out.println("Sender created!" + sender.getFirstName());
+                    storageRef.child("profile").child(sender.getFireBaseID())
+                            .getBytes(2048 * 2048)
+                            .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                @Override
+                                public void onSuccess(byte[] bytes) {
+                                    sender.setProfileImage(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+                                    System.out.println("Got sender Profile image");
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            sender.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
+                            System.out.println("Got fake picture");
+                        }
+                    });
+
+                    //putting in a dictionary.
+                    instance.notificationSenders.put(notification.getUid(), sender);
+                    System.out.println(instance.notificationSenders.keySet().size());
+                    System.out.println("User added to dictionary");
 //                        System.out.println(notificationSenders.get(notification.getUid()));
 
 //
-                    }
+                }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                    }
-                });
+                }
+            });
 
-
-
-
-            }
 
         }
+
+    }
 
 }
 

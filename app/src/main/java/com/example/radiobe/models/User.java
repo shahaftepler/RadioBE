@@ -3,10 +3,12 @@ package com.example.radiobe.models;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.text.format.DateFormat;
 
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -15,7 +17,7 @@ public class User {
     private String firstName;
     private String lastName;
     private String email;
-    private String birthDate; //TODO: check about Date in 21 api
+    private String birthDateString; //TODO: check about Date in 21 api
     private String password;
     private String _id;
     private String _rev;
@@ -23,6 +25,7 @@ public class User {
     private List<String> favoritesID;
     Bitmap profileImage;
     Bitmap coverImage;
+    private Date birthDate;
 
     public Bitmap getProfileImage() {
         return profileImage;
@@ -62,11 +65,13 @@ public class User {
     }
 
     /*full Constructor*/
-    public User(String firstName, String lastName, String email, String birthDate, String password) {
+    public User(String firstName, String lastName, String email, Date birthDate, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.birthDate = birthDate;
+        String birth = DateFormat.format("dd/MM/yyyy", birthDate).toString();
+        setBirthDateString(birth);
         this.password = password;
     }
 
@@ -82,21 +87,9 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.birthDate = birthDate;
+        this.birthDateString = birthDate;
         this.password = password;
         this.fireBaseID = fireBaseID;
-    }
-
-
-    /*full Constructor with database data*/
-    public User(String firstName, String lastName, String email, String birthDate, String password, String _id, String _rev) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.birthDate = birthDate;
-        this.password = password;
-        this._id = _id;
-        this._rev = _rev;
     }
 
     /*Getters and Setters*/
@@ -104,6 +97,7 @@ public class User {
     public String getFirstName() {
         return firstName;
     }
+
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -119,32 +113,28 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
-    public String getBirthDate() {
+
+    public Date getBirthDate() {
         return birthDate;
     }
-    public void setBirthDate(String birthDate) {
+
+    public void setBirthDate(Date birthDate) {
         this.birthDate = birthDate;
+        String birth = DateFormat.format("dd/MM/yyyy", birthDate).toString();
+        setBirthDateString(birth);
+    }
+
+    public String getBirthDateString() {
+        return birthDateString;
+    }
+    public void setBirthDateString(String birthDate) {
+        this.birthDateString = birthDate;
     }
     public String getPassword() {
         return password;
     }
     public void setPassword(String password) {
         this.password = password;
-    }
-
-
-    //getters setters for database
-    public String get_id() {
-        return _id;
-    }
-    public void set_id(String _id) {
-        this._id = _id;
-    }
-    public String get_rev() {
-        return _rev;
-    }
-    public void set_rev(String _rev) {
-        this._rev = _rev;
     }
 
 
@@ -155,7 +145,7 @@ public class User {
                 "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
-                ", birthDate=" + birthDate +
+                ", birthDate=" + birthDateString +
                 ", password='" + password + '\'' +
                 '}';
     }

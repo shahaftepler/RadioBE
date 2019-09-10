@@ -57,12 +57,16 @@ public class SignUp extends AppCompatActivity {
             int month = datePicker.getMonth();
             int year = datePicker.getYear();
             int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(year, month, day);
 
+            Date birthDate = calendar.getTime();
 
             String firstName = etFirst.getText().toString();
             String lastName = etLast.getText().toString();
             String userName = etEmail.getText().toString();
-            String birthDay = getStringDate(year, month, day);
+
+//            String birthDay = getStringDate(year, month, day);
             String password = etPassword.getText().toString();
             String password2 = etPassAgain.getText().toString();
 
@@ -94,7 +98,7 @@ public class SignUp extends AppCompatActivity {
                 user = new User(etFirst.getText().toString(),
                         etLast.getText().toString(),
                         etEmail.getText().toString(),
-                        birthDay,
+                        birthDate,
                         etPassword.getText().toString()
                 );
                 createUser(user);
@@ -105,14 +109,14 @@ public class SignUp extends AppCompatActivity {
 
     }
 
-    private String getStringDate(int year, int month, int day) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day);
-        Date date = calendar.getTime();
-
-        return simpleDateFormat.format(date);
-    }
+//    private String getStringDate(int year, int month, int day) {
+//        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.set(year, month, day);
+//        Date date = calendar.getTime();
+//
+//        return simpleDateFormat.format(date);
+//    }
 
     public void createUser(User newUser) {
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(newUser.getEmail(), newUser.getPassword()).addOnCompleteListener((task) -> {
@@ -124,12 +128,12 @@ public class SignUp extends AppCompatActivity {
                 ref.child("users").child(newUser.getFireBaseID()).setValue(newUser);
 
                 //todo: create listener
-                CurrentUser.getInstance().createUser(newUser.getFireBaseID() , null);
+                CurrentUser.getInstance().createUser(newUser.getFireBaseID() , ()->{
+                    Intent intent = new Intent(this, MainScreen.class);
+                    startActivity(intent);
+                    finish();
+                });
 
-
-                Intent intent = new Intent(this, MainScreen.class);
-                startActivity(intent);
-                finish();
             } else {
                 if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                     Toast.makeText(this, "המייל כבר נמצא במערכת", Toast.LENGTH_SHORT).show();

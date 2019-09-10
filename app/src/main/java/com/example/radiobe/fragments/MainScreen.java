@@ -16,6 +16,9 @@ import android.widget.Toast;
 import com.example.radiobe.MainActivity;
 import com.example.radiobe.R;
 import com.example.radiobe.adapters.MainScreenAdapter;
+import com.example.radiobe.adapters.NotificationsAdapter;
+import com.example.radiobe.database.CurrentUser;
+import com.example.radiobe.database.RefreshNotificationsListener;
 import com.example.radiobe.generalScreens.Profile;
 import com.example.radiobe.generalScreens.Settings;
 import com.facebook.login.LoginManager;
@@ -101,7 +104,6 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
 
         setContentView(R.layout.activity_mainscreen);
         generalSetup();
-
 
 //        LocalBroadcastManager.getInstance(this).registerReceiver(new ExoPlayerView().broadcastReceiver, new IntentFilter("play_song"));
 

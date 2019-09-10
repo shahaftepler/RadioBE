@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.radiobe.R;
+import com.example.radiobe.database.CurrentUser;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -78,9 +79,14 @@ public class Profile extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
 
-        getImageStorageFrom("cover", coverImage);
-        getImageStorageFrom("profile", profileImage);
-
+//        getImageStorageFrom("cover", coverImage);
+//        getImageStorageFrom("profile", profileImage);
+        profileImage.setImageBitmap(CurrentUser.getInstance().getProfileImage());
+        coverImage.setImageBitmap(CurrentUser.getInstance().getCoverImage());
+        profileName.setText(CurrentUser.getInstance().getFirstName() +" "+ CurrentUser.getInstance().getLastName());
+        profileDescription.setText(CurrentUser.getInstance().getFirstName() +" "+ CurrentUser.getInstance().getLastName());
+        //todo: are we going to add description to the user registration? if so, get it from current user too.
+        profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
 
         editImageProfile.setOnClickListener((view -> {
 
@@ -224,6 +230,11 @@ public class Profile extends AppCompatActivity {
         viewForAlert = LayoutInflater.from(this).inflate(R.layout.dialog_view, null);
         editDialogName = viewForAlert.findViewById(R.id.edit_dialog_name);
         editDialogDescription = viewForAlert.findViewById(R.id.edit_dialog_description);
+
+        editDialogName.setText(CurrentUser.getInstance().getFirstName() + " " +CurrentUser.getInstance().getLastName());
+        editDialogDescription.setText(CurrentUser.getInstance().getFirstName() + " " +CurrentUser.getInstance().getLastName());
+
+
         positiveButton = viewForAlert.findViewById(R.id.positiveButton);
         negativeButton = viewForAlert.findViewById(R.id.negativeButton);
         datePicker = viewForAlert.findViewById(R.id.datePicker);
@@ -270,6 +281,11 @@ public class Profile extends AppCompatActivity {
                 alert.dismiss();
             }
         });
+
+        negativeButton.setOnClickListener((v)->{
+            alert.dismiss();
+        });
+
     }
 
 
