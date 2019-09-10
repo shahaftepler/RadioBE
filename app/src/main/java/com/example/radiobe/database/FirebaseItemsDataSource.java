@@ -262,31 +262,14 @@ public class FirebaseItemsDataSource{
         ref.child("favorites").child(firebaseUser.getUid()).child(radioItem.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                //at the moment it updates only minus, no plus for likes. need to figure out.
                 if (dataSnapshot.getValue() != null){
-                    //TODO:
-//                    CurrentUser.getInstance().removeFavorite(radioItem.getUid());
-//                    ref.child("favorites").child(firebaseUser.getUid()).setValue(CurrentUser.getInstance().getFavoritesID());
                     ref.child("favorites").child(firebaseUser.getUid()).child(radioItem.getUid()).removeValue();
                     System.out.println("Suppose to take off favorite");
 
                 } else {
-                    //TODO:
-//                    CurrentUser.getInstance().addFavorite(radioItem.getUid());
-//                    ref.child("favorites").child(firebaseUser.getUid()).setValue(CurrentUser.getInstance().getFavoritesID());
                     ref.child("favorites").child(firebaseUser.getUid()).child(radioItem.getUid()).setValue(ServerValue.TIMESTAMP);
-                    CurrentUser.getInstance().addFavorite(radioItem);
-
                 }
 
-
-
-//
-//                        //show on ui - suppose to happen to on the delegate call on the dataChange on top.
-//                        if (updateLikes != null){
-//                            updateLikes.update(radioItem);
-//                        }
             }
 
             @Override
@@ -342,13 +325,6 @@ public class FirebaseItemsDataSource{
                             System.out.println("Suppose to add like!");
                         }
 
-
-
-//
-//                        //show on ui - suppose to happen to on the delegate call on the dataChange on top.
-//                        if (updateLikes != null){
-//                            updateLikes.update(radioItem);
-//                        }
                     }
 
                     @Override

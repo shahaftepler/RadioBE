@@ -102,6 +102,7 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
         setContentView(R.layout.activity_mainscreen);
         generalSetup();
 
+
 //        LocalBroadcastManager.getInstance(this).registerReceiver(new ExoPlayerView().broadcastReceiver, new IntentFilter("play_song"));
 
 //        navigation.setSelectedItemId(R.id.navigation_home);

@@ -37,46 +37,26 @@ public class CurrentUser extends User {
         List<NotificationItem> notifications;
         Context context;
         RefreshNotificationsListener refreshNotificationsListener;
+        RefreshFavorites refreshFavoritesListener;
 
-        long favoriteCount = 0;
-        long notificationsCount = 0;
+        long favoriteCount = -1;
+        long notificationsCount = -1;
         Timer t = new Timer();
         Timer newTimer = new Timer();
+        Timer favoritesTimer = new Timer();
         boolean once = true;
 
     public HashMap<String, User> getNotificationSenders() {
         return notificationSenders;
     }
 
-    public void setNotificationSenders(HashMap<String, User> notificationSenders) {
-        this.notificationSenders = notificationSenders;
-    }
-
-
     public List<RadioItem> getFavorites() {
-        return favorites;
-    }
-
-    public void setFavorites(List<RadioItem> favorites) {
-        this.favorites = favorites;
+        return instance.favorites;
     }
 
     public List<NotificationItem> getNotifications() {
-        return notifications;
+        return instance.notifications;
     }
-
-    public void setNotifications(List<NotificationItem> notifications) {
-        this.notifications = notifications;
-    }
-
-
-    //todo: maybe find a different way, or combine with the addFavorite method in the datasource
-    public void addFavorite(RadioItem item){
-        instance.favorites.add(item);
-    }
-    public void removeFavorite(RadioItem item){instance.favorites.remove(item);}
-
-
 
     StorageReference storageRef = FirebaseStorage.getInstance().getReference();
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
@@ -91,6 +71,7 @@ public class CurrentUser extends User {
 
     private CurrentUser() {
         favorites = new ArrayList<>();
+        favoritesID = new ArrayList<>();
         notifications = new ArrayList<>();
         notificationSenders = new HashMap<>();
     }
@@ -109,80 +90,79 @@ public class CurrentUser extends User {
                         instance = dataSnapshot.getValue(CurrentUser.class);
                         System.out.println("Created instance");
                         System.out.println(instance);
-                        ref.child("favorites").child(fireBaseID).addListenerForSingleValueEvent(new ValueEventListener() {
+
+
+                        ref.child("favorites").child(fireBaseID).addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
                                 if (dataSnapshot.getChildrenCount() > 0) {
                                     favoriteCount = dataSnapshot.getChildrenCount();
+
+                                        System.out.println("CLEAR");
+                                        instance.favoritesID.clear();
+                                        instance.favorites.clear();
+
                                     for (DataSnapshot snap : dataSnapshot.getChildren()) {
-                                        ref.child("streams").child(snap.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                instance.favorites.add(dataSnapshot.getValue(RadioItem.class));
-                                                System.out.println("Favorite Added");
-                                                System.out.println(favorites);
-
-                                            }
-
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                            }
-                                        });
-
-
-
-
-
+                                        instance.favoritesID.add(snap.getKey());
 //                                        favorites.add(snap.getValue(RadioItem.class));
-//                                        System.out.println("Favorite Added");
+                                        System.out.println("Favorite Added");
                                     }
 
+
+                                    System.out.println("--------------------- BEFORE INIT FAVORITES");
+                                    System.out.println("FAVORITES" + instance.favorites.size());
+                                    System.out.println("FAVORITES ID" + instance.favoritesID.size());
+                                    initFavorites();
+
+                                } else{
+                                    System.out.println("NO FAVORITES");
                                 }
 
-
-                                    ref.child("notifications").child(fireBaseID).addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            if (dataSnapshot.getChildrenCount() > 0) {
-                                                notificationsCount = dataSnapshot.getChildrenCount();
-                                                System.out.println(notificationsCount);
-
-                                                if(!once)
-                                                    instance.notifications.clear();
-                                                for (DataSnapshot snap : dataSnapshot.getChildren()) {
-                                                    instance.notifications.add(snap.getValue(NotificationItem.class));
-                                                    System.out.println("Notification Added");
-                                                    System.out.println(notifications);
-                                                }
-
-                                                initNotifications();
-
-//                                                if(once) {
-//
-//                                                } else {
-//                                                    initNotifications();//todo: update listener for notifications adapter.
-//                                                }
-
-
-                                            }
-
-                                        }
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
-                                    });
-
-
                             }
+
 
                             @Override
                             public void onCancelled(@NonNull DatabaseError databaseError) {
 
                             }
                         });
+
+                        ref.child("notifications").child(fireBaseID).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                                if (dataSnapshot.getChildrenCount() > 0) {
+                                    notificationsCount = dataSnapshot.getChildrenCount();
+                                    System.out.println(notificationsCount);
+
+                                    if(!once)
+                                        instance.notifications.clear();
+                                        instance.notificationSenders.clear();
+                                    for (DataSnapshot snap : dataSnapshot.getChildren()) {
+                                        instance.notifications.add(snap.getValue(NotificationItem.class));
+                                        System.out.println("Notification Added");
+                                    }
+
+                                    initNotifications();
+
+                                }
+
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
                     }
+                    t.scheduleAtFixedRate(new TimerTask() {
+                        @Override
+                        public void run() {
+                            checkLoadingComplete(finishedCurrentUserInit);
+                        }
+                    }, 0 , 250);
+
                 }
 
                 @Override
@@ -191,39 +171,143 @@ public class CurrentUser extends User {
                 }
             });
 
-            t.scheduleAtFixedRate(new TimerTask() {
+
+        }
+
+    private void initFavorites() {
+        instance.favorites = new ArrayList<>();
+        System.out.println(once);
+
+        if (!once) {
+            favoritesTimer = new Timer();
+            favoritesTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    checkLoadingComplete(finishedCurrentUserInit);
+                    checkFavoriteLoading();
                 }
-            }, 0 , 250);
+
+            }, 0, 250);
+        }
+
+        for (String key : instance.favoritesID){
+            for (RadioItem stream : FirebaseItemsDataSource.getInstance().getFireBaseStreams()){
+                if (key.equals(stream.getUid())){
+                    System.out.println("ABOUT TO ADD FAVORITE" + instance.favorites.size());
+                    instance.favorites.add(stream);
+                }
+            }
+
+
+
+
+
+//            ref.child("streams").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                    if (dataSnapshot.getValue() != null) {
+//
+//                        System.out.println("ABOUT TO ADD FAVORITE" + instance.favorites.size());
+//
+//                        instance.favorites.add(dataSnapshot.getValue(RadioItem.class));
+//                        System.out.println("Favorite converted");
+//                    } else {
+//                        System.out.println("Something is wrong");
+//                    }
+//
+//
+//
+//                }
+//
+//                @Override
+//                public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                }
+//            });
         }
 
 
+    }
 
+    private void checkFavoriteLoading() {
+        System.out.println("IN FAVORITE LOADING");
+        System.out.println(instance.favoritesID.size() + "FAVORITES ID");
+        System.out.println(instance.favorites.size() + "FAVORITES");
+        System.out.println(favoriteCount + "COUNT");
+        if (instance.favoritesID.size() == instance.favorites.size() && instance.favorites.size() == favoriteCount) {
+            System.out.println(instance.refreshFavoritesListener);
+            System.out.println("HELLO!");
+            System.out.println("Favorites Timer");
+            favoritesTimer.cancel();
+            favoritesTimer.purge();
+            if (instance.refreshFavoritesListener != null) {     //todo: find out why null.
+                instance.refreshFavoritesListener.refresh(instance.favorites);
+            }
+        }
+    }
 
-        //todo: check if new arraylist size is 0
-        public void checkLoadingComplete(FinishedCurrentUserInit finishedCurrentUserInit){
+    private void checkNotificationsLoading() {
 
-            if(favorites != null && notifications != null && !notificationSenders.isEmpty()){
-            if (favorites.size() == favoriteCount  && notifications.size() == notificationsCount && notificationSenders.keySet().size() == notificationsCount){
-                t.cancel();
-                t.purge();
-                once = false;
-                if (finishedCurrentUserInit != null)
-                    finishedCurrentUserInit.done();
-                //stop the timer and update th elistener
+        System.out.println("Inside Notifications Timer");
+        System.out.println(instance.notifications.size() + "NOTIFICATIONS");
+        System.out.println(instance.notificationSenders.keySet().size() + "Senders");
+        System.out.println(notificationsCount);
+        if (instance.notificationSenders.keySet().size() == instance.notifications.size() && instance.notifications.size() == notificationsCount) {
+            System.out.println("Sizes are good");
+            newTimer.cancel();
+            newTimer.purge();
+            if (instance.refreshNotificationsListener != null) {
+                System.out.println("listener not null");
+                instance.refreshNotificationsListener.refresh(instance.notifications, instance.notificationSenders);
 
             }
         }
+    }
+
+
+    //todo: check if new arraylist size is 0
+        public void checkLoadingComplete(FinishedCurrentUserInit finishedCurrentUserInit){
+
+            if(instance.notifications != null) {
+                if (instance.favorites.size() == favoriteCount && instance.notifications.size() == notificationsCount &&
+                        instance.notificationSenders.keySet().size() == notificationsCount) {
+                    t.cancel();
+                    t.purge();
+                    once = false;
+                    if (finishedCurrentUserInit != null)
+                        finishedCurrentUserInit.done();
+                    //stop the timer and update th elistener
+
+                }
+            }else {
+                System.out.println("WTF");
+
+            }
         }
 
         public void setNotificationsListener(RefreshNotificationsListener refreshNotificationsListener ){
             this.refreshNotificationsListener = refreshNotificationsListener;
         }
 
-        public void initNotifications(){
-            for (NotificationItem notification : notifications) {
+    public void setRefreshFavoritesListener(RefreshFavorites refreshFavoritesListener) {
+        this.refreshFavoritesListener = refreshFavoritesListener;
+        System.out.println(this.refreshFavoritesListener + "Current User listener");
+    }
+
+    public void initNotifications(){
+
+        if (!once) {
+            newTimer = new Timer();
+            newTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+
+                    checkNotificationsLoading();
+                }
+
+            }, 0, 250);
+        }
+
+            for (NotificationItem notification : instance.notifications) {
                 System.out.println(notifications);
                 System.out.println(notification);
                 //get sender profile and name for the notification
@@ -243,14 +327,13 @@ public class CurrentUser extends User {
                                 }).addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
-                                            //todo: setProfileImage Place Holder.
                                             sender.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
                                             System.out.println("Got fake picture");
                                         }
                         });
 
                         //putting in a dictionary.
-                        notificationSenders.put(notification.getUid() , sender);
+                        instance.notificationSenders.put(notification.getUid() , sender);
                         System.out.println("User added to dictionary");
 //                        System.out.println(notificationSenders.get(notification.getUid()));
 
@@ -268,23 +351,6 @@ public class CurrentUser extends User {
 
             }
 
-            if (!once) {
-
-                newTimer.scheduleAtFixedRate(new TimerTask() {
-                    @Override
-                    public void run() {
-
-                        if (notificationSenders.keySet().size() == notifications.size()) {
-                            if (refreshNotificationsListener != null) {
-                                refreshNotificationsListener.refresh(notifications, notificationSenders);
-                                newTimer.cancel();
-                                newTimer.purge();
-                            }
-                        }
-                    }
-
-                }, 0, 250);
-            }
         }
 
 }

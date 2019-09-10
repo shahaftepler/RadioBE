@@ -49,7 +49,7 @@ public class Notifications extends Fragment {
         adapter = new NotificationsAdapter(CurrentUser.getInstance().getNotifications(),  CurrentUser.getInstance().getNotificationSenders(),getContext());
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-        adapter.initNotificationListener();
+        adapter.initNotificationListener(getActivity());
 
 
     }

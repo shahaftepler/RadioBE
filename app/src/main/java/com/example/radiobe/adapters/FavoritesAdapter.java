@@ -1,5 +1,6 @@
 package com.example.radiobe.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.radiobe.R;
+import com.example.radiobe.database.CurrentUser;
+import com.example.radiobe.database.RefreshFavorites;
+import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.RadioItem;
 
 import java.util.List;
@@ -19,6 +23,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
     /*Properties*/
     private List<RadioItem> favoriteItemList;
     private Context context;
+    RefreshFavorites refreshFavorites;
 
     /*Constructor*/
     public FavoritesAdapter(List<RadioItem> favoriteItemList, Context context) {
@@ -42,11 +47,32 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         holder.ivFavoriteItemImage.setImageResource(favoriteRecommendedItem.getResImage());
         holder.tvFavoriteTitle.setText(favoriteRecommendedItem.getItemName());
         holder.tvFavoriteDescription.setText(favoriteRecommendedItem.getItemName());
+
     }
+
 
     @Override
     public int getItemCount() {
         return favoriteItemList.size();
+    }
+
+    public void initRefreshListener(Activity activity){
+        refreshFavorites = new RefreshFavorites() {
+            @Override
+            public void refresh(List<RadioItem> favorites) {
+                favoriteItemList = favorites;
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("Suppose to update");
+                        notifyDataSetChanged();
+                    }
+                });
+
+            }
+        };
+        System.out.println(refreshFavorites + "LISTENER");
+        CurrentUser.getInstance().setRefreshFavoritesListener(refreshFavorites);
     }
 
     class FavoritesViewHolder extends RecyclerView.ViewHolder {

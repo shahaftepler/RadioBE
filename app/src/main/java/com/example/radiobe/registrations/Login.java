@@ -76,9 +76,13 @@ public class Login extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
 
-        if (firebaseUser != null) {
-            Intent intent = new Intent(this, MainScreen.class);
-            startActivity(intent);
+        if (firebaseUser != null) {   //TODO : try to understand why it didn't work from the splash screen itself.
+            CurrentUser.getInstance().setContext(getApplicationContext());
+            CurrentUser.getInstance().createUser(firebaseUser.getUid(), ()->{
+                Intent intent = new Intent(this, MainScreen.class);
+                startActivity(intent);
+            }); // todo: create a listener for that.
+
         }
 
 
@@ -166,7 +170,7 @@ public class Login extends AppCompatActivity {
 
                         System.out.println("signInWithEmail:success");
                         //handle getting UserCredentials from server;
-
+                        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                         CurrentUser.getInstance().setContext(getApplicationContext());
                         CurrentUser.getInstance().createUser(firebaseUser.getUid(), ()-> {
                             Intent intent = new Intent(this, MainScreen.class);
@@ -208,7 +212,7 @@ public class Login extends AppCompatActivity {
 
 
     private void updateUI(FirebaseUser myFirebaseUser) {
-        etName.setText(myFirebaseUser.getEmail());
+//        etName.setText(myFirebaseUser.getEmail());
         Intent intent = new Intent(this, MainScreen.class);
         startActivity(intent);
     }
