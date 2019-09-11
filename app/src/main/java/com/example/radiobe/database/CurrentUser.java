@@ -284,7 +284,7 @@ public class CurrentUser extends User {
 
     public void checkLoadingComplete(FinishedCurrentUserInit finishedCurrentUserInit) {
         System.out.println(instance.photosUpload.size() + "BOOLEAN");
-        if(instance.notifications.size() > 0) {
+//        if(instance.notifications.size() > 0) {
 
             System.out.println(instance.favorites.size() + "FAVORITES SIZe");
             System.out.println(favoriteCount + "FAVORITE COUNT");
@@ -300,10 +300,8 @@ public class CurrentUser extends User {
                 //stop the timer and update th elistener
 
             }
-        } else {
-            System.out.println("WTF?");
         }
-    }
+
 
     public void setNotificationsListener(RefreshNotificationsListener refreshNotificationsListener) {
         this.refreshNotificationsListener = refreshNotificationsListener;

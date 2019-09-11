@@ -80,7 +80,7 @@ public class SignUp extends AppCompatActivity {
 
             System.out.println("user over 16?: " + (currentYear - year));
             if ((currentYear - year) < 16) {
-                Toast.makeText(this, "Your age must be over 16 old.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "You must be over 16 years old to use this app.", Toast.LENGTH_SHORT).show();
             }
 
             if (password.length() < 6)
@@ -128,6 +128,7 @@ public class SignUp extends AppCompatActivity {
                 ref.child("users").child(newUser.getFireBaseID()).setValue(newUser);
 
                 //todo: create listener
+                CurrentUser.getInstance().setContext(getApplicationContext());
                 CurrentUser.getInstance().createUser(newUser.getFireBaseID() , ()->{
                     Intent intent = new Intent(this, MainScreen.class);
                     startActivity(intent);

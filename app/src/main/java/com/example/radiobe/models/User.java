@@ -26,6 +26,15 @@ public class User {
     Bitmap profileImage;
     Bitmap coverImage;
     private Date birthDate;
+    String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Bitmap getProfileImage() {
         return profileImage;
