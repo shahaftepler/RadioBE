@@ -166,7 +166,7 @@ public class Login extends AppCompatActivity {
 
                         System.out.println("signInWithEmail:success");
                         //handle getting UserCredentials from server;
-
+                        firebaseUser = firebaseAuth.getCurrentUser();
                         CurrentUser.getInstance().setContext(getApplicationContext());
                         CurrentUser.getInstance().createUser(firebaseUser.getUid(), ()-> {
                             Intent intent = new Intent(this, MainScreen.class);

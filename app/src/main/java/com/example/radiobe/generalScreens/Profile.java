@@ -270,6 +270,10 @@ public class Profile extends AppCompatActivity {
                 alert.dismiss();
             }
         });
+
+        negativeButton.setOnClickListener((view -> {
+            alert.dismiss();
+        }));
     }
 
 
