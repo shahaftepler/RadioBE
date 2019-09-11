@@ -9,9 +9,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.autofill.AutofillValue;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -20,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.radiobe.R;
+import com.example.radiobe.database.CurrentUser;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -35,6 +38,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -78,9 +82,7 @@ public class Profile extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
 
-        getImageStorageFrom("cover", coverImage);
-        getImageStorageFrom("profile", profileImage);
-
+        setupInfo();
 
         editImageProfile.setOnClickListener((view -> {
 
@@ -116,6 +118,21 @@ public class Profile extends AppCompatActivity {
                 });
     }
 
+    private void setupInfo() {
+        profileImage.setImageBitmap(CurrentUser.getInstance().getProfileImage());
+        coverImage.setImageBitmap(CurrentUser.getInstance().getCoverImage());
+        profileName.setText(CurrentUser.getInstance().getFirstName() +" "+ CurrentUser.getInstance().getLastName());
+
+        if (CurrentUser.getInstance().getDescription() != null){
+            profileDescription.setText(CurrentUser.getInstance().getDescription());
+        } else {
+            profileDescription.setText("Hello my name is "+CurrentUser.getInstance().getFirstName() +" nice to meet you");
+
+        }
+        //todo: are we going to add description to the user registration? if so, get it from current user too.
+        profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -125,43 +142,31 @@ public class Profile extends AppCompatActivity {
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                     //get data as uri
                     filePath = data.getData();
-                    //set the profileImage to the uri data
-                    coverImage.setImageURI(filePath);
+                    //set the profileImage to the uri data. transferred it to onSuccess of the upload, cause otherwise it doesn't worth it.
+//                    coverImage.setImageURI(filePath);
                     //upload the image to firebase storage im cover/ folder
-                    uploadImage("cover");
-                }
-                break;
+                    uploadImage("cover" , coverImage);
+                } else {
+                    Toast.makeText(this, "Something wasn't done right.", Toast.LENGTH_SHORT).show();
+
+                }                break;
             case PICK_PROFILE_IMAGE:
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                     //get data as uri
                     filePath = data.getData();
                     //set the profileImage to the uri data
-                    profileImage.setImageURI(filePath);
+//                    profileImage.setImageURI(filePath);
                     //upload the image to firebase storage im profile/ folder
-                    uploadImage("profile");
+                    uploadImage("profile" , profileImage);
+                } else {
+                    Toast.makeText(this, "Something wasn't done right.", Toast.LENGTH_SHORT).show();
+
                 }
                 break;
         }
 
     }
 
-    /**
-     * Get the image that the user choose from the Storage and make sure it's not over 4 MB.
-     * If success we turn the image to Bitmap and place it on the ImageView.
-     *
-     * @param folder     -> represent the folder on the FireBase Storage.
-     * @param imagePlace -> represent the ImageView that going to display the picture.
-     */
-    private void getImageStorageFrom(String folder, ImageView imagePlace) {
-        storageReference.child(folder).child(uid).getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                imagePlace.setImageBitmap(bitmap);
-            }
-        });
-    }
 
     /**
      * UploadImage gave us the ability to choose or create a folder on the FireBase Storage
@@ -169,7 +174,7 @@ public class Profile extends AppCompatActivity {
      *
      * @param folder -> represent the folder that we want create or upload to it.
      */
-    private void uploadImage(String folder) {
+    private void uploadImage(String folder , ImageView imagePlace) {
 
         if (filePath != null) {
             final ProgressDialog progressDialog = new ProgressDialog(this);
@@ -182,8 +187,14 @@ public class Profile extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            //only after the photo was uploaded successfully to the server im setting in the UI
+                            imagePlace.setImageURI(filePath);
+
+                            //set the current user photo too.
+                            updateCurrentUserPhotoChange(folder);
+
                             progressDialog.dismiss();
-                            Toast.makeText(Profile.this, "Uploaded", Toast.LENGTH_LONG).show();
+                            Toast.makeText(Profile.this, "Your photo was uploaded successfully!", Toast.LENGTH_LONG).show();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -198,6 +209,35 @@ public class Profile extends AppCompatActivity {
                         progressDialog.setMessage("Uploading " + (int) progress + "%");
                     });
         }
+    }
+
+
+    /**
+     * This method purpose is to update the current user object with the new photo being picked.
+     * Its being called only if the upload to the server was a success.
+     * @param folder -> represent the kind of photo to be uploaded.
+     */
+
+    private void updateCurrentUserPhotoChange(String folder){
+        switch (folder){
+            case "profile":
+                try {
+                    CurrentUser.getInstance().setProfileImage(MediaStore.Images.Media.getBitmap(Profile.this.getContentResolver(), filePath));
+                    System.out.println(CurrentUser.getInstance().getProfileImage());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("File wasn't uploaded to Current user profile");
+                }
+            case "cover":
+                try {
+                    CurrentUser.getInstance().setCoverImage(MediaStore.Images.Media.getBitmap(Profile.this.getContentResolver(), filePath));
+                    System.out.println(CurrentUser.getInstance().getCoverImage());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("File wasn't uploaded to Current user profile");
+                }
+        }
+
     }
 
     /**
@@ -224,19 +264,22 @@ public class Profile extends AppCompatActivity {
         viewForAlert = LayoutInflater.from(this).inflate(R.layout.dialog_view, null);
         editDialogName = viewForAlert.findViewById(R.id.edit_dialog_name);
         editDialogDescription = viewForAlert.findViewById(R.id.edit_dialog_description);
+
+        editDialogName.setText(profileName.getText().toString());
+        editDialogDescription.setText(profileDescription.getText().toString());
+
+
         positiveButton = viewForAlert.findViewById(R.id.positiveButton);
         negativeButton = viewForAlert.findViewById(R.id.negativeButton);
         datePicker = viewForAlert.findViewById(R.id.datePicker);
         datePicker.setMaxDate(new Date().getTime());
         builder.setView(viewForAlert);
+
+        //todo: init picker with the date of birth.
         Calendar calendar = Calendar.getInstance();
+        calendar.setTime(CurrentUser.getInstance().getBirthDate());
         datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH), new DatePicker.OnDateChangedListener() {
-                    @Override
-                    public void onDateChanged(DatePicker datePicker, int year, int month, int dayOfMonth) {
-                        profileBirthDay.setText(String.format("%d/%d/%d", dayOfMonth, (month + 1), year));
-                    }
-                });
+                calendar.get(Calendar.DAY_OF_MONTH), null);
 
 
         builder.setIcon(R.drawable.pan_edit);
@@ -260,6 +303,7 @@ public class Profile extends AppCompatActivity {
             if (name.length() < 1) {
                 editDialogName.setError("Enter A Name");
             }
+
             if (description.length() < 1) {
                 editDialogDescription.setError("Choose Description");
             }
@@ -271,9 +315,11 @@ public class Profile extends AppCompatActivity {
             }
         });
 
-        negativeButton.setOnClickListener((view -> {
+        negativeButton.setOnClickListener((v)->{
             alert.dismiss();
-        }));
+            Toast.makeText(this, "No change!", Toast.LENGTH_SHORT).show();
+        });
+
     }
 
 

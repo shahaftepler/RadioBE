@@ -42,12 +42,13 @@ public class Favorites extends Fragment {
         recyclerView = view.findViewById(R.id.rvFavoriteTop);
 
         FavoritesAdapter favoritesAdapter = new FavoritesAdapter(
-        CurrentUser.getInstance().getFavorites(), getContext());
+        CurrentUser.getInstance().getFavorites(), getActivity());
         LinearLayoutManager layoutManagerTop = new LinearLayoutManager(getContext(),
                 LinearLayoutManager.HORIZONTAL,false);
 
         recyclerView.setLayoutManager(layoutManagerTop);
         recyclerView.setAdapter(favoritesAdapter);
+        favoritesAdapter.initRefreshListener(getActivity());
 
 
 

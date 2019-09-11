@@ -1,5 +1,6 @@
 package com.example.radiobe.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -23,7 +24,7 @@ import java.util.Map;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.NotificationViewHolder>{
+public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.NotificationViewHolder> implements RefreshNotificationsListener{
     /*Properties*/
     List<NotificationItem> notificationItemList;
     Context context;
@@ -52,14 +53,12 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
         NotificationItem notificationItem = notificationItemList.get(position);
         User user = notificationSenders.get(notificationItem.getUid());
-        System.out.println(notificationItemList);
-        System.out.println("---------------------------");
-
+        System.out.println(notificationSenders);
         System.out.println(user);
         holder.tvNotificationTime.setText(DateFormat.format("dd/MM/yyyy", new Date(notificationItem.getCreationDate())).toString());
         holder.tvDescription.setText(notificationItem.getDescription());
         holder.tvTitle.setText(notificationItem.getTitle());
-//        holder.ivNotification.setImageBitmap(user.getProfileImage());
+        holder.ivNotification.setImageBitmap(user.getProfileImage());
 //        holder.ivNotification.setImageResource(notificationItem.getImageURL());
 
     }
@@ -69,18 +68,31 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         return notificationItemList.size();
     }
 
-    public void initNotificationListener(){
+
+    public void initNotificationListener(Activity activity){
         refreshNotificationsListener = new RefreshNotificationsListener() {
             @Override
             public void refresh(List<NotificationItem> notifications, HashMap<String, User> senders) {
+                System.out.println("Inside Refresh Notifications");
                 notificationItemList = notifications;
                 notificationSenders = senders;
-                notifyDataSetChanged();
+                //todo: find out if there's a better way than holding the activity.
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyDataSetChanged();
+                    }
+                });
             }
 
         };
 
         CurrentUser.getInstance().setNotificationsListener(refreshNotificationsListener);
+    }
+
+    @Override
+    public void refresh(List<NotificationItem> notifications, HashMap<String, User> senders) {
+        System.out.println("HELLO FROM LISTENER");
     }
 
     class NotificationViewHolder extends RecyclerView.ViewHolder{
