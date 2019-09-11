@@ -9,5 +9,6 @@
     <color name="com_facebook_button_background_color_focused">#3C5A99</color>
     <color name="com_facebook_button_border_color_focused">#3C5A99</color>
     <color name="main_backround">#999999</color>
-    <color name="white">#ffffff</color>
+    <color name="white">#fff</color>
+    <color name="light_color">#E1EBE5E5</color>
 </resources>

@@ -5,59 +5,54 @@
     android:id="@+id/cvFavorite"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="center|top"
     android:layout_marginStart="32dp"
     android:layout_marginTop="16dp"
     android:layout_marginEnd="32dp"
-    android:descendantFocusability="blocksDescendants"
-    app:cardCornerRadius="10dp">
+    app:cardCornerRadius="15dp"
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clFavorite"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/shape_radius_border_white">
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_shadow_with_white_bg">
+
+        <ToggleButton
+            android:id="@+id/toggleButtonFavorite"
+            android:layout_width="250dp"
+            android:layout_height="170dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/microphone"
+            android:gravity="top|center"
+            android:paddingTop="16dp"
+            android:textColor="@color/light_color"
+            android:textOff="@string/label_play"
+            android:textOn="@string/stop_radio_item"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvItemFavoriteTitle" />
 
         <TextView
             android:id="@+id/tvItemFavoriteTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="Title"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="@+id/civFavoriteItemImage"
-            app:layout_constraintStart_toStartOf="@+id/civFavoriteItemImage"
-            app:layout_constraintTop_toBottomOf="@+id/civFavoriteItemImage"
-            tools:ignore="HardcodedText" />
-
-        <TextView
-            android:id="@+id/tvItemFavoriteDescription"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="Description"
-            android:textSize="24sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/civFavoriteItemImage"
-            app:layout_constraintStart_toStartOf="@+id/civFavoriteItemImage"
-            app:layout_constraintTop_toBottomOf="@+id/tvItemFavoriteTitle"
-            tools:ignore="HardcodedText" />
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/civFavoriteItemImage"
-            android:layout_width="204dp"
-            android:layout_height="236dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:src="@mipmap/ic_launcher"
+            android:fontFamily="@font/bangers"
+            android:text="Title"
+            android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

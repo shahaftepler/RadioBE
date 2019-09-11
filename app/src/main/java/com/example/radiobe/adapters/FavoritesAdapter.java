@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.example.radiobe.R;
 import com.example.radiobe.database.CurrentUser;
@@ -14,6 +15,7 @@ import com.example.radiobe.database.RefreshFavorites;
 import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.RadioItem;
 
+import java.lang.reflect.Array;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -24,6 +26,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
     private List<RadioItem> favoriteItemList;
     private Context context;
     RefreshFavorites refreshFavorites;
+
 
     /*Constructor*/
     public FavoritesAdapter(List<RadioItem> favoriteItemList, Context context) {
@@ -42,11 +45,11 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
 
     @Override
     public void onBindViewHolder(@NonNull FavoritesViewHolder holder, int position) {
+
         RadioItem favoriteRecommendedItem = favoriteItemList.get(position);
 
-        holder.ivFavoriteItemImage.setImageResource(favoriteRecommendedItem.getResImage());
         holder.tvFavoriteTitle.setText(favoriteRecommendedItem.getItemName());
-        holder.tvFavoriteDescription.setText(favoriteRecommendedItem.getItemName());
+//        holder.tvFavoriteDescription.setText(favoriteRecommendedItem.getItemName());
 
     }
 
@@ -77,7 +80,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
 
     class FavoritesViewHolder extends RecyclerView.ViewHolder {
         /*Properties*/
-        ImageView ivFavoriteItemImage;
+        ToggleButton toggleButtonFavorite;
         TextView tvFavoriteTitle;
         TextView tvFavoriteDescription;
 
@@ -85,9 +88,9 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         /*Constructor*/
         private FavoritesViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivFavoriteItemImage = itemView.findViewById(R.id.civFavoriteItemImage);
+            toggleButtonFavorite = itemView.findViewById(R.id.toggleButtonFavorite);
             tvFavoriteTitle = itemView.findViewById(R.id.tvItemFavoriteTitle);
-            tvFavoriteDescription = itemView.findViewById(R.id.tvItemFavoriteDescription);
+//            tvFavoriteDescription = itemView.findViewById(R.id.tvItemFavoriteDescription);
         }
 
 
