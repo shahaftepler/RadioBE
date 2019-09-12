@@ -176,13 +176,6 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
                 changeToggles();
 
             }
-
-//            StreamDAO.getInstance().handleViews(firebaseUser, radioItem, new ChangeViewsListener() {
-//                @Override
-//                public void done() {
-//                    holder.tvViews.setText(String.valueOf(radioItem.getViews()));
-//                }
-//            });
         });
 
         holder.shareFacebook.setOnClickListener((v)->{
@@ -208,7 +201,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
 
             if (MainScreen.simpleExoPlayer.getPlaybackState() == Player.STATE_READY && holder != null &&
-                    MainScreen.simpleExoPlayer.getCurrentTag() != holder.tvFileName.getText()){
+                    MainScreen.simpleExoPlayer.getCurrentTag() != holder.tvFileName.getText().toString()){
                 System.out.println("NEW IF");
 
                 holder.tb.setChecked(false);

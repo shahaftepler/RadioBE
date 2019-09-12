@@ -5,10 +5,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.radiobe.adapters.NotificationsAdapter;
 import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.R;
+import com.example.radiobe.database.RefreshNotificationsListener;
+import com.example.radiobe.models.NotificationItem;
 import com.example.radiobe.models.User;
 
 import androidx.annotation.NonNull;
@@ -18,14 +21,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.HashMap;
+import java.util.List;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class Notifications extends Fragment {
+public class Notifications extends Fragment implements RefreshNotificationsListener {
     NotificationsAdapter adapter;
     RecyclerView recyclerView;
+    TextView noNotifications;
 
     public Notifications() {
         // Required empty public constructor
@@ -46,11 +51,33 @@ public class Notifications extends Fragment {
         recyclerView = view.findViewById(R.id.rvNotifications);
         System.out.println(CurrentUser.getInstance().getNotifications());
         System.out.println(CurrentUser.getInstance().getNotificationSenders());
-        adapter = new NotificationsAdapter(CurrentUser.getInstance().getNotifications(),  CurrentUser.getInstance().getNotificationSenders(),getContext());
+        adapter = new NotificationsAdapter(CurrentUser.getInstance().getNotifications(),  CurrentUser.getInstance().getNotificationSenders(), getActivity());
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
-        adapter.initNotificationListener(getActivity());
+        CurrentUser.getInstance().registerNotificationObserver(this);
+//        adapter.initNotificationListener(getActivity());
+        noNotifications = view.findViewById(R.id.noNotifications);
+
+        if(CurrentUser.getInstance().getNotifications().size() > 0){
+            noNotifications.setVisibility(View.GONE);
+        } else {
+            noNotifications.setVisibility(View.VISIBLE);
+        }
 
 
+
+    }
+
+    @Override
+    public void refresh(List<NotificationItem> notifications, HashMap<String, User> senders) {
+        if(notifications.size() > 0){
+            getActivity().runOnUiThread(()->{
+                noNotifications.setVisibility(View.GONE);
+            });
+        } else {
+            getActivity().runOnUiThread(()->{
+                noNotifications.setVisibility(View.VISIBLE);
+            });
+        }
     }
 }

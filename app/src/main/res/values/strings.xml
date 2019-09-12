@@ -64,6 +64,8 @@
     <string name="your_favorites">Your Favorites</string>
     <string name="radio_kol_etzion">Radio Kol Etzion</string>
     <string name="logo_radio_gif">Logo Radio gif</string>
+    <string name="no_favorites">You don\'t have any favorites!</string>
+    <string name="no_notifications">You don\'t have notifications!</string>
 
 
 </resources>

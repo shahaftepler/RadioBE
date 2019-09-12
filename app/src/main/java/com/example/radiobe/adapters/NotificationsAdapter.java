@@ -28,14 +28,17 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     /*Properties*/
     List<NotificationItem> notificationItemList;
     Context context;
-    RefreshNotificationsListener refreshNotificationsListener;
+//    RefreshNotificationsListener refreshNotificationsListener;
     HashMap<String, User> notificationSenders;
+    Activity activity;
 
 /*Constructor*/
-    public NotificationsAdapter(List<NotificationItem> notificationItemList,HashMap<String, User> notificationSenders ,Context context) {
+    public NotificationsAdapter(List<NotificationItem> notificationItemList,HashMap<String, User> notificationSenders , Activity activity) {
         this.notificationItemList = notificationItemList;
-        this.context = context;
+        this.context = activity;
         this.notificationSenders = notificationSenders;
+        CurrentUser.getInstance().registerNotificationObserver(this);
+        this.activity = activity;
 //        System.out.println(notificationItemList);
     }
 
@@ -69,30 +72,39 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     }
 
 
-    public void initNotificationListener(Activity activity){
-        refreshNotificationsListener = new RefreshNotificationsListener() {
-            @Override
-            public void refresh(List<NotificationItem> notifications, HashMap<String, User> senders) {
-                System.out.println("Inside Refresh Notifications");
-                notificationItemList = notifications;
-                notificationSenders = senders;
-                //todo: find out if there's a better way than holding the activity.
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyDataSetChanged();
-                    }
-                });
-            }
-
-        };
-
-        CurrentUser.getInstance().setNotificationsListener(refreshNotificationsListener);
-    }
+//    public void initNotificationListener(Activity activity){
+//        refreshNotificationsListener = new RefreshNotificationsListener() {
+//            @Override
+//            public void refresh(List<NotificationItem> notifications, HashMap<String, User> senders) {
+//                System.out.println("Inside Refresh Notifications");
+//                notificationItemList = notifications;
+//                notificationSenders = senders;
+//                //todo: find out if there's a better way than holding the activity.
+//                activity.runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        notifyDataSetChanged();
+//                    }
+//                });
+//            }
+//
+//        };
+//
+////        CurrentUser.getInstance().setNotificationsListener(refreshNotificationsListener);
+//    }
 
     @Override
     public void refresh(List<NotificationItem> notifications, HashMap<String, User> senders) {
-        System.out.println("HELLO FROM LISTENER");
+        System.out.println("Inside Refresh Notifications");
+        notificationItemList = notifications;
+        notificationSenders = senders;
+        //todo: find out if there's a better way than holding the activity.
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     class NotificationViewHolder extends RecyclerView.ViewHolder{

@@ -28,7 +28,7 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class CurrentUser extends User {
+public class CurrentUser extends User implements NotificationsSubject , FavoritesSubject {
     private static CurrentUser instance;
     List<String> favoritesID;
     List<String> messagesID;
@@ -36,8 +36,8 @@ public class CurrentUser extends User {
     List<RadioItem> favorites;
     List<NotificationItem> notifications;
     Context context;
-    RefreshNotificationsListener refreshNotificationsListener;
-    RefreshFavorites refreshFavoritesListener;
+//    RefreshNotificationsListener refreshNotificationsListener;
+//    RefreshFavorites refreshFavoritesListener;
 
     long favoriteCount = -1;
     long notificationsCount = -1;
@@ -46,6 +46,12 @@ public class CurrentUser extends User {
     Timer favoritesTimer = new Timer();
     boolean once = true;
     List<Boolean> photosUpload;
+    private List<RefreshNotificationsListener> notificationsListeners;
+    private List<RefreshFavorites> favoritesListeners;
+
+
+
+
     public HashMap<String, User> getNotificationSenders() {
         return notificationSenders;
     }
@@ -75,6 +81,8 @@ public class CurrentUser extends User {
         notifications = new ArrayList<>();
         notificationSenders = new HashMap<>();
         photosUpload = new ArrayList<>();
+        notificationsListeners = new ArrayList<>();
+        favoritesListeners = new ArrayList<>();
     }
 
     public void setContext(Context context) {
@@ -119,6 +127,11 @@ public class CurrentUser extends User {
                             } else {
                                 System.out.println("NO FAVORITES");
                                 favoriteCount = 0;
+                                instance.favoritesID.clear();
+                                instance.favorites.clear();
+                                System.out.println("NEW NOTIFICATIONS SIZE " + instance.favorites.size());
+                                System.out.println("NEW SENDERS SIZE " + instance.favoritesID.size());
+                                initFavorites();
                             }
 
                         }
@@ -151,6 +164,11 @@ public class CurrentUser extends User {
 
                             } else {
                                 notificationsCount = 0;
+                                instance.notifications.clear();
+                                instance.notificationSenders.clear();
+                                System.out.println("NEW NOTIFICATIONS SIZE " + instance.notifications.size());
+                                System.out.println("NEW SENDERS SIZE " + instance.notificationSenders.size());
+                                initNotifications();
                             }
 
                         }
@@ -233,14 +251,17 @@ public class CurrentUser extends User {
             }, 0, 250);
         }
 
-        for (String key : instance.favoritesID) {
-            for (RadioItem stream : FirebaseItemsDataSource.getInstance().getFireBaseStreams()) {
-                if (key.equals(stream.getUid())) {
-                    System.out.println("ABOUT TO ADD FAVORITE" + instance.favorites.size());
-                    instance.favorites.add(stream);
-                }
-            }
+        if(instance.favoritesID.size() > 0) {
 
+            for (String key : instance.favoritesID) {
+                for (RadioItem stream : FirebaseItemsDataSource.getInstance().getFireBaseStreams()) {
+                    if (key.equals(stream.getUid())) {
+                        System.out.println("ABOUT TO ADD FAVORITE" + instance.favorites.size());
+                        instance.favorites.add(stream);
+                    }
+                }
+
+            }
         }
 
 
@@ -252,14 +273,16 @@ public class CurrentUser extends User {
         System.out.println(instance.favorites.size() + "FAVORITES");
         System.out.println(favoriteCount + "COUNT");
         if (instance.favoritesID.size() == instance.favorites.size() && instance.favorites.size() == favoriteCount) {
-            System.out.println(instance.refreshFavoritesListener);
+//            System.out.println(instance.refreshFavoritesListener);
             System.out.println("HELLO!");
             System.out.println("Favorites Timer");
             favoritesTimer.cancel();
             favoritesTimer.purge();
-            if (instance.refreshFavoritesListener != null) {     //todo: find out why null.
-                instance.refreshFavoritesListener.refresh(instance.favorites);
-            }
+//            if (instance.refreshFavoritesListener != null) {
+//                instance.refreshFavoritesListener.refresh(instance.favorites);
+//            }
+
+            notifyFavoriteObservers();
         }
     }
 
@@ -273,11 +296,13 @@ public class CurrentUser extends User {
             System.out.println("Sizes are good");
             newTimer.cancel();
             newTimer.purge();
-            if (instance.refreshNotificationsListener != null) {
-                System.out.println("listener not null");
-                instance.refreshNotificationsListener.refresh(instance.notifications, instance.notificationSenders);
 
-            }
+            notifyNotificationObservers();
+//            if (instance.refreshNotificationsListener != null) {
+//                System.out.println("listener not null");
+//                instance.refreshNotificationsListener.refresh(instance.notifications, instance.notificationSenders);
+//
+//            }
         }
     }
 
@@ -303,14 +328,14 @@ public class CurrentUser extends User {
         }
 
 
-    public void setNotificationsListener(RefreshNotificationsListener refreshNotificationsListener) {
-        this.refreshNotificationsListener = refreshNotificationsListener;
-    }
-
-    public void setRefreshFavoritesListener(RefreshFavorites refreshFavoritesListener) {
-        this.refreshFavoritesListener = refreshFavoritesListener;
-        System.out.println(this.refreshFavoritesListener + "Current User listener");
-    }
+//    public void setNotificationsListener(RefreshNotificationsListener refreshNotificationsListener) {
+//        this.refreshNotificationsListener = refreshNotificationsListener;
+//    }
+//
+//    public void setRefreshFavoritesListener(RefreshFavorites refreshFavoritesListener) {
+//        this.refreshFavoritesListener = refreshFavoritesListener;
+//        System.out.println(this.refreshFavoritesListener + "Current User listener");
+//    }
 
     public void initNotifications() {
 
@@ -327,49 +352,101 @@ public class CurrentUser extends User {
         }
 
 
-        for (NotificationItem notification : instance.notifications) {
-            System.out.println(notification);
-            //get sender profile and name for the notification
-            ref.child("users").child(notification.getSenderID()).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    User sender = dataSnapshot.getValue(User.class);
-                    System.out.println("Sender created!" + sender.getFirstName());
-                    storageRef.child("profile").child(sender.getFireBaseID())
-                            .getBytes(2048 * 2048)
-                            .addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                @Override
-                                public void onSuccess(byte[] bytes) {
-                                    sender.setProfileImage(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-                                    System.out.println("Got sender Profile image");
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            sender.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
-                            System.out.println("Got fake picture");
-                        }
-                    });
+        if (instance.notifications.size() > 0) {
+            for (NotificationItem notification : instance.notifications) {
+                System.out.println(notification);
+                //get sender profile and name for the notification
+                ref.child("users").child(notification.getSenderID()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        User sender = dataSnapshot.getValue(User.class);
+                        System.out.println("Sender created!" + sender.getFirstName());
+                        storageRef.child("profile").child(sender.getFireBaseID())
+                                .getBytes(2048 * 2048)
+                                .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                    @Override
+                                    public void onSuccess(byte[] bytes) {
+                                        sender.setProfileImage(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+                                        System.out.println("Got sender Profile image");
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                sender.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
+                                System.out.println("Got fake picture");
+                            }
+                        });
 
-                    //putting in a dictionary.
-                    instance.notificationSenders.put(notification.getUid(), sender);
-                    System.out.println(instance.notificationSenders.keySet().size());
-                    System.out.println("User added to dictionary");
+                        //putting in a dictionary.
+                        instance.notificationSenders.put(notification.getUid(), sender);
+                        System.out.println(instance.notificationSenders.keySet().size());
+                        System.out.println("User added to dictionary");
 //                        System.out.println(notificationSenders.get(notification.getUid()));
 
 //
-                }
+                    }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                }
-            });
+                    }
+                });
 
+
+            }
 
         }
-
     }
 
+
+    //new observers!
+
+    @Override
+    public void registerFavoriteObserver(RefreshFavorites refreshFavoritesObserver) {
+        if(!favoritesListeners.contains(refreshFavoritesObserver)) {
+            System.out.println("FAVORITE LISTENER ADDED");
+            favoritesListeners.add(refreshFavoritesObserver);
+        }
+    }
+
+    @Override
+    public void removeFavoriteObserver(RefreshFavorites refreshFavoritesObserver) {
+        if(favoritesListeners.contains(refreshFavoritesObserver)) {
+            System.out.println("FAVORITE LISTENER REMOVED");
+            favoritesListeners.remove(refreshFavoritesObserver);
+        }
+    }
+
+    @Override
+    public void notifyFavoriteObservers() {
+        for (RefreshFavorites observer: instance.favoritesListeners) {
+            System.out.println("NOTIFY FAVORITE OBSERVER");
+            observer.refresh(instance.favorites);
+        }
+    }
+
+    @Override
+    public void registerNotificationObserver(RefreshNotificationsListener refreshNotificationsListener) {
+        if(!notificationsListeners.contains(refreshNotificationsListener)) {
+            System.out.println("NOTIFICATION LISTENER ADDED");
+            notificationsListeners.add(refreshNotificationsListener);
+        }
+    }
+
+    @Override
+    public void removeNotificationObserver(RefreshNotificationsListener refreshNotificationsListener) {
+        if(notificationsListeners.contains(refreshNotificationsListener)) {
+            System.out.println("NOTIFICATION LISTENER REmoved");
+            notificationsListeners.remove(refreshNotificationsListener);
+        }
+    }
+
+    @Override
+    public void notifyNotificationObservers() {
+        for (RefreshNotificationsListener observer: instance.notificationsListeners) {
+            System.out.println("NOTIFICATION LISTENER notified");
+            observer.refresh(instance.notifications , instance.notificationSenders);
+        }
+    }
 }
 
