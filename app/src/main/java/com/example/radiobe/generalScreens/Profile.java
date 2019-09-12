@@ -66,6 +66,7 @@ public class Profile extends AppCompatActivity {
     private TextView profileBirthDay;
     //dialog
     private EditText editDialogName;
+    private EditText editDialogLastName;
     private EditText editDialogDescription;
     private View viewForAlert;
     private String uid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
@@ -263,10 +264,12 @@ public class Profile extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter your new details");
         viewForAlert = LayoutInflater.from(this).inflate(R.layout.dialog_view, null);
-        editDialogName = viewForAlert.findViewById(R.id.edit_dialog_name);
+        editDialogName = viewForAlert.findViewById(R.id.edit_dialog_firstName);
+        editDialogLastName = viewForAlert.findViewById(R.id.edit_dialog_lastName);
         editDialogDescription = viewForAlert.findViewById(R.id.edit_dialog_description);
 
-        editDialogName.setText(profileName.getText().toString());
+        editDialogName.setText(CurrentUser.getInstance().getFirstName());
+        editDialogLastName.setText(CurrentUser.getInstance().getLastName());
         editDialogDescription.setText(profileDescription.getText().toString());
 
 
@@ -278,7 +281,7 @@ public class Profile extends AppCompatActivity {
 
         //todo: init picker with the date of birth.
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(CurrentUser.getInstance().getBirthDate());
+        calendar.setTime(new Date(CurrentUser.getInstance().getBirthDate()));
         datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH), null);
 
@@ -292,28 +295,37 @@ public class Profile extends AppCompatActivity {
 
         positiveButton.setOnClickListener((v)->{
             String name = editDialogName.getText().toString();
+            String lastName = editDialogLastName.getText().toString();
             String description = editDialogDescription.getText().toString();
             Calendar dateOfBirth = Calendar.getInstance();
             int dayOfYear = dateOfBirth.DAY_OF_YEAR;
-            dateOfBirth.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth());
+            dateOfBirth.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth() , 0 ,0 , 0);
+            dateOfBirth.set(Calendar.MILLISECOND, 0);
 
-            if(dateOfBirth.getTimeInMillis() < new Date().getTime()){
-                //todo: create some kind of error.
-            }
-
-            if (name.length() < 1) {
-                editDialogName.setError("Enter A Name");
-            }
-
-            if (description.length() < 1) {
-                editDialogDescription.setError("Choose Description");
-            }
-
-            if (editDialogName.getError() != null || editDialogDescription.getError() != null ){
-                Toast.makeText(this, "Check Errors", Toast.LENGTH_SHORT).show();
-            } else{
+            if(checkForChanges(name, lastName , dateOfBirth)) {
+                System.out.println("IN NEW IF ???");
                 alert.dismiss();
+
+            } else {
+                System.out.println("WEIRD?");
             }
+//            if(dateOfBirth.getTimeInMillis() < new Date().getTime()){
+//                //todo: create some kind of error.
+//            }
+//
+//            if (name.length() < 1) {
+//                editDialogName.setError("Enter A Name");
+//            }
+//
+//            if (description.length() < 1) {
+//                editDialogDescription.setError("Choose Description");
+//            }
+//
+//            if (editDialogName.getError() != null || editDialogDescription.getError() != null ){
+//                Toast.makeText(this, "Check Errors", Toast.LENGTH_SHORT).show();
+//            } else{
+//                alert.dismiss();
+//            }
         });
 
         negativeButton.setOnClickListener((v)->{
@@ -337,6 +349,25 @@ public class Profile extends AppCompatActivity {
         profileBirthDay = findViewById(R.id.idBirthDayProfile);
         editDetails = findViewById(R.id.idEditDetails);
 
+    }
+
+    //check if there was any change to the details.
+    private boolean checkForChanges(String firstName, String lastName , Calendar dateOfBirth){
+
+        System.out.println(firstName);
+        System.out.println(lastName);
+
+
+        System.out.println(dateOfBirth.getTime());
+        System.out.println(CurrentUser.getInstance().getBirthDate());
+        System.out.println(CurrentUser.getInstance().getBirthDate());
+        System.out.println(dateOfBirth.getTimeInMillis());
+        return (firstName.equals(CurrentUser.getInstance().getFirstName()) &&
+                lastName.equals(CurrentUser.getInstance().getLastName()) &&
+                dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate());
+
+
+        //dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate().getTime()
     }
 
 
