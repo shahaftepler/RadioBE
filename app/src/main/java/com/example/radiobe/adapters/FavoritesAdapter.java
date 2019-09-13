@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,8 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -57,6 +60,8 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         View view = layoutInflater.inflate(R.layout.item_favorite, parent, false);
 
         return new FavoritesViewHolder(view);
+
+
     }
 
     @Override
@@ -146,6 +151,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         ToggleButton toggleButtonFavorite;
         TextView tvFavoriteTitle;
         ImageButton deleteFavorite;
+        ConstraintLayout constraintLayout;
 
 
         /*Constructor*/
@@ -154,6 +160,10 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
             toggleButtonFavorite = itemView.findViewById(R.id.toggleButtonFavorite);
             tvFavoriteTitle = itemView.findViewById(R.id.tvItemFavoriteTitle);
             deleteFavorite = itemView.findViewById(R.id.deleteFavorite);
+            constraintLayout = itemView.findViewById(R.id.clFavorite);
+
+            
+
         }
 
 
