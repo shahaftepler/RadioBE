@@ -1,5 +1,6 @@
 package com.example.radiobe.adapters;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -162,7 +164,20 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 
         });
 
+        holder.tvComments.setOnClickListener((view -> {
+            androidx.appcompat.app.AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            View viewForAlert = LayoutInflater.from(context).inflate(R.layout.dialog_comment, null);
 
+            RecyclerView recyclerView = viewForAlert.findViewById(R.id.idRecyclerViewComments);
+            CommentsAdapter commentsAdapter = new CommentsAdapter(radioItem.getCommentsArray(),context);
+
+
+
+            builder.setView(viewForAlert);
+
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        }));
 
         holder.tb.setOnCheckedChangeListener((v, b) -> {
             Intent intent = new Intent("play_song");
