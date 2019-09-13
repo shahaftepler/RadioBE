@@ -116,26 +116,14 @@
                     android:textStyle="bold"
                     tools:ignore="RelativeOverlap" />
 
-                <TextView
-                    android:id="@+id/idLastNameProfile"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/idFirstNameProfile"
-                    android:layout_centerHorizontal="true"
-                    android:text="@string/last_name"
-                    android:layout_marginTop="8dp"
-                    android:textColor="#fff"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/idDescriptionProfile"
+                    android:id="@+id/idEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/idLastNameProfile"
+                    android:layout_below="@+id/idFirstNameProfile"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
                     android:text="@string/description_profile"
                     android:textColor="#fff"
                     android:textSize="18sp" />
@@ -143,7 +131,7 @@
                     android:id="@+id/idBirthDayProfile"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/idDescriptionProfile"
+                    android:layout_below="@+id/idEmail"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
@@ -162,8 +150,23 @@
                 android:layout_marginTop="25dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/test"
+                >
 
-                />
+                <TextView
+                    android:id="@+id/idDescriptionProfile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/description_profile"
+                    android:textColor="#fff"
+                    android:textSize="18sp" />
+            </RelativeLayout>
+
+
         </RelativeLayout>
 
 

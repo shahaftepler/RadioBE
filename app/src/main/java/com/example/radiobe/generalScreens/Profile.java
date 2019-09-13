@@ -12,8 +12,10 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.autofill.AutofillValue;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -62,12 +64,17 @@ public class Profile extends AppCompatActivity {
     private ImageView editDetails;
     private CircleImageView profileImage;
     private TextView profileName;
+    private TextView email;
     private TextView profileDescription;
     private TextView profileBirthDay;
+    private TextView descriptionTitle;
     //dialog
     private EditText editDialogName;
     private EditText editDialogLastName;
     private EditText editDialogDescription;
+    private EditText editEmail;
+    private EditText editPassword;
+    private EditText editConfirmPassword;
     private View viewForAlert;
     private String uid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     private DatePicker datePicker;
@@ -124,6 +131,7 @@ public class Profile extends AppCompatActivity {
         profileImage.setImageBitmap(CurrentUser.getInstance().getProfileImage());
         coverImage.setImageBitmap(CurrentUser.getInstance().getCoverImage());
         profileName.setText(CurrentUser.getInstance().getFirstName() +" "+ CurrentUser.getInstance().getLastName());
+        email.setText(CurrentUser.getInstance().getEmail());
 
         if (CurrentUser.getInstance().getDescription() != null){
             profileDescription.setText(CurrentUser.getInstance().getDescription());
@@ -267,17 +275,33 @@ public class Profile extends AppCompatActivity {
         editDialogName = viewForAlert.findViewById(R.id.edit_dialog_firstName);
         editDialogLastName = viewForAlert.findViewById(R.id.edit_dialog_lastName);
         editDialogDescription = viewForAlert.findViewById(R.id.edit_dialog_description);
+        editEmail = viewForAlert.findViewById(R.id.edit_email);
+        editPassword = viewForAlert.findViewById(R.id.edit_password);
+        editConfirmPassword = viewForAlert.findViewById(R.id.edit_confirmPassword);
+
 
         editDialogName.setText(CurrentUser.getInstance().getFirstName());
         editDialogLastName.setText(CurrentUser.getInstance().getLastName());
         editDialogDescription.setText(profileDescription.getText().toString());
-
+        editEmail.setText(CurrentUser.getInstance().getEmail());
 
         positiveButton = viewForAlert.findViewById(R.id.positiveButton);
         negativeButton = viewForAlert.findViewById(R.id.negativeButton);
         datePicker = viewForAlert.findViewById(R.id.datePicker);
         datePicker.setMaxDate(new Date().getTime());
         builder.setView(viewForAlert);
+
+        viewForAlert.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+
+                if(imm.isAcceptingText()) { // verify if the soft keyboard is open
+                    imm.hideSoftInputFromWindow(viewForAlert.getWindowToken(), 0);
+                }
+                return false;
+            }
+        });
 
         //todo: init picker with the date of birth.
         Calendar calendar = Calendar.getInstance();
@@ -297,17 +321,19 @@ public class Profile extends AppCompatActivity {
             String name = editDialogName.getText().toString();
             String lastName = editDialogLastName.getText().toString();
             String description = editDialogDescription.getText().toString();
+            String email = editEmail.getText().toString();
+            String password = editPassword.getText().toString();
+            String confirmPassword = editConfirmPassword.getText().toString();
             Calendar dateOfBirth = Calendar.getInstance();
             int dayOfYear = dateOfBirth.DAY_OF_YEAR;
             dateOfBirth.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth() , 0 ,0 , 0);
             dateOfBirth.set(Calendar.MILLISECOND, 0);
 
-            if(checkForChanges(name, lastName , dateOfBirth)) {
+            if(checkForChanges(name, lastName , dateOfBirth , email , password , confirmPassword , description)) {
                 System.out.println("IN NEW IF ???");
+                Toast.makeText(this, "No changes were made!", Toast.LENGTH_SHORT).show();
                 alert.dismiss();
 
-            } else {
-                System.out.println("WEIRD?");
             }
 //            if(dateOfBirth.getTimeInMillis() < new Date().getTime()){
 //                //todo: create some kind of error.
@@ -330,7 +356,7 @@ public class Profile extends AppCompatActivity {
 
         negativeButton.setOnClickListener((v)->{
             alert.dismiss();
-            Toast.makeText(this, "No change!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No change were made!", Toast.LENGTH_SHORT).show();
         });
 
     }
@@ -344,15 +370,17 @@ public class Profile extends AppCompatActivity {
         profileImage = findViewById(R.id.idImageViewProfile);
         editCoverImage = findViewById(R.id.idCoverEditImage);
         coverImage = findViewById(R.id.idCoverTopProfile);
-        profileName = findViewById(R.id.idNameProfile);
+        profileName = findViewById(R.id.idFirstNameProfile);
         profileDescription = findViewById(R.id.idDescriptionProfile);
         profileBirthDay = findViewById(R.id.idBirthDayProfile);
         editDetails = findViewById(R.id.idEditDetails);
+        email = findViewById(R.id.idEmail);
+//        descriptionTitle = findViewById(R.id.idAboutMe);
 
     }
 
     //check if there was any change to the details.
-    private boolean checkForChanges(String firstName, String lastName , Calendar dateOfBirth){
+    private boolean checkForChanges(String firstName, String lastName , Calendar dateOfBirth , String email , String password , String confirmPassword , String description){
 
         System.out.println(firstName);
         System.out.println(lastName);
@@ -364,7 +392,11 @@ public class Profile extends AppCompatActivity {
         System.out.println(dateOfBirth.getTimeInMillis());
         return (firstName.equals(CurrentUser.getInstance().getFirstName()) &&
                 lastName.equals(CurrentUser.getInstance().getLastName()) &&
-                dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate());
+                dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate() &&
+                password.isEmpty() &&
+                (confirmPassword.equals(password) || confirmPassword.isEmpty()) &&
+                email.equals(CurrentUser.getInstance().getEmail()) &&
+                description.equals(profileDescription.getText().toString()));
 
 
         //dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate().getTime()
