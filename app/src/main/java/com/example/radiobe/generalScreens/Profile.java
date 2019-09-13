@@ -1,19 +1,13 @@
 package com.example.radiobe.generalScreens;
 
 import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.autofill.AutofillValue;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -40,8 +34,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
@@ -344,7 +336,7 @@ public class Profile extends AppCompatActivity {
         profileImage = findViewById(R.id.idImageViewProfile);
         editCoverImage = findViewById(R.id.idCoverEditImage);
         coverImage = findViewById(R.id.idCoverTopProfile);
-        profileName = findViewById(R.id.idNameProfile);
+        profileName = findViewById(R.id.idFirstNameProfile);
         profileDescription = findViewById(R.id.idDescriptionProfile);
         profileBirthDay = findViewById(R.id.idBirthDayProfile);
         editDetails = findViewById(R.id.idEditDetails);

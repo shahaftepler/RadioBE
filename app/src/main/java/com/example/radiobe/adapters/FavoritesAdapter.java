@@ -151,7 +151,6 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         ToggleButton toggleButtonFavorite;
         TextView tvFavoriteTitle;
         ImageButton deleteFavorite;
-        ConstraintLayout constraintLayout;
 
 
         /*Constructor*/
@@ -160,9 +159,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
             toggleButtonFavorite = itemView.findViewById(R.id.toggleButtonFavorite);
             tvFavoriteTitle = itemView.findViewById(R.id.tvItemFavoriteTitle);
             deleteFavorite = itemView.findViewById(R.id.deleteFavorite);
-            constraintLayout = itemView.findViewById(R.id.clFavorite);
 
-            
 
         }
 

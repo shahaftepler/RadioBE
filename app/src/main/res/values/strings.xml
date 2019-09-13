@@ -79,6 +79,10 @@
     <string name="desc_close_dropdown_comment_chat">close dropdown comment chat</string>
     <string name="desc_send_comment">send comment</string>
     <string name="desc_edit_profile_details">edit profile details</string>
+    <string name="user_name">User Name</string>
+    <string name="the_comment_of_the_user">the Comment of the user</string>
+    <string name="comments">Comments</string>
+    <string name="close_comments">close Comments</string>
 
 
 </resources>
