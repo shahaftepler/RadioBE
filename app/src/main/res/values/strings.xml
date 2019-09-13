@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name"></string>
+    <string name="app_name">Radio Beit Ekstein</string>
     <string name="all_programs">All Programs</string>
     <string name="most_watched">Most Viewed</string>
     <string name="recently_added">recently added</string>
@@ -50,7 +50,7 @@
     <string name="play_radio_item" translatable="false">PLAY</string>
     <string name="stop_radio_item" translatable="false">STOP</string>
     <string name="creation_date_radio_item" translatable="false">creationDate</string>
-    <string name="enter_your_comment">Enter your comment...</string>
+    <string name="enter_your_comment">Enter your comment…</string>
     <string name="submit">submit</string>
     <string name="recommended_for_you">Recommended For You</string>
     <string name="last_shows_that_add">Last shows that add</string>
@@ -66,6 +66,19 @@
     <string name="logo_radio_gif">Logo Radio gif</string>
     <string name="no_favorites">You don\'t have any favorites!</string>
     <string name="no_notifications">You don\'t have notifications!</string>
+    <string name="last_name">Last Name</string>
+    <string name="choose_your_birth_day">Choose Your Birth Day</string>
+    <string name="birth_day">Birth Day</string>
+    <string name="desc_cover_image_profile">Cover Image Profile</string>
+    <string name="desc_add_new_cover_image">add new cover image</string>
+    <string name="desc_add_profile_image">add profile image</string>
+    <string name="desc_profile_image">profile_image</string>
+    <string name="change_first_name">Change first name</string>
+    <string name="change_last_name">Change last name</string>
+    <string name="desc_delete_radio_item_from_favorite">delete radio item from favorite</string>
+    <string name="desc_close_dropdown_comment_chat">close dropdown comment chat</string>
+    <string name="desc_send_comment">send comment</string>
+    <string name="desc_edit_profile_details">edit profile details</string>
 
 
 </resources>

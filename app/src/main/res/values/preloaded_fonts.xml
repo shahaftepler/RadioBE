@@ -3,8 +3,10 @@
     <array name="preloaded_fonts" translatable="false">
         <item>@font/aclonica</item>
 
+        <item>@font/average</item>
         <item>@font/bangers</item>
         <item>@font/boogaloo</item>
         <item>@font/david_libre</item>
+        <item>@font/montserrat_subrayada</item>
     </array>
 </resources>

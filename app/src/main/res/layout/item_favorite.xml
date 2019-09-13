@@ -43,7 +43,8 @@
             android:background="#00FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/icons8_delete36" />
+            app:srcCompat="@drawable/icons8_delete36"
+            android:contentDescription="@string/desc_delete_radio_item_from_favorite" />
 
 
         <TextView

@@ -6,14 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp">
-    <!--
-    Notifications properties
-
-    * Title -> new massage
-    * Description -> some of the massage
-    * Time -> the time got massage
-    * Picture -> picture of the sender
--->
 
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#deecff"
+    android:background="@drawable/shape_background_all_programs"
     android:splitMotionEvents="true"
     tools:context=".registrations.SignUp">
 
@@ -36,11 +36,13 @@
             android:inputType="textPersonName"
             android:textSize="15sp"
             android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             app:layout_constraintCircleRadius="20dp"
             app:layout_constraintEnd_toEndOf="@+id/tvTitle"
             app:layout_constraintStart_toStartOf="@+id/tvTitle"
             app:layout_constraintTop_toBottomOf="@+id/tvTitle"
-            tools:ignore="UnusedAttribute" />
+            android:importantForAutofill="no"
+            tools:targetApi="26" />
 
         <EditText
             android:id="@+id/etLast"
@@ -50,12 +52,15 @@
             android:background="@drawable/rounded_corner"
             android:textSize="15sp"
             android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:hint="@string/hint_enter_last_name"
             android:inputType="textPersonName"
             app:layout_constraintEnd_toEndOf="@+id/etFirst"
             app:layout_constraintStart_toStartOf="@+id/etFirst"
             app:layout_constraintTop_toBottomOf="@+id/etFirst"
-            tools:ignore="UnusedAttribute" />
+
+            android:importantForAutofill="no"
+            tools:targetApi="26" />
 
         <EditText
             android:id="@+id/etEmail"
@@ -65,44 +70,33 @@
             android:background="@drawable/rounded_corner"
             android:textSize="15sp"
             android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:hint="@string/hint_email_address"
             android:inputType="textEmailAddress"
             app:layout_constraintEnd_toEndOf="@+id/etLast"
             app:layout_constraintStart_toStartOf="@+id/etLast"
             app:layout_constraintTop_toBottomOf="@+id/etLast"
-            tools:ignore="UnusedAttribute" />
+            android:importantForAutofill="no"
+            tools:targetApi="26" />
 
-        <!--<EditText-->
-        <!--android:id="@+id/etDate"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="37dp"-->
-        <!--android:layout_marginTop="8dp"-->
-        <!--android:background="@drawable/rounded_corner"-->
-        <!--android:ems="13"-->
-        <!--android:hint="@string/enter_your_birthday"-->
-        <!--android:inputType="date"-->
-        <!--app:layout_constraintEnd_toEndOf="@+id/etEmail"-->
-        <!--app:layout_constraintStart_toStartOf="@+id/etEmail"-->
-        <!--app:layout_constraintTop_toBottomOf="@+id/etEmail"-->
-        <!--android:autofillHints=""-->
-        <!--tools:ignore="UnusedAttribute" />-->
         <TextView
             android:id="@+id/idBirthDateTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
-
+            android:textColor="@color/white"
+            android:textStyle="bold"
             android:layout_marginTop="8dp"
-            android:text="Choose Your Birth Day"
+            android:text="@string/choose_your_birth_day"
             app:layout_constraintEnd_toEndOf="@+id/etEmail"
             app:layout_constraintStart_toStartOf="@+id/etEmail"
-            app:layout_constraintTop_toBottomOf="@+id/etEmail" />\
+            app:layout_constraintTop_toBottomOf="@+id/etEmail" />
 
         <DatePicker
             android:id="@+id/datePicker"
             android:layout_width="wrap_content"
             android:layout_height="90dp"
             android:calendarViewShown="false"
+            android:layout_marginTop="8dp"
             android:datePickerMode="spinner"
             app:layout_constraintEnd_toEndOf="@+id/idBirthDateTitle"
             app:layout_constraintStart_toStartOf="@+id/idBirthDateTitle"
@@ -113,14 +107,16 @@
             android:layout_width="280dp"
             android:layout_height="40dp"
             android:background="@drawable/rounded_corner"
-            android:textSize="15dp"
+            android:textSize="15sp"
+            android:paddingEnd="8dp"
             android:paddingStart="8dp"
             android:hint="@string/hint_password"
             android:inputType="textPassword"
             app:layout_constraintEnd_toEndOf="@+id/datePicker"
             app:layout_constraintStart_toStartOf="@+id/datePicker"
             app:layout_constraintTop_toBottomOf="@+id/datePicker"
-            tools:ignore="RtlHardcoded,UnusedAttribute" />
+            android:importantForAutofill="no"
+            tools:targetApi="26" />
 
         <EditText
             android:id="@+id/etPassAgain"
@@ -128,14 +124,15 @@
             android:layout_height="40dp"
             android:layout_marginTop="8dp"
             android:background="@drawable/rounded_corner"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:paddingStart="8dp"
+            android:paddingRight="8dp"
             android:hint="@string/reenter_your_password"
             android:inputType="textPassword"
             app:layout_constraintEnd_toEndOf="@+id/etPassword"
             app:layout_constraintStart_toStartOf="@+id/etPassword"
             app:layout_constraintTop_toBottomOf="@+id/etPassword"
-            tools:ignore="RtlHardcoded,UnusedAttribute" />
+            tools:ignore="Autofill,RtlHardcoded,UnusedAttribute" />
 
         <Button
             android:id="@+id/btnSignUp"
@@ -147,8 +144,8 @@
             android:text="@string/sign_up"
             android:textAllCaps="false"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/tvTitle"
-            app:layout_constraintStart_toStartOf="@+id/tvTitle"
+            app:layout_constraintEnd_toEndOf="@+id/etPassAgain"
+            app:layout_constraintStart_toStartOf="@+id/etPassAgain"
             app:layout_constraintTop_toBottomOf="@+id/etPassAgain" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -16,11 +16,14 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
-        android:hint="Change first name"
+        android:hint="@string/change_first_name"
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        tools:targetApi="26" />
 
     <EditText
         android:id="@+id/edit_dialog_lastName"
@@ -29,11 +32,14 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
-        android:hint="Change last name"
+        android:hint="@string/change_last_name"
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/edit_dialog_firstName" />
+        app:layout_constraintTop_toBottomOf="@id/edit_dialog_firstName"
+        android:importantForAutofill="no"
+        tools:targetApi="26"
+        android:inputType="text" />
 
     <EditText
         android:id="@+id/edit_dialog_description"
@@ -46,7 +52,10 @@
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_dialog_lastName" />
+        app:layout_constraintTop_toBottomOf="@+id/edit_dialog_lastName"
+        android:importantForAutofill="no"
+        tools:targetApi="26"
+        android:inputType="text" />
 
     <DatePicker
         android:id="@+id/datePicker"

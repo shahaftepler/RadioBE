@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name"></string>
+    <string name="app_name">רדיו בית אקשטיין</string>
     <string name="all_programs">כל התוכניות</string>
     <string name="most_watched">הנצפים ביותר</string>
     <string name="recently_added">נוספו לאחרונה</string>
@@ -41,6 +41,36 @@
     <string name="cancel">בטל</string>
     <string name="title_activity_main_screen">מסך ראשי</string>
     <string name="title_menu_log_out">התנתק/י</string>
+    <string name="enter_your_comment">הכנס תגובה</string>
+    <string name="submit">אישור</string>
+    <string name="recommended_for_you">מומלץ עבורך</string>
+    <string name="last_shows_that_add">שידור אחרון שנוסף</string>
+    <string name="my_lists">הרשימה שלי</string>
+    <string name="title_notification">כותרת התראות</string>
+    <string name="time_date">תאריך\שעה</string>
+    <string name="profile_name">שם המשתמש</string>
+    <string name="description_profile">תיאור המשתמש</string>
+    <string name="change_name">שנה שם</string>
+    <string name="change_description">שנה תיאור</string>
+    <string name="your_favorites">המועדפים שלך</string>
+    <string name="radio_kol_etzion">רדיו קול עציון</string>
+    <string name="logo_radio_gif">לוגו רדיו גיפ</string>
+    <string name="no_favorites">אין לך שידורים במועדפים!</string>
+    <string name="no_notifications">אין לך התראות!</string>
+    <string name="last_name">שם משפחה</string>
+    <string name="choose_your_birth_day">בחר את תאריך הלידה שלך</string>
+    <string name="birth_day">תאריך לידה</string>
+    <string name="change_first_name">שנה שם פרטי</string>
+    <string name="change_last_name">שנה שם משפחה</string>
+    <string name="desc_cover_image_profile">Cover Image Profile</string>
+    <string name="desc_add_new_cover_image">add new cover image</string>
+    <string name="desc_add_profile_image">add profile image</string>
+    <string name="desc_profile_image">profile_image</string>
+    <string name="desc_delete_radio_item_from_favorite">delete radio item from favorite</string>
+    <string name="desc_close_dropdown_comment_chat">close dropdown comment chat</string>
+    <string name="desc_send_comment">send comment</string>
+    <string name="desc_edit_profile_details">edit profile details</string>
+
 
 
 </resources>
