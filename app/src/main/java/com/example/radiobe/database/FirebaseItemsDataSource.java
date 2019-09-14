@@ -3,6 +3,7 @@ package com.example.radiobe.database;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.view.View;
@@ -13,11 +14,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 //import com.example.radiobe.StreamDAO;
+import com.example.radiobe.R;
 import com.example.radiobe.adapters.RadioItemsAdapter;
 import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.Comment;
 import com.example.radiobe.models.RadioItem;
+import com.example.radiobe.models.User;
 import com.google.android.exoplayer2.Player;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -26,14 +31,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class FirebaseItemsDataSource{
+public class FirebaseItemsDataSource implements SubjectServerUpdates{
 
     private WeakReference<RecyclerView> rvRadioItems;
     private WeakReference<ProgressBar> progressBar;
@@ -45,8 +54,21 @@ public class FirebaseItemsDataSource{
     public RadioItemsAdapter adapter = null;
     private static FirebaseItemsDataSource instance;
     UpdateServer updateServer;
+    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+    List<Comment> comments;
+    Context context;
+    Map<String, User> commentSenders;
+    long commentsCount = -1;
+    Timer commentsTimer;
+    List<UpdateServer> updateServerListeners;
+    final String UPDATE_LIKES = "updateLikes";
+    final String UPDATE_COMMENTS = "updateComments";
+    final String UPDATE_VIEWS = "updateViews";
+
+
+
 
     public static FirebaseItemsDataSource getInstance() {
         if (instance == null)
@@ -62,6 +84,9 @@ public class FirebaseItemsDataSource{
     private FirebaseItemsDataSource(){
         t = new Timer();
         fireBaseStreams = new ArrayList<>();
+        comments = new ArrayList<>();
+        commentSenders = new HashMap<>();
+        updateServerListeners = new ArrayList<>();
     }
 
     public void setUpdateLikes(UpdateServer updateServer){
@@ -117,9 +142,10 @@ public class FirebaseItemsDataSource{
                                 isDoneAll.add(true);
                                 changeProgress.change();
                             } else {
-                                if (updateServer != null) {
-                                    updateServer.updateLikes(item);
-                                }
+//                                if (updateServer != null) {
+//                                    updateServer.updateLikes(item);
+                                    notifyServerObservers(item , UPDATE_LIKES);
+//                                }
                             }
 
                         } else {
@@ -131,9 +157,10 @@ public class FirebaseItemsDataSource{
                                 changeProgress.change();
 
                             }   else{
-                                if(updateServer != null){
-                                    updateServer.updateLikes(item);
-                                }
+//                                if(updateServer != null){
+//                                    updateServer.updateLikes(item);
+                                    notifyServerObservers(item , UPDATE_LIKES);
+//                                }
                             }
                         }
                     }
@@ -141,18 +168,8 @@ public class FirebaseItemsDataSource{
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
-
                         System.out.println("ERROR");
-                        //if can't read, no likes
-//                        fireBaseStreams.get(finalI).setLikes(0);
-//                        if(once) {
-//                            isDoneAll.add(true);
-//                        }   else{
-//                            if(updateLikes != null){
-//                                updateLikes.update(fireBaseStreams.get(finalI));
-//                            }
-//                        }
+
                     }
                 });
 
@@ -171,9 +188,10 @@ public class FirebaseItemsDataSource{
                                 changeProgress.change();
 
                             } else {
-                                if (updateServer != null) {
-                                    updateServer.updateViews(item);
-                                }
+//                                if (updateServer != null) {
+//                                    updateServer.updateViews(item);
+                                    notifyServerObservers(item , UPDATE_VIEWS);
+//                                }
                             }
 
                         } else {
@@ -185,9 +203,10 @@ public class FirebaseItemsDataSource{
                                 changeProgress.change();
 
                             }   else{
-                                if(updateServer != null){
-                                    updateServer.updateViews(item);
-                                }
+//                                if(updateServer != null){
+//                                    updateServer.updateViews(item);
+                                    notifyServerObservers(item , UPDATE_VIEWS);
+//                                }
                             }
                         }
                     }
@@ -204,31 +223,30 @@ public class FirebaseItemsDataSource{
                         if (dataSnapshot.getValue() != null) {
                             item.setComments(dataSnapshot.getChildrenCount());
                             ref.child("streams").child(item.getUid()).child("comments").setValue(item.getComments());
+                            commentsCount = dataSnapshot.getChildrenCount();
 
-
-                            if (once) {
-                                //update adapter
-                                isDoneAll.add(true);
-                                changeProgress.change();
-
-                            } else {
-                                if (updateServer != null) {
-                                    updateServer.updateComments(item);
-                                }
+                            item.removeCommentSenders();
+                            item.removeAllComments();
+                            for (DataSnapshot snap : dataSnapshot.getChildren()){
+                                item.addComment(snap.getValue(Comment.class));
+                                System.out.println("Comment added!");
                             }
+
+                            initComments(item.getCommentsArray() , item , changeProgress);
+
 
                         } else {
                             item.setComments(0);
                             ref.child("streams").child(item.getUid()).child("comments").setValue(item.getComments());
-
                             if(once) {
                                 isDoneAll.add(true);
                                 changeProgress.change();
 
                             }   else{
-                                if(updateServer != null){
-                                    updateServer.updateComments(item);
-                                }
+//                                if(updateServer != null){
+//                                    updateServer.updateComments(item);
+                                    notifyServerObservers(item , UPDATE_COMMENTS);
+//                                }
                             }
                         }
                     }
@@ -255,7 +273,99 @@ public class FirebaseItemsDataSource{
 
     }
 
+    private void initComments(List<Comment> itemCommentsList , RadioItem item , ChangeProgress changeProgress) {
 
+        if (!once) {
+            commentsTimer = new Timer();
+            commentsTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    checkCommentsLoading(item, itemCommentsList, changeProgress);
+
+                }
+            }, 0, 250);
+
+        }
+
+        if(itemCommentsList.size() > 0){
+            for(Comment comment : itemCommentsList){
+                System.out.println("********************************************" + comment.getUser());
+                ref.child("users").child(comment.getUser()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() != null) {
+                            User sender = dataSnapshot.getValue(User.class);
+                            System.out.println("Sender created!" + sender.getFirstName());
+                            storageRef.child("profile").child(sender.getFireBaseID()).
+                                    getBytes(2048 * 2048).
+                                    addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                        @Override
+                                        public void onSuccess(byte[] bytes) {
+                                            sender.setProfileImage(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+                                            System.out.println("GOT SENDER PROFILE IMAGE");
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    sender.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
+                                    System.out.println("Got fake picture");
+                                }
+                            });
+
+                            item.addSender(comment.getUid() , sender);
+                            System.out.println(commentSenders.keySet().size());
+                            System.out.println("USER ADDED TO DIC");
+
+
+                        } else {
+                            System.out.println("NULL");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            if (once) {
+                //update adapter
+                System.out.println("BOOLEAN ADDED");
+                isDoneAll.add(true);
+                changeProgress.change();
+
+            }
+        }
+    }
+
+    private void checkCommentsLoading(RadioItem item , List<Comment> comments , ChangeProgress changeProgress) {
+        System.out.println("INSIDE COMMENTS TIMER");
+        System.out.println(item.getCommentsArray().size() + "COMMENTS SIZE FOR ITEM");
+        System.out.println(item.getCommentSenders().size() + "SENDERS SIZE");
+        System.out.println(item.getComments() + "COUNT");
+
+        if(item.getCommentsArray().size() == item.getCommentSenders().size() &&
+            item.getCommentsArray().size() == item.getComments()){
+            commentsTimer.cancel();
+            commentsTimer.purge();
+
+
+            if (once) {
+                //update adapter
+//                isDoneAll.add(true);
+//                changeProgress.change();
+
+            } else {
+                System.out.println("INSIDE ELSE");
+//                if (updateServer != null) {
+//                    updateServer.updateComments(item);
+                    notifyServerObservers(item, UPDATE_COMMENTS);
+//                }
+            }
+
+        }
+    }
 
 
     public void addFavorites(RadioItem radioItem){
@@ -351,8 +461,56 @@ public class FirebaseItemsDataSource{
         }
     }
 
+    public void setContext(Context context) {
+        this.context = context;
     }
+
+    @Override
+    public void registerServerObserver(UpdateServer updateServerObserver) {
+        if(!updateServerListeners.contains(updateServerObserver)) {
+            System.out.println("SERVER LISTENER ADDED");
+            updateServerListeners.add(updateServerObserver);
+        }
+    }
+
+    @Override
+    public void removeServerObserver(UpdateServer updateServerObserver) {
+        if(updateServerListeners.contains(updateServerObserver)) {
+            System.out.println("SERVER LISTENER REMOVED");
+            updateServerListeners.remove(updateServerObserver);
+        }
+    }
+
+    @Override
+    public void notifyServerObservers(RadioItem item , String method) {
+
+        for (UpdateServer serverListener : updateServerListeners) {
+            System.out.println("NOTIFY SERVER OBSERVER");
+
+            switch (method){
+                case UPDATE_LIKES:
+                    serverListener.updateLikes(item);
+                    break;
+                case UPDATE_COMMENTS:
+                    serverListener.updateComments(item);
+                    break;
+
+                case UPDATE_VIEWS:
+                    serverListener.updateViews(item);
+                    break;
+            }
+
+
+        }
+    }
+}
 
     interface DoneUpdatingLikes{
     void done();
         }
+
+
+
+
+
+

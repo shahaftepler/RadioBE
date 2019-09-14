@@ -1,5 +1,6 @@
 package com.example.radiobe.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,20 +12,30 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.radiobe.R;
+import com.example.radiobe.database.FirebaseItemsDataSource;
+import com.example.radiobe.database.UpdateServer;
 import com.example.radiobe.models.Comment;
+import com.example.radiobe.models.RadioItem;
 import com.example.radiobe.models.User;
 
 import java.util.List;
+import java.util.Map;
 
-public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.CommentsViewHolder> {
+public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.CommentsViewHolder> implements UpdateServer {
 
     List<Comment> commentList;
     Context context;
+    Map<String , User> commentSenders;
+    Activity activity;
 
     //constructor
-    public CommentsAdapter(List<Comment> commentList,Context context){
+    public CommentsAdapter(List<Comment> commentList, Map<String , User> commentSenders, Context context, Activity activity){
         this.commentList = commentList;
         this.context = context;
+        this.commentSenders = commentSenders;
+        this.activity = activity;
+        FirebaseItemsDataSource.getInstance().registerServerObserver(this);
+        System.out.println("----+++++"+commentList);
     }
 
     @NonNull
@@ -41,9 +52,9 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     @Override
     public void onBindViewHolder(@NonNull CommentsViewHolder holder, int position) {
         Comment comment = commentList.get(position);
-//        User user = commentSenders.get(commentItem.getUid());
-//        holder.tvUserNameComment.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
-//        holder.imageUserComment.setImageBitmap(user.getProfileImage());
+        User user = commentSenders.get(comment.getUid());
+        holder.tvUserNameComment.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
+        holder.imageUserComment.setImageBitmap(user.getProfileImage());
         holder.tvCommentText.setText(comment.getDescription());
         holder.tvCommentTime.setText(comment.getCreationDateString());
     }
@@ -51,6 +62,28 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     @Override
     public int getItemCount() {
         return commentList.size();
+    }
+
+    @Override
+    public void updateLikes(RadioItem item) {
+
+    }
+
+    @Override
+    public void updateComments(RadioItem item) {
+        commentList = item.getCommentsArray();
+        commentSenders = item.getCommentSenders();
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
+    }
+
+    @Override
+    public void updateViews(RadioItem item) {
+
     }
 
     class CommentsViewHolder extends RecyclerView.ViewHolder {

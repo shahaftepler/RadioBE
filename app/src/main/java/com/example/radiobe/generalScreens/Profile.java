@@ -232,7 +232,7 @@ public class Profile extends AppCompatActivity {
         switch (folder){
             case "profile":
                 try {
-                    CurrentUser.getInstance().setProfileImage(MediaStore.Images.Media.getBitmap(Profile.this.getContentResolver(), filePath));
+                    CurrentUser.getInstance().setProfileImage(MediaStore.Images.Media.getBitmap(this.getContentResolver(), filePath));
                     System.out.println(CurrentUser.getInstance().getProfileImage());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -240,11 +240,11 @@ public class Profile extends AppCompatActivity {
                 }
             case "cover":
                 try {
-                    CurrentUser.getInstance().setCoverImage(MediaStore.Images.Media.getBitmap(Profile.this.getContentResolver(), filePath));
+                    CurrentUser.getInstance().setCoverImage(MediaStore.Images.Media.getBitmap(this.getContentResolver(), filePath));
                     System.out.println(CurrentUser.getInstance().getCoverImage());
                 } catch (IOException e) {
                     e.printStackTrace();
-                    System.out.println("File wasn't uploaded to Current user profile");
+                    System.out.println("File wasn't uploaded to Current user cover");
                 }
         }
 
@@ -381,15 +381,6 @@ public class Profile extends AppCompatActivity {
 
     //check if there was any change to the details.
     private boolean checkForChanges(String firstName, String lastName , Calendar dateOfBirth , String email , String password , String confirmPassword , String description){
-
-        System.out.println(firstName);
-        System.out.println(lastName);
-
-
-        System.out.println(dateOfBirth.getTime());
-        System.out.println(CurrentUser.getInstance().getBirthDate());
-        System.out.println(CurrentUser.getInstance().getBirthDate());
-        System.out.println(dateOfBirth.getTimeInMillis());
         return (firstName.equals(CurrentUser.getInstance().getFirstName()) &&
                 lastName.equals(CurrentUser.getInstance().getLastName()) &&
                 dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate() &&

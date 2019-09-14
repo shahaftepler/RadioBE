@@ -48,10 +48,10 @@ public class AllPrograms extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.recycler);
 //        progressBar = view.findViewById(R.id.progressBar);
-        adapter = new RadioItemsAdapter(FirebaseItemsDataSource.getInstance().getFireBaseStreams(), recyclerView,  getContext());
+        adapter = new RadioItemsAdapter(FirebaseItemsDataSource.getInstance().getFireBaseStreams(), recyclerView,  getContext(), getActivity());
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter.updateLikes();
+//        adapter.updateLikes();
 
         searchView = view.findViewById(R.id.searchView);
         if (getActivity() != null) {
