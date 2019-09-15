@@ -70,6 +70,13 @@
     <string name="desc_close_dropdown_comment_chat">close dropdown comment chat</string>
     <string name="desc_send_comment">send comment</string>
     <string name="desc_edit_profile_details">edit profile details</string>
+    <string name="user_name">שם משתמש</string>
+    <string name="the_comment_of_the_user">התגובה של המשתמש</string>
+    <string name="comments">תגובה</string>
+    <string name="close_comments">סגור תגובה</string>
+    <string name="description_about_me">קצת עלי</string>
+    <string name="about_me">קצת עלי</string>
+    <string name="change_the_about_me">שינוי קצת עלי</string>
 
 
 

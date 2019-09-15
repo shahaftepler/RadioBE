@@ -52,6 +52,8 @@ public class Profile extends AppCompatActivity {
     private ImageView editCoverImage;
     private ImageView coverImage;
     private ImageView editDetails;
+    private ImageView editAboutMeButton;
+    private EditText dialogAboutMeEditText;
     private CircleImageView profileImage;
     private TextView profileName;
     private TextView profileDescription;
@@ -61,6 +63,7 @@ public class Profile extends AppCompatActivity {
     private EditText editDialogLastName;
     private EditText editDialogDescription;
     private View viewForAlert;
+    private View viewForAlertAboutMe;
     private String uid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     private DatePicker datePicker;
     private Button positiveButton;
@@ -93,6 +96,10 @@ public class Profile extends AppCompatActivity {
             setEditDetails();
         }));
 
+        editAboutMeButton.setOnClickListener((view -> {
+            setAboutMe();
+
+        }));
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
@@ -258,11 +265,11 @@ public class Profile extends AppCompatActivity {
         viewForAlert = LayoutInflater.from(this).inflate(R.layout.dialog_view, null);
         editDialogName = viewForAlert.findViewById(R.id.edit_dialog_firstName);
         editDialogLastName = viewForAlert.findViewById(R.id.edit_dialog_lastName);
-        editDialogDescription = viewForAlert.findViewById(R.id.edit_dialog_description);
+//        editDialogDescription = viewForAlert.findViewById(R.id.edit_dialog_description);
 
         editDialogName.setText(CurrentUser.getInstance().getFirstName());
         editDialogLastName.setText(CurrentUser.getInstance().getLastName());
-        editDialogDescription.setText(profileDescription.getText().toString());
+//        editDialogDescription.setText(profileDescription.getText().toString());
 
 
         positiveButton = viewForAlert.findViewById(R.id.positiveButton);
@@ -288,7 +295,7 @@ public class Profile extends AppCompatActivity {
         positiveButton.setOnClickListener((v)->{
             String name = editDialogName.getText().toString();
             String lastName = editDialogLastName.getText().toString();
-            String description = editDialogDescription.getText().toString();
+//            String description = editDialogDescription.getText().toString();
             Calendar dateOfBirth = Calendar.getInstance();
             int dayOfYear = dateOfBirth.DAY_OF_YEAR;
             dateOfBirth.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth() , 0 ,0 , 0);
@@ -327,6 +334,47 @@ public class Profile extends AppCompatActivity {
 
     }
 
+    public void setAboutMe(){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter your new About Me");
+        viewForAlertAboutMe = LayoutInflater.from(this).inflate(R.layout.dialog_about_me, null);
+        dialogAboutMeEditText = viewForAlertAboutMe.findViewById(R.id.edit_about_me);
+        positiveButton = viewForAlertAboutMe.findViewById(R.id.positiveButton);
+        negativeButton = viewForAlertAboutMe.findViewById(R.id.negativeButton);
+
+        builder.setView(viewForAlertAboutMe);
+        builder.setIcon(R.drawable.pan_edit);
+        AlertDialog alertDialog = builder.create();
+
+        alertDialog.show();
+
+        positiveButton.setOnClickListener((v)->{
+            String aboutMe = dialogAboutMeEditText.getText().toString();
+
+            if(aboutMe.length() > 300) {
+                int aboutMeLength = aboutMe.length();
+                int needToDelete = aboutMeLength - 300;
+                dialogAboutMeEditText.setError("Your comment is big then 300 characters please delete at least: "+needToDelete+"characters");
+
+            }else if (aboutMe.length() == 0){
+                dialogAboutMeEditText.setError("Enter Some words About You");
+            }else {
+                profileDescription.setText(dialogAboutMeEditText.getText());
+                alertDialog.dismiss();
+            }
+
+            if (dialogAboutMeEditText.getError() != null){
+                Toast.makeText(this, dialogAboutMeEditText.getError().toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        negativeButton.setOnClickListener((v)->{
+            alertDialog.dismiss();
+            Toast.makeText(this, "No change!", Toast.LENGTH_SHORT).show();
+        });
+
+    }
 
     /**
      * setup all the Views on Profile be equals them to there ID's
@@ -340,6 +388,9 @@ public class Profile extends AppCompatActivity {
         profileDescription = findViewById(R.id.idDescriptionProfile);
         profileBirthDay = findViewById(R.id.idBirthDayProfile);
         editDetails = findViewById(R.id.idEditDetails);
+        editAboutMeButton = findViewById(R.id.idEditDetailsDescription);
+        dialogAboutMeEditText = findViewById(R.id.edit_about_me);
+
 
     }
 
@@ -348,8 +399,6 @@ public class Profile extends AppCompatActivity {
 
         System.out.println(firstName);
         System.out.println(lastName);
-
-
         System.out.println(dateOfBirth.getTime());
         System.out.println(CurrentUser.getInstance().getBirthDate());
         System.out.println(CurrentUser.getInstance().getBirthDate());
