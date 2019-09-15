@@ -280,7 +280,7 @@ public class Profile extends AppCompatActivity {
 
         //todo: init picker with the date of birth.
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date(CurrentUser.getInstance().getBirthDate()));
+        calendar.setTime(new Date(CurrentUser.getInstance().getBirthDate().getTime()));
         datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH), null);
 
@@ -405,7 +405,7 @@ public class Profile extends AppCompatActivity {
         System.out.println(dateOfBirth.getTimeInMillis());
         return (firstName.equals(CurrentUser.getInstance().getFirstName()) &&
                 lastName.equals(CurrentUser.getInstance().getLastName()) &&
-                dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate());
+                dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate().getTime());
 
 
         //dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate().getTime()
