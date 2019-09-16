@@ -9,7 +9,9 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class User {
@@ -28,6 +30,16 @@ public class User {
 //    private Date birthDate;
     private long birthDate;
     String description;
+
+    public User(String name, String lastName, String email, long birthDate , String birthDateString, String password, String fireBaseID) {
+        this.firstName = name;
+        this.lastName = lastName;
+        this.email = email;
+        this.birthDate = birthDate;
+        this.birthDateString = birthDateString;
+        this.password = password;
+        this.fireBaseID = fireBaseID;
+    }
 
     public String getDescription() {
         return description;
@@ -102,6 +114,11 @@ public class User {
         this.fireBaseID = fireBaseID;
     }
 
+//
+//    public User(String firstName , String lastName , String email , long birthDate , String birthDateString){
+//
+//    }
+
     /*Getters and Setters*/
 
     public String getFirstName() {
@@ -147,6 +164,17 @@ public class User {
         this.password = password;
     }
 
+
+    public Map<String, Object> toMap(){
+        Map<String , Object> result = new HashMap<>();
+        result.put("firstName" , firstName);
+        result.put("lastName" , lastName);
+        result.put("birthDate" , birthDate);
+        result.put("birthDateString" , birthDateString);
+        result.put("email" , email);
+        result.put("fireBaseID" , fireBaseID);
+        return result;
+    }
 
     /*ToString*/
     @Override
