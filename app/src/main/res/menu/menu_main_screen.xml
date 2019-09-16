@@ -6,18 +6,14 @@
         android:id="@+id/profile_menu"
         android:orderInCategory="100"
         android:title="@string/title_activity_profile"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/settings_nemu"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
+        app:showAsAction="always" />
+
 
     <item
         android:id="@+id/logout_menu"
         android:orderInCategory="100"
         android:title="@string/title_menu_log_out"
         android:icon="@drawable/logout_icon"
-        app:showAsAction="never" />
+        app:showAsAction="always" />
 
 </menu>

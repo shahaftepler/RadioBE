@@ -12,7 +12,6 @@ public class Comment {
     String creationDateString;
     long creationDate;
     String description;
-    String commentId;
     String uid;
 
 //    public Comment(String user, long creationDate, String description) {
@@ -22,13 +21,14 @@ public class Comment {
 //        this.creationDateString =  DateFormat.format("dd/MM/yyyy", new Date(creationDate)).toString();
 //    }
 
+    public Comment(){}
+
 
     public Comment(String user , long creationDate, String description) {
         this.user = user;
         this.description = description;
         this.creationDate = creationDate;
-        setCreationDateString(creationDate);
-
+        convertCreationDateToString(creationDate);
     }
 //SimpleDateFormat s1 = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 //    SimpleDateFormat s2 = new SimpleDateFormat("ddMMyyyyHHmm");
@@ -48,13 +48,6 @@ public class Comment {
         this.uid = uid;
     }
 
-    public String getCommentId() {
-        return commentId;
-    }
-
-    public void setCommentId(String commentId) {
-        this.commentId = commentId;
-    }
 
     public String getUser() {
         return user;
@@ -72,11 +65,14 @@ public class Comment {
         return creationDateString;
     }
 
-    public void setCreationDateString(long creationDate) {
-//        this.creationDateString = creationDateString;
-        creationDateString = DateFormat.format("dd/MM/yyyy", new Date(creationDate)).toString();
-        System.out.println(creationDateString);
+    public void setCreationDateString(String creationDateString) {
+        this.creationDateString = creationDateString;
 
+    }
+
+    public void convertCreationDateToString(long creationDate){
+        String newDate = DateFormat.format("dd/MM/yyyy", new Date(creationDate)).toString();
+        setCreationDateString(newDate);
     }
 
     public void setCreationDate(long creationDate) {

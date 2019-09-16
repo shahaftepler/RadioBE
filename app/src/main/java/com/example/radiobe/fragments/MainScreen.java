@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -105,6 +108,9 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
         setContentView(R.layout.activity_mainscreen);
         generalSetup();
 
+        Bitmap img = CurrentUser.getInstance().getProfileImage();
+        BitmapDrawable d = new BitmapDrawable(getResources() , img);
+        getSupportActionBar().setIcon(d);
 //        LocalBroadcastManager.getInstance(this).registerReceiver(new ExoPlayerView().broadcastReceiver, new IntentFilter("play_song"));
 
 //        navigation.setSelectedItemId(R.id.navigation_home);
@@ -259,10 +265,6 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
                 Toast.makeText(this, "There is no user currently logged in!", Toast.LENGTH_SHORT).show();
             }
 
-            return true;
-        } else if (id == R.id.settings_nemu) {
-            Intent intent = new Intent(MainScreen.this, Settings.class);
-            startActivity(intent);
             return true;
         }
 

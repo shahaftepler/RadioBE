@@ -7,7 +7,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -56,12 +58,17 @@ public class Profile extends AppCompatActivity {
     private EditText dialogAboutMeEditText;
     private CircleImageView profileImage;
     private TextView profileName;
+    private TextView email;
     private TextView profileDescription;
     private TextView profileBirthDay;
+    private TextView descriptionTitle;
     //dialog
     private EditText editDialogName;
     private EditText editDialogLastName;
     private EditText editDialogDescription;
+    private EditText editEmail;
+    private EditText editPassword;
+    private EditText editConfirmPassword;
     private View viewForAlert;
     private View viewForAlertAboutMe;
     private String uid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
@@ -123,6 +130,7 @@ public class Profile extends AppCompatActivity {
         profileImage.setImageBitmap(CurrentUser.getInstance().getProfileImage());
         coverImage.setImageBitmap(CurrentUser.getInstance().getCoverImage());
         profileName.setText(CurrentUser.getInstance().getFirstName() +" "+ CurrentUser.getInstance().getLastName());
+        email.setText(CurrentUser.getInstance().getEmail());
 
         if (CurrentUser.getInstance().getDescription() != null){
             profileDescription.setText(CurrentUser.getInstance().getDescription());
@@ -223,7 +231,7 @@ public class Profile extends AppCompatActivity {
         switch (folder){
             case "profile":
                 try {
-                    CurrentUser.getInstance().setProfileImage(MediaStore.Images.Media.getBitmap(Profile.this.getContentResolver(), filePath));
+                    CurrentUser.getInstance().setProfileImage(MediaStore.Images.Media.getBitmap(this.getContentResolver(), filePath));
                     System.out.println(CurrentUser.getInstance().getProfileImage());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -231,7 +239,7 @@ public class Profile extends AppCompatActivity {
                 }
             case "cover":
                 try {
-                    CurrentUser.getInstance().setCoverImage(MediaStore.Images.Media.getBitmap(Profile.this.getContentResolver(), filePath));
+                    CurrentUser.getInstance().setCoverImage(MediaStore.Images.Media.getBitmap(this.getContentResolver(), filePath));
                     System.out.println(CurrentUser.getInstance().getCoverImage());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -266,11 +274,18 @@ public class Profile extends AppCompatActivity {
         editDialogName = viewForAlert.findViewById(R.id.edit_dialog_firstName);
         editDialogLastName = viewForAlert.findViewById(R.id.edit_dialog_lastName);
 //        editDialogDescription = viewForAlert.findViewById(R.id.edit_dialog_description);
+        editDialogDescription = viewForAlert.findViewById(R.id.edit_dialog_description);
+        editEmail = viewForAlert.findViewById(R.id.edit_email);
+        editPassword = viewForAlert.findViewById(R.id.edit_password);
+        editConfirmPassword = viewForAlert.findViewById(R.id.edit_confirmPassword);
+
 
         editDialogName.setText(CurrentUser.getInstance().getFirstName());
         editDialogLastName.setText(CurrentUser.getInstance().getLastName());
 //        editDialogDescription.setText(profileDescription.getText().toString());
 
+        editDialogDescription.setText(profileDescription.getText().toString());
+        editEmail.setText(CurrentUser.getInstance().getEmail());
 
         positiveButton = viewForAlert.findViewById(R.id.positiveButton);
         negativeButton = viewForAlert.findViewById(R.id.negativeButton);
@@ -278,9 +293,21 @@ public class Profile extends AppCompatActivity {
         datePicker.setMaxDate(new Date().getTime());
         builder.setView(viewForAlert);
 
+        viewForAlert.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+
+                if(imm.isAcceptingText()) { // verify if the soft keyboard is open
+                    imm.hideSoftInputFromWindow(viewForAlert.getWindowToken(), 0);
+                }
+                return false;
+            }
+        });
+
         //todo: init picker with the date of birth.
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date(CurrentUser.getInstance().getBirthDate().getTime()));
+        calendar.setTime(new Date(CurrentUser.getInstance().getBirthDate()));
         datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH), null);
 
@@ -295,18 +322,20 @@ public class Profile extends AppCompatActivity {
         positiveButton.setOnClickListener((v)->{
             String name = editDialogName.getText().toString();
             String lastName = editDialogLastName.getText().toString();
-//            String description = editDialogDescription.getText().toString();
+            String description = editDialogDescription.getText().toString();
+            String email = editEmail.getText().toString();
+            String password = editPassword.getText().toString();
+            String confirmPassword = editConfirmPassword.getText().toString();
             Calendar dateOfBirth = Calendar.getInstance();
             int dayOfYear = dateOfBirth.DAY_OF_YEAR;
             dateOfBirth.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth() , 0 ,0 , 0);
             dateOfBirth.set(Calendar.MILLISECOND, 0);
 
-            if(checkForChanges(name, lastName , dateOfBirth)) {
+            if(checkForChanges(name, lastName , dateOfBirth , email , password , confirmPassword , description)) {
                 System.out.println("IN NEW IF ???");
+                Toast.makeText(this, "No changes were made!", Toast.LENGTH_SHORT).show();
                 alert.dismiss();
 
-            } else {
-                System.out.println("WEIRD?");
             }
 //            if(dateOfBirth.getTimeInMillis() < new Date().getTime()){
 //                //todo: create some kind of error.
@@ -329,7 +358,7 @@ public class Profile extends AppCompatActivity {
 
         negativeButton.setOnClickListener((v)->{
             alert.dismiss();
-            Toast.makeText(this, "No change!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No change were made!", Toast.LENGTH_SHORT).show();
         });
 
     }
@@ -384,10 +413,12 @@ public class Profile extends AppCompatActivity {
         profileImage = findViewById(R.id.idImageViewProfile);
         editCoverImage = findViewById(R.id.idCoverEditImage);
         coverImage = findViewById(R.id.idCoverTopProfile);
-        profileName = findViewById(R.id.idFirstNameProfile);
+        profileName = findViewById(R.id.idFullNameProfile);
         profileDescription = findViewById(R.id.idDescriptionProfile);
         profileBirthDay = findViewById(R.id.idBirthDayProfile);
         editDetails = findViewById(R.id.idEditDetails);
+        email = findViewById(R.id.idEmail);
+//        descriptionTitle = findViewById(R.id.idAboutMe);
         editAboutMeButton = findViewById(R.id.idEditDetailsDescription);
         dialogAboutMeEditText = findViewById(R.id.edit_about_me);
 
@@ -395,17 +426,14 @@ public class Profile extends AppCompatActivity {
     }
 
     //check if there was any change to the details.
-    private boolean checkForChanges(String firstName, String lastName , Calendar dateOfBirth){
-
-        System.out.println(firstName);
-        System.out.println(lastName);
-        System.out.println(dateOfBirth.getTime());
-        System.out.println(CurrentUser.getInstance().getBirthDate());
-        System.out.println(CurrentUser.getInstance().getBirthDate());
-        System.out.println(dateOfBirth.getTimeInMillis());
+    private boolean checkForChanges(String firstName, String lastName , Calendar dateOfBirth , String email , String password , String confirmPassword , String description){
         return (firstName.equals(CurrentUser.getInstance().getFirstName()) &&
                 lastName.equals(CurrentUser.getInstance().getLastName()) &&
-                dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate().getTime());
+                dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate() &&
+                password.isEmpty() &&
+                (confirmPassword.equals(password) || confirmPassword.isEmpty()) &&
+                email.equals(CurrentUser.getInstance().getEmail()) &&
+                description.equals(profileDescription.getText().toString()));
 
 
         //dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate().getTime()

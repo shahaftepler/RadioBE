@@ -1,5 +1,6 @@
 package com.example.radiobe.database;
 
+import android.content.Context;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
@@ -40,10 +41,12 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
     ChangeProgress changeProgress;
     private List<RadioItem> serverStreams = new ArrayList<>();
     long newDuration = -1;
+    Context context;
 
-    public FireBaseParseJson(ParseJsonListener listener, ChangeProgress changeProgress) {
+    public FireBaseParseJson(ParseJsonListener listener, ChangeProgress changeProgress , Context context) {
         this.listener = listener;
         this.changeProgress = changeProgress;
+        this.context = context;
 //        idCount = 0;
     }
 
@@ -107,7 +110,7 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
     @Override
     protected void onPostExecute(List<RadioItem> jsonStreams){
 
-
+        FirebaseItemsDataSource.getInstance().setContext(context);
         FirebaseItemsDataSource.getInstance().setStreams(jsonStreams);
         serverStreams = null;
 

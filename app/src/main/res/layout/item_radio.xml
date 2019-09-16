@@ -104,7 +104,7 @@
             app:fabSize="mini"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/titleTv"
-            app:srcCompat="@drawable/icons8_add_to_favorites_32" />
+            app:srcCompat="@drawable/icons8_heart_black24" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/shareFbBtn"
@@ -118,7 +118,7 @@
             app:fabSize="mini"
             app:layout_constraintEnd_toEndOf="@+id/addFavoriteBtn"
             app:layout_constraintTop_toBottomOf="@+id/addFavoriteBtn"
-            app:srcCompat="@drawable/icons8_share_32" />
+            app:srcCompat="@drawable/icons8_share_facebook" />
 
         <ImageButton
             android:id="@+id/viewsIv"

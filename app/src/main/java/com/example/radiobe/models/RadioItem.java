@@ -1,11 +1,10 @@
 package com.example.radiobe.models;
 
-import com.example.radiobe.models.User;
-
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class RadioItem {
@@ -31,6 +30,20 @@ public class RadioItem {
     private List<User> usersThatViewed = new ArrayList<>();
     private List<Comment> commentsArray = new ArrayList<>();
 
+    Map<String , User> commentSenders = new HashMap<>();
+
+    public Map<String, User> getCommentSenders() {
+        return commentSenders;
+    }
+
+    public void setCommentSenders(Map<String, User> commentSenders) {
+        this.commentSenders = commentSenders;
+    }
+
+    public void addSender(String commentId , User sender){
+        System.out.println("INSIDE ADD SENDER");
+        commentSenders.put(commentId , sender);
+    }
 
     private String creationDateString;
 
@@ -260,6 +273,15 @@ public class RadioItem {
         this.commentsArray = commentsArray;
     }
 
+
+    public void removeAllComments(){
+        commentsArray.clear();
+    }
+
+    public void removeCommentSenders(){
+        commentSenders.clear();
+    }
+
     public void addComment(Comment comment){ commentsArray.add(comment); }
 
     //getters setters for cloud
@@ -314,3 +336,9 @@ public class RadioItem {
     }
 }
 
+//1) boolean isFavorite in model
+//2) listener in radio adapter
+//3) update boolean in change favorites
+//4) change ui in listener method
+
+// maybe only listener?

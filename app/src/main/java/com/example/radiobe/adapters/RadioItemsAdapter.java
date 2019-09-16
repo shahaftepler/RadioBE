@@ -1,12 +1,15 @@
 package com.example.radiobe.adapters;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Filter;
@@ -40,11 +43,12 @@ import java.util.concurrent.TimeUnit;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.threeten.bp.LocalDate;
 
-public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.RadioViewHolder> implements Filterable {
+public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.RadioViewHolder> implements Filterable , UpdateServer{
     //    List<RadioItem> items;
     List<RadioItem> streams;
     RecyclerView recyclerView;
@@ -53,14 +57,17 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
     Context context;
     List<RadioItem> filteredStreams;
     UpdateServer updateServer;
+    Activity activity;
 
-    public RadioItemsAdapter(List<RadioItem> streams, RecyclerView recyclerView, Context context) {
+    public RadioItemsAdapter(List<RadioItem> streams, RecyclerView recyclerView, Context context, Activity activity) {
         this.streams = streams;
         //change 1
         this.filteredStreams = streams;
         this.recyclerView = recyclerView;
 //        this.progressBar = pb;
         this.context = context;
+        this.activity = activity;
+        FirebaseItemsDataSource.getInstance().registerServerObserver(this);
     }
 
 
@@ -165,18 +172,51 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         });
 
         holder.tvComments.setOnClickListener((view -> {
+            System.out.println(radioItem.getCommentsArray());
+            System.out.println(radioItem.getCommentSenders());
             androidx.appcompat.app.AlertDialog.Builder builder = new AlertDialog.Builder(context);
             View viewForAlert = LayoutInflater.from(context).inflate(R.layout.dialog_comment, null);
-
-            RecyclerView recyclerView = viewForAlert.findViewById(R.id.idRecyclerViewComments);
-            CommentsAdapter commentsAdapter = new CommentsAdapter(radioItem.getCommentsArray(),context);
-
+            ImageButton close = (ImageButton) viewForAlert.findViewById(R.id.idCloseComment);
 
 
             builder.setView(viewForAlert);
 
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
+
+
+            RecyclerView recyclerView = viewForAlert.findViewById(R.id.idRecyclerViewComments);
+            recyclerView.setHasFixedSize(true);
+            CommentsAdapter commentsAdapter = new CommentsAdapter(radioItem.getCommentsArray(),radioItem.getCommentSenders(),context , activity);
+            recyclerView.setAdapter(commentsAdapter);
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
+            //todo: consider dialog fragment instead. for some reason the dialog is very small and doesn't contain the comments properly.
+//            Dialog dialog = new Dialog(context);
+//            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+//            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//            dialog.setContentView(R.layout.dialog_comment);
+//            dialog.setCanceledOnTouchOutside(true);
+//            dialog.setCancelable(true);
+//            dialog.show();
+
+
+
+//            ImageButton close = dialog.findViewById(R.id.idCloseComment);
+//            RecyclerView recyclerView = dialog.findViewById(R.id.idRecyclerViewComments);
+//            recyclerView.setHasFixedSize(true);
+//            CommentsAdapter commentsAdapter = new CommentsAdapter(radioItem.getCommentsArray(),radioItem.getCommentSenders(),context);
+//            recyclerView.setAdapter(commentsAdapter);
+//            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
+
+
+            close.setOnClickListener((v)->{
+                alertDialog.dismiss();
+            });
+
+
+
         }));
 
         holder.tb.setOnCheckedChangeListener((v, b) -> {
@@ -225,60 +265,60 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         }
     }
 
-    public void updateLikes(){
-        updateServer = new UpdateServer() {
-            @Override
-            public void updateLikes(RadioItem item) {
-                for (int i = 0; i < recyclerView.getChildCount(); i++) {
-
-                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-                    //holder.radioItem.getItemName()
-                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
-                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
-
-                        holder.tvLikes.setText(String.valueOf(item.getLikes()));
-                        holder.tvViews.setText(String.valueOf(item.getViews()));
-                        notifyItemChanged(i);
-                        return;
-                    }
-                }
-            }
-
-            @Override
-            public void updateComments(RadioItem item) {
-                for (int i = 0; i < recyclerView.getChildCount(); i++) {
-
-                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-                    //holder.radioItem.getItemName()
-                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
-                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
-                        holder.tvComments.setText(String.valueOf(item.getComments()));
-                        notifyItemChanged(i);
-                        return;
-                    }
-                }
-            }
-
-            @Override
-            public void updateViews(RadioItem item) {
-                for (int i = 0; i < recyclerView.getChildCount(); i++) {
-
-                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-                    //holder.radioItem.getItemName()
-                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
-                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
-                        holder.tvViews.setText(String.valueOf(item.getViews()));
-                        notifyItemChanged(i);
-                        return;
-                    }
-                }
-            }
-
-
-            };
-
-        FirebaseItemsDataSource.getInstance().setUpdateLikes(updateServer);
-    }
+//    public void updateLikes(){
+//        updateServer = new UpdateServer() {
+//            @Override
+//            public void updateLikes(RadioItem item) {
+//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+//
+//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+//                    //holder.radioItem.getItemName()
+//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
+//
+//                        holder.tvLikes.setText(String.valueOf(item.getLikes()));
+//                        holder.tvViews.setText(String.valueOf(item.getViews()));
+//                        notifyItemChanged(i);
+//                        return;
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void updateComments(RadioItem item) {
+//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+//
+//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+//                    //holder.radioItem.getItemName()
+//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
+//                        holder.tvComments.setText(String.valueOf(item.getComments()));
+//                        notifyItemChanged(i);
+//                        return;
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void updateViews(RadioItem item) {
+//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+//
+//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+//                    //holder.radioItem.getItemName()
+//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
+//                        holder.tvViews.setText(String.valueOf(item.getViews()));
+//                        notifyItemChanged(i);
+//                        return;
+//                    }
+//                }
+//            }
+//
+//
+//            };
+//
+//        FirebaseItemsDataSource.getInstance().setUpdateLikes(updateServer);
+//    }
 
 //change 3
     @Override
@@ -321,6 +361,66 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
                     notifyDataSetChanged();
                 }
             };
+    }
+
+    @Override
+    public void updateLikes(RadioItem item) {
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            int finalI = i;
+            RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(finalI);
+            //holder.radioItem.getItemName()
+            if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+                System.out.println("Item Changed LIKES---->"+holder.radioItem.getItemName());
+                activity.runOnUiThread(()->{
+                    holder.tvLikes.setText(String.valueOf(item.getLikes()));
+                    holder.tvViews.setText(String.valueOf(item.getViews()));
+                    notifyDataSetChanged();
+                });
+                return;
+
+            }
+        }
+    }
+
+    @Override
+    public void updateComments(RadioItem item) {
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            int finalI = i;
+            RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+            //holder.radioItem.getItemName()
+            if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+                System.out.println("Item Changed COMMENTS---->"+holder.radioItem.getItemName());
+
+                activity.runOnUiThread(()->{
+                    holder.tvComments.setText(String.valueOf(item.getComments()));
+//                    notifyItemChanged(finalI);
+                    notifyDataSetChanged();
+                });
+                return;
+            }
+        }
+
+    }
+
+    @Override
+    public void updateViews(RadioItem item) {
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            int finalI = i;
+            RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+            //holder.radioItem.getItemName()
+            if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+                System.out.println("Item Changed VIEWS---->"+holder.radioItem.getItemName());
+
+
+                activity.runOnUiThread(()->{
+                    holder.tvViews.setText(String.valueOf(item.getViews()));
+//                    notifyItemChanged(finalI);
+                    notifyDataSetChanged();
+                });
+                return;
+
+            }
+        }
     }
 
     class RadioViewHolder extends RecyclerView.ViewHolder {

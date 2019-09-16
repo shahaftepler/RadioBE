@@ -79,13 +79,19 @@
     <string name="desc_close_dropdown_comment_chat">close dropdown comment chat</string>
     <string name="desc_send_comment">send comment</string>
     <string name="desc_edit_profile_details">edit profile details</string>
-    <string name="user_name">User Name</string>
-    <string name="the_comment_of_the_user">the Comment of the user</string>
+    <string name="string_change_email">+@string/change_email</string>
+    <string name="change_email">Change Email</string>
+    <string name="new_password">New password...</string>
+    <string name="confirm_new_password">Confirm new password...</string>
+    <string name="the_comment_of_the_user">User comment</string>
+    <string name="user_name">User name</string>
     <string name="comments">Comments</string>
     <string name="close_comments">close Comments</string>
     <string name="description_about_me">Description About me</string>
     <string name="about_me">About Me</string>
     <string name="change_the_about_me">Change the About me</string>
+    <string name="email">Email</string>
+    <string name="full_name">Full Name</string>
 
 
 </resources>

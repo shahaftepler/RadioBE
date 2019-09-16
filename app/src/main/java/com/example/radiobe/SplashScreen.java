@@ -62,7 +62,7 @@ public class SplashScreen extends AppCompatActivity {
             public void change() {
                 progressBar.setProgress(progressBar.getProgress() + 1);
             }
-        }).execute();
+        }, getApplicationContext()).execute();
 
 
     }
