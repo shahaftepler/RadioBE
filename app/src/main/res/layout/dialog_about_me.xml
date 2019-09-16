@@ -17,12 +17,14 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:hint="@string/change_the_about_me"
+        android:importantForAutofill="no"
+        android:inputType="text|textMultiLine"
         android:padding="8dp"
+        android:maxLength="300"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:importantForAutofill="no"
-        android:inputType="text"
         tools:targetApi="26" />
 
     <Button
@@ -31,9 +33,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:textColor="#C118DF"
-        android:text="@string/Ok"
         android:background="@drawable/shape_radius_border_white"
+        android:text="@string/Ok"
+        android:textColor="#C118DF"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edit_about_me" />
 

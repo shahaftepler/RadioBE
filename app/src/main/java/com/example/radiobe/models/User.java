@@ -27,7 +27,8 @@ public class User {
     private List<String> favoritesID;
     Bitmap profileImage;
     Bitmap coverImage;
-    private Date birthDate;
+    //    private Date birthDate;
+    private long birthDate;
     String description;
 
     public User(String name, String lastName, String email, long birthDate , String birthDateString, String password, String fireBaseID) {
@@ -86,7 +87,7 @@ public class User {
     }
 
     /*full Constructor*/
-    public User(String firstName, String lastName, String email, Date birthDate, String password) {
+    public User(String firstName, String lastName, String email, long birthDate, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -140,11 +141,11 @@ public class User {
         this.email = email;
     }
 
-    public Date getBirthDate() {
+    public long getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(Date birthDate) {
+    public void setBirthDate(long birthDate) {
         this.birthDate = birthDate;
         String birth = DateFormat.format("dd/MM/yyyy", birthDate).toString();
         setBirthDateString(birth);
