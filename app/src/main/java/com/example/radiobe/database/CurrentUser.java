@@ -337,6 +337,28 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
 //        System.out.println(this.refreshFavoritesListener + "Current User listener");
 //    }
 
+    public void loadDetailsFromMap(){
+        ref.child("users").child(instance.getFireBaseID()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null){
+                    User user = dataSnapshot.getValue(User.class);
+                    instance.setFirstName(user.getFirstName());
+                    instance.setLastName(user.getLastName());
+                    instance.setBirthDate(user.getBirthDate());
+                    instance.setBirthDateString(user.getBirthDateString());
+                    System.out.println(CurrentUser.getInstance().toString());
+                } else{
+                    System.out.println("NULL");
+                }            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                System.out.println("ERROR");
+            }
+        });
+    }
+
     public void initNotifications() {
 
         if (!once) {
@@ -448,5 +470,8 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
             observer.refresh(instance.notifications , instance.notificationSenders);
         }
     }
+
+
+
 }
 

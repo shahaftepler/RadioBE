@@ -25,13 +25,23 @@ import android.widget.Toast;
 
 import com.example.radiobe.R;
 import com.example.radiobe.database.CurrentUser;
+import com.example.radiobe.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -44,9 +54,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -55,6 +69,7 @@ public class Profile extends AppCompatActivity {
     private final int PICK_COVER_IMAGE = 71;
     private final int PICK_PROFILE_IMAGE = 72;
     private final long ONE_MEGABYTE = 2048 * 2048;
+    private DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
     private FirebaseStorage storage;
     private StorageReference storageReference;
     private Uri filePath;
@@ -269,20 +284,31 @@ public class Profile extends AppCompatActivity {
      */
     @SuppressLint("InflateParams")
     private void setEditDetails() {
+        String newFirstname;
+        String newLastname;
+        String newEmail;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter your new details");
         viewForAlert = LayoutInflater.from(this).inflate(R.layout.dialog_view, null);
         editDialogName = viewForAlert.findViewById(R.id.edit_dialog_firstName);
         editDialogLastName = viewForAlert.findViewById(R.id.edit_dialog_lastName);
-        editDialogDescription = viewForAlert.findViewById(R.id.edit_dialog_description);
+//        editDialogDescription = viewForAlert.findViewById(R.id.edit_dialog_description);
         editEmail = viewForAlert.findViewById(R.id.edit_email);
         editPassword = viewForAlert.findViewById(R.id.edit_password);
         editConfirmPassword = viewForAlert.findViewById(R.id.edit_confirmPassword);
 
+        EditText[] editTexts = new EditText[]{editDialogName, editDialogLastName , editEmail};
 
         editDialogName.setText(CurrentUser.getInstance().getFirstName());
         editDialogLastName.setText(CurrentUser.getInstance().getLastName());
-        editDialogDescription.setText(profileDescription.getText().toString());
+
+
+//        if (CurrentUser.getInstance().getDescription() != null){
+//            editDialogDescription.setText(CurrentUser.getInstance().getDescription());
+//        } else {
+//            editDialogDescription.setText(profileDescription.getText().toString());
+//        }
+
         editEmail.setText(CurrentUser.getInstance().getEmail());
 
         positiveButton = viewForAlert.findViewById(R.id.positiveButton);
@@ -318,9 +344,13 @@ public class Profile extends AppCompatActivity {
 
 
         positiveButton.setOnClickListener((v)->{
+            boolean nameChanged = false;
+            boolean lastNameChanged = false;
+            boolean emailChanged = false;
+            boolean passwordChanged = false;
             String name = editDialogName.getText().toString();
             String lastName = editDialogLastName.getText().toString();
-            String description = editDialogDescription.getText().toString();
+//            String description = editDialogDescription.getText().toString();
             String email = editEmail.getText().toString();
             String password = editPassword.getText().toString();
             String confirmPassword = editConfirmPassword.getText().toString();
@@ -329,29 +359,157 @@ public class Profile extends AppCompatActivity {
             dateOfBirth.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth() , 0 ,0 , 0);
             dateOfBirth.set(Calendar.MILLISECOND, 0);
 
-            if(checkForChanges(name, lastName , dateOfBirth , email , password , confirmPassword , description)) {
+
+            //if no changes, dismiss dialog
+            if(checkForChanges(name, lastName , dateOfBirth , email , password , confirmPassword)) {
                 System.out.println("IN NEW IF ???");
                 Toast.makeText(this, "No changes were made!", Toast.LENGTH_SHORT).show();
                 alert.dismiss();
 
             }
-//            if(dateOfBirth.getTimeInMillis() < new Date().getTime()){
-//                //todo: create some kind of error.
+
+//            for (int i = 0; i < editTexts.length ; i++) {
+//                String change = editTexts[i].getText().toString();
+//                if(change.length() < 1){
+//                    editTexts[i].setError("You must fill this box with more than 0 characters");
+//                }
 //            }
-//
-//            if (name.length() < 1) {
-//                editDialogName.setError("Enter A Name");
-//            }
-//
-//            if (description.length() < 1) {
-//                editDialogDescription.setError("Choose Description");
-//            }
-//
-//            if (editDialogName.getError() != null || editDialogDescription.getError() != null ){
-//                Toast.makeText(this, "Check Errors", Toast.LENGTH_SHORT).show();
-//            } else{
-//                alert.dismiss();
-//            }
+
+
+
+            if (name.length() < 1) {
+                editDialogName.setError("Your name must be longer than 0 characters");
+            }
+
+            if(lastName.length() < 1){
+                editDialogLastName.setError("Your last name must be longer than 0 characters");
+            }
+
+            if(!isEmailValid(email)){
+                editEmail.setError("Your email must be according to a@a.com format");
+            }
+
+            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+            if (!email.equals(CurrentUser.getInstance().getEmail())) {
+                if (firebaseUser != null) {
+                    firebaseUser.updateEmail(email)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(Profile.this, "Your e-mail was successfully changed to " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
+                                        CurrentUser.getInstance().setEmail(email);
+                                    } else {
+                                        try {
+                                            throw task.getException();
+                                        } catch(FirebaseAuthWeakPasswordException e) {
+                                            editPassword.setError("הסיסמה חלשה מדי, אנא הכנס סיסמה עם 6 תווים ומעלה");
+                                            editPassword.requestFocus();
+                                        } catch(FirebaseAuthInvalidCredentialsException e) {
+                                            editEmail.setError("הפרטים אינם חוקיים");
+                                            editEmail.requestFocus();
+                                        } catch(FirebaseAuthUserCollisionException e) {
+                                            editEmail.setError("המייל כבר נמצא במערכת");
+                                            editEmail.requestFocus();
+                                            Toast.makeText(Profile.this, "המייל כבר נמצא במערכת", Toast.LENGTH_SHORT).show();
+                                        } catch (FirebaseAuthRecentLoginRequiredException e){
+                                            editEmail.setError("Please re-confirm your email");
+                                            AlertDialog.Builder builderApprove = new AlertDialog.Builder(Profile.this);
+                                            builderApprove.setTitle("Re-confirmation Details");
+                                            builderApprove.setMessage("Please re-confirm your soon to be changed details");
+                                            View newViewForAlert = LayoutInflater.from(Profile.this).inflate(R.layout.change_email_dialog, null);
+                                            EditText authEmail = newViewForAlert.findViewById(R.id.editEmailText);
+                                            EditText authPassword = newViewForAlert.findViewById(R.id.editPasswordText);
+                                            builderApprove.setPositiveButton("Done" , (d , v) ->{
+
+                                                AuthCredential credential = EmailAuthProvider.getCredential(authEmail.getText().toString(), authPassword.getText().toString());
+                                                firebaseUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        firebaseUser.updateEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                if(task.isSuccessful()){
+                                                                    System.out.println("EMAIL SUPPOSE TO CHANGE" + firebaseUser.getEmail());
+                                                                    Toast.makeText(Profile.this, "Your e-mail was successfully changed to " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
+                                                                    CurrentUser.getInstance().setEmail(email);
+                                                                    editEmail.setError(null);
+                                                                } else{
+                                                                        try {
+                                                                            throw task.getException();
+                                                                        } catch(FirebaseAuthInvalidCredentialsException e) {
+                                                                        editEmail.setError("הפרטים אינם חוקיים");
+                                                                        editEmail.requestFocus();
+                                                                    } catch(FirebaseAuthUserCollisionException e) {
+                                                                            Toast.makeText(Profile.this, "המייל כבר נמצא במערכת", Toast.LENGTH_SHORT).show();
+                                                                        editEmail.setError("המייל כבר נמצא במערכת");
+                                                                        editEmail.requestFocus();
+                                                                    } catch (Exception ex) {
+                                                                            System.out.println(ex.getMessage());
+                                                                        }
+                                                                    System.out.println("JUST TEST FOR NOW");
+                                                                }
+                                                            }
+                                                        });
+
+                                                    }
+                                                });
+                                            });
+                                            builderApprove.setView(newViewForAlert);
+                                            builderApprove.show();
+                                        } catch(Exception e) {
+                                            System.out.println(e.getMessage());
+                                        }
+
+
+
+
+
+
+                                        System.out.println(task.getException().toString());
+//                                        Toast.makeText(Profile.this, task.getException().toString() , Toast.LENGTH_SHORT).show();
+
+//                                        if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+//                                            Toast.makeText(Profile.this, "המייל כבר נמצא במערכת", Toast.LENGTH_SHORT).show();
+//                                        } else {
+//                                            System.out.println(task.getException().toString());
+//                                        }
+                                    }
+
+                                    if (editDialogName.getError() != null || editDialogLastName.getError() != null  || editEmail.getError() != null){
+                                        Toast.makeText(Profile.this, "Check Errors", Toast.LENGTH_SHORT).show();
+
+                                    } else{
+                                        User user = new User(name , lastName , CurrentUser.getInstance().getEmail(), CurrentUser.getInstance().getBirthDate() , CurrentUser.getInstance().getBirthDateString() ,  null , CurrentUser.getInstance().getFireBaseID());
+                                        ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap());
+                                        CurrentUser.getInstance().loadDetailsFromMap();
+                                        profileName.setText(CurrentUser.getInstance().getFirstName() +" "+ CurrentUser.getInstance().getLastName());
+                                        Profile.this.email.setText(CurrentUser.getInstance().getEmail());
+                                        profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
+                                        alert.dismiss();
+                                    }
+
+                                }
+                            });
+                }
+
+
+            } else {
+                if (editDialogName.getError() != null || editDialogLastName.getError() != null  || editEmail.getError() != null){
+                    Toast.makeText(Profile.this, "Check Errors", Toast.LENGTH_SHORT).show();
+
+                } else{
+                    User user = new User(name , lastName , CurrentUser.getInstance().getEmail(), CurrentUser.getInstance().getBirthDate() , CurrentUser.getInstance().getBirthDateString() ,  null , CurrentUser.getInstance().getFireBaseID());
+                    ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap());
+                    CurrentUser.getInstance().loadDetailsFromMap();
+                    profileName.setText(CurrentUser.getInstance().getFirstName() +" "+ CurrentUser.getInstance().getLastName());
+                    this.email.setText(CurrentUser.getInstance().getEmail());
+                    profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
+                    alert.dismiss();
+                }
+            }
+
         });
 
         negativeButton.setOnClickListener((v)->{
@@ -380,19 +538,38 @@ public class Profile extends AppCompatActivity {
     }
 
     //check if there was any change to the details.
-    private boolean checkForChanges(String firstName, String lastName , Calendar dateOfBirth , String email , String password , String confirmPassword , String description){
+    private boolean checkForChanges(String firstName, String lastName , Calendar dateOfBirth , String email , String password , String confirmPassword){
         return (firstName.equals(CurrentUser.getInstance().getFirstName()) &&
                 lastName.equals(CurrentUser.getInstance().getLastName()) &&
                 dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate() &&
                 password.isEmpty() &&
                 (confirmPassword.equals(password) || confirmPassword.isEmpty()) &&
-                email.equals(CurrentUser.getInstance().getEmail()) &&
-                description.equals(profileDescription.getText().toString()));
+                email.equals(CurrentUser.getInstance().getEmail()));
 
 
         //dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate().getTime()
     }
 
+    public boolean isEmailValid(String email)
+    {
+        String regExpn =
+                "^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+                        +"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                        +"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                        +"([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
+
+        CharSequence inputStr = email;
+
+        Pattern pattern = Pattern.compile(regExpn,Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(inputStr);
+
+        if(matcher.matches())
+            return true;
+        else
+            return false;
+    }
 
 }
 
