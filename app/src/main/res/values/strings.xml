@@ -92,6 +92,9 @@
     <string name="change_the_about_me">Change the About me</string>
     <string name="email">Email</string>
     <string name="full_name">Full Name</string>
+    <string name="image_of_profile_in_the_toolbar">Image Of profile in the toolBar</string>
+    <string name="profile">Profile</string>
+    <string name="logout_in_toolbar">logout in toolbar</string>
 
 
 </resources>

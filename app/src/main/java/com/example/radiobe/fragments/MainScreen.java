@@ -14,6 +14,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.radiobe.MainActivity;
@@ -44,16 +46,21 @@ import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class MainScreen extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     FragmentManager fm;
     ViewPager viewPager;
     MainScreenAdapter mMainScreenAdapter;
     BottomNavigationView navigation;
+
     Toolbar toolbar;
+    de.hdodenhof.circleimageview.CircleImageView imageProfileTBar;
+    ImageButton logOutBtn;
+
 
     FirebaseUser firebaseUser;
-    Button logOutBtn;
 
     String fileName;
     String filePath;
@@ -81,10 +88,10 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
             fileName = intent.getStringExtra("stream_name");
             filePath = intent.getStringExtra("stream_url");
             boolean play = intent.getBooleanExtra("play", false);
-            if(play)
+            if (play)
                 loadDataToplayer(fileName, filePath);
 
-            else{
+            else {
                 simpleExoPlayer.stop();
             }
 
@@ -109,8 +116,40 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
         generalSetup();
 
         Bitmap img = CurrentUser.getInstance().getProfileImage();
-        BitmapDrawable d = new BitmapDrawable(getResources() , img);
-        getSupportActionBar().setIcon(d);
+        imageProfileTBar.setImageBitmap(img);
+        logOutBtn.setImageResource(R.drawable.logout_icon);
+
+        imageProfileTBar.setOnClickListener(view -> {
+            Intent intent = new Intent(this, Profile.class);
+            startActivity(intent);
+        });
+        logOutBtn.setOnClickListener(view -> {
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(getString(R.string.logOutDialog))
+                        .setPositiveButton(getString(R.string.Ok), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                LoginManager.getInstance().logOut();
+                                FirebaseAuth.getInstance().signOut();
+                                Toast.makeText(MainScreen.this, getString(R.string.logOutSuccess), Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(MainScreen.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                        })
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Toast.makeText(MainScreen.this, "No change!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            } else {
+                Toast.makeText(this, "There is no user currently logged in!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+//        getSupportActionBar().setIcon(d);
 //        LocalBroadcastManager.getInstance(this).registerReceiver(new ExoPlayerView().broadcastReceiver, new IntentFilter("play_song"));
 
 //        navigation.setSelectedItemId(R.id.navigation_home);
@@ -158,8 +197,12 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
 //        logOutBtn = findViewById(R.id.logOutBtn);
         navigation = findViewById(R.id.navigation);
         viewPager = findViewById(R.id.container);
+
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        imageProfileTBar = findViewById(R.id.idImageToolBar);
+        logOutBtn = findViewById(R.id.idLogOutBtn);
+
 
         playerView = findViewById(R.id.playerView);
         // Setup Exoplayer instance
@@ -220,56 +263,56 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
         return false;
     }
 
-    //    menu
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main_screen, menu);
-        return true;
-    }
+//    //    menu
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.menu_main_screen, menu);
+//        return true;
+//    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.profile_menu) {
-            Intent intent = new Intent(this, Profile.class);
-            startActivity(intent);
-            return true;
-        } else if (id == R.id.logout_menu) {
-            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage(getString(R.string.logOutDialog))
-                        .setPositiveButton(getString(R.string.Ok), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                LoginManager.getInstance().logOut();
-                                FirebaseAuth.getInstance().signOut();
-                                Toast.makeText(MainScreen.this, getString(R.string.logOutSuccess), Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(MainScreen.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
-                        })
-                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                Toast.makeText(MainScreen.this, "No change!", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
-            } else {
-                Toast.makeText(this, "There is no user currently logged in!", Toast.LENGTH_SHORT).show();
-            }
-
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        int id = item.getItemId();
+//
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.profile_menu) {
+//            Intent intent = new Intent(this, Profile.class);
+//            startActivity(intent);
+//            return true;
+//        } else if (id == R.id.logout_menu) {
+//            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+//                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//                builder.setMessage(getString(R.string.logOutDialog))
+//                        .setPositiveButton(getString(R.string.Ok), new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int id) {
+//                                LoginManager.getInstance().logOut();
+//                                FirebaseAuth.getInstance().signOut();
+//                                Toast.makeText(MainScreen.this, getString(R.string.logOutSuccess), Toast.LENGTH_SHORT).show();
+//                                Intent intent = new Intent(MainScreen.this, MainActivity.class);
+//                                startActivity(intent);
+//                                finish();
+//                            }
+//                        })
+//                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int id) {
+//                                Toast.makeText(MainScreen.this, "No change!", Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
+//                AlertDialog alertDialog = builder.create();
+//                alertDialog.show();
+//            } else {
+//                Toast.makeText(this, "There is no user currently logged in!", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
 }
 

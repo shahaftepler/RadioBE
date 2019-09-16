@@ -23,7 +23,41 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@drawable/shape_background_gradient"
-            app:popupTheme="@style/AppTheme.PopupOverlay" >
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <RelativeLayout
+                android:id="@+id/parentRL"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageButton
+                    android:id="@+id/idLogOutBtn"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="#00444444"
+                    android:contentDescription="@string/logout_in_toolbar"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="12dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/logout_icon" />
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/idImageToolBar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/microphone"
+                    android:layout_toStartOf="@+id/idLogOutBtn"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="@string/image_of_profile_in_the_toolbar" />
+
+
+
+
+
+            </RelativeLayout>
+
 
         </androidx.appcompat.widget.Toolbar>
 
