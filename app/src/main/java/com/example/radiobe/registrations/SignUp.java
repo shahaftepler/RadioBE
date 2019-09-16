@@ -58,11 +58,9 @@ public class SignUp extends AppCompatActivity {
             int year = datePicker.getYear();
             int currentYear = Calendar.getInstance().get(Calendar.YEAR);
             Calendar calendar = Calendar.getInstance();
-            calendar.set(year, month, day, 0 , 0 , 0);
-            calendar.set(Calendar.MILLISECOND , 0);
+            calendar.set(year, month, day);
 
-            long birthDate = calendar.getTimeInMillis();
-//            System.out.println(time);
+            Date birthDate = calendar.getTime();
 
             String firstName = etFirst.getText().toString();
             String lastName = etLast.getText().toString();
