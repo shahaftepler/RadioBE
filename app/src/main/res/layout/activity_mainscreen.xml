@@ -29,6 +29,26 @@
                 android:id="@+id/parentRL"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/idImageToolBar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/microphone"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="@string/image_of_profile_in_the_toolbar" />
+
+
+                <TextView
+                    android:id="@+id/idUserNameTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:textSize="22sp"
+                    android:text="@string/user_name"
+                    android:fontFamily="@font/boogaloo"/>
 
                 <ImageButton
                     android:id="@+id/idLogOutBtn"
@@ -41,16 +61,6 @@
                     android:layout_marginTop="12dp"
                     android:scaleType="fitXY"
                     android:src="@drawable/logout_icon" />
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/idImageToolBar"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/microphone"
-                    android:layout_toStartOf="@+id/idLogOutBtn"
-                    android:layout_marginEnd="4dp"
-                    android:layout_marginTop="8dp"
-                    android:contentDescription="@string/image_of_profile_in_the_toolbar" />
 
 
 

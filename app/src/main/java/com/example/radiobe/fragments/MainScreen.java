@@ -57,6 +57,7 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
 
     Toolbar toolbar;
     de.hdodenhof.circleimageview.CircleImageView imageProfileTBar;
+    TextView userNameTV;
     ImageButton logOutBtn;
 
 
@@ -123,6 +124,7 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
             Intent intent = new Intent(this, Profile.class);
             startActivity(intent);
         });
+        userNameTV.setText("Hello, "+CurrentUser.getInstance().getFirstName());
         logOutBtn.setOnClickListener(view -> {
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -201,6 +203,7 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         imageProfileTBar = findViewById(R.id.idImageToolBar);
+        userNameTV = findViewById(R.id.idUserNameTV);
         logOutBtn = findViewById(R.id.idLogOutBtn);
 
 
