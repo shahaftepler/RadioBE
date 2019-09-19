@@ -35,29 +35,27 @@
 
             <ImageView
                 android:id="@+id/idCoverEditImage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="-4dp"
+                android:layout_marginEnd="4dp"
                 android:clickable="true"
                 android:contentDescription="@string/desc_add_new_cover_image"
                 android:focusable="true"
-                android:src="@drawable/add_image" />
+                android:src="@drawable/add_cover_png" />
 
             <ImageView
                 android:id="@+id/idProfileEditImage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/idImageViewProfile"
-                android:layout_alignEnd="@+id/idImageViewProfile"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="-4dp"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_below="@id/idCoverTopProfile"
+                android:layout_centerHorizontal="true"
+                android:layout_toEndOf="@+id/idImageViewProfile"
                 android:clickable="true"
                 android:contentDescription="@string/desc_add_profile_image"
                 android:focusable="true"
-                android:src="@drawable/add_image" />
+                android:src="@drawable/add_camera" />
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/idImageViewProfile"
@@ -80,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/idCoverTopProfile"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/test"
                 android:elevation="-1dp"
@@ -92,12 +90,10 @@
 
                 <ImageView
                     android:id="@+id/idEditDetails"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@+id/idFullNameProfile"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="16dp"
                     android:clickable="true"
                     android:contentDescription="@string/desc_edit_profile_details"
                     android:focusable="true"
@@ -169,7 +165,7 @@
                         android:layout_centerHorizontal="true"
                         android:layout_marginTop="32dp"
                         android:text="@string/about_me"
-                        android:textColor="@color/white"
+                        android:textColor="#fff"
                         android:textSize="22sp"
                         android:textStyle="bold" />
 
@@ -182,22 +178,21 @@
                         android:layout_alignParentStart="true"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:padding="8dp"
                         android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="8dp"
                         android:layout_toEndOf="@+id/idEditDetailsDescription"
+                        android:padding="8dp"
                         android:text="@string/description_about_me"
                         android:textColor="#fff"
                         android:textSize="18sp" />
 
                     <ImageView
                         android:id="@+id/idEditDetailsDescription"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
                         android:layout_alignTop="@+id/idDescriptionProfile"
                         android:layout_alignParentEnd="true"
                         android:layout_gravity="end"
-                        android:layout_marginEnd="16dp"
                         android:clickable="true"
                         android:contentDescription="@string/desc_edit_profile_details"
                         android:focusable="true"
@@ -209,4 +204,6 @@
 
 
     </ScrollView>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
