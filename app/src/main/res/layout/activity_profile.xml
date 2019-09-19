@@ -83,7 +83,6 @@
                 android:background="@drawable/test"
                 android:elevation="-1dp"
                 android:paddingHorizontal="24dp"
-                android:paddingTop="60dp"
                 android:paddingBottom="16dp"
                 tools:targetApi="26">
 
@@ -94,6 +93,7 @@
                     android:layout_height="25dp"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
+                    android:layout_marginTop="24dp"
                     android:clickable="true"
                     android:contentDescription="@string/desc_edit_profile_details"
                     android:focusable="true"
@@ -107,6 +107,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_centerHorizontal="true"
                     android:text="@string/full_name"
+                    android:layout_marginTop="52dp"
                     android:textColor="#fff"
                     android:textSize="20sp"
                     android:textStyle="bold"
@@ -147,7 +148,7 @@
 
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="8dp"
@@ -172,10 +173,11 @@
 
                     <TextView
                         android:id="@+id/idDescriptionProfile"
-                        android:layout_width="245dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/idTitleDescription"
                         android:layout_alignParentStart="true"
+                        android:layout_alignParentEnd="true"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginEnd="8dp"
@@ -190,8 +192,9 @@
                         android:id="@+id/idEditDetailsDescription"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
-                        android:layout_alignTop="@+id/idDescriptionProfile"
+                        android:layout_alignParentTop="true"
                         android:layout_alignParentEnd="true"
+                        android:layout_marginTop="24dp"
                         android:layout_gravity="end"
                         android:clickable="true"
                         android:contentDescription="@string/desc_edit_profile_details"
