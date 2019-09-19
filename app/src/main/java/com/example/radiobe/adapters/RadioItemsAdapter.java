@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import com.example.radiobe.R;
 
 import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.database.FirebaseItemsDataSource;
+import com.example.radiobe.database.RefreshFavorites;
 import com.example.radiobe.database.UpdateServer;
 import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.Comment;
@@ -48,7 +50,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.threeten.bp.LocalDate;
 
-public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.RadioViewHolder> implements Filterable , UpdateServer{
+public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.RadioViewHolder> implements Filterable , UpdateServer {
     //    List<RadioItem> items;
     List<RadioItem> streams;
     RecyclerView recyclerView;
@@ -103,6 +105,16 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         holder.tvViews.setText(String.valueOf(radioItem.getViews()));
         holder.tvComments.setText(String.valueOf(radioItem.getComments()));
         holder.tvLikes.setText(String.valueOf(radioItem.getLikes()));
+
+
+        if(CurrentUser.getInstance().getFavorites().contains(radioItem)){
+            Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_red);
+            holder.addFavorites.setImageDrawable(d);
+        } else {
+            Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_black24);
+            holder.addFavorites.setImageDrawable(d);
+        }
+
 //        holder.tvCloudID.setText(radioItem.get_id());
 
         //holder.tb.setBackgroundResource(radioItem.getResImage());
@@ -422,8 +434,45 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             }
         }
     }
+//
+//    @Override
+//    public void refresh(List<RadioItem> favorites) {
+//
+//
+//            for (int i = 0; i < recyclerView.getChildCount(); i++) {
+//                int finalI = i;
+//                RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+//                //holder.radioItem.getItemName()
+//                if ((holder != null) && favorites.contains(holder.radioItem)){
+//                    System.out.println("Item Changed VIEWS---->");
+//
+//                    Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_red);
+//                    activity.runOnUiThread(()->{
+//                        holder.addFavorites.setImageDrawable(d);
+//
+//                        //                    notifyItemChanged(finalI);
+//                        notifyDataSetChanged();
+//                    });
+//                    return;
+//
+//                } else {
+//                    if (holder != null) {
+//                        Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_black24);
+////                    holder.addFavorites.setImageDrawable(d);
+//                        activity.runOnUiThread(() -> {
+//                            holder.addFavorites.setImageDrawable(d);
+//
+//                            //                    notifyItemChanged(finalI);
+//                            notifyDataSetChanged();
+//                        });
+//                    }
+//                }
+//            }
+//        }
 
-    class RadioViewHolder extends RecyclerView.ViewHolder {
+
+    class RadioViewHolder extends RecyclerView.ViewHolder implements RefreshFavorites
+    {
         ToggleButton tb;
         TextView tvFileName;
         TextView tvDuration;
@@ -445,6 +494,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 
         public RadioViewHolder(@NonNull View itemView) {
             super(itemView);
+            CurrentUser.getInstance().registerFavoriteObserver(this);
             tb = itemView.findViewById(R.id.tbPlayStop);
             tvFileName = itemView.findViewById(R.id.titleTv);
             tvDuration = itemView.findViewById(R.id.durationTv);
@@ -462,6 +512,22 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             closeCommentButton = itemView.findViewById(R.id.closeCommentButton);
 
 //            tvCloudID = itemView.findViewById(R.id.tvCloudID);
+        }
+
+        @Override
+        public void refresh(List<RadioItem> favorites) {
+            if(favorites.contains(radioItem)){
+                Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_red);
+                activity.runOnUiThread(()->{
+                    addFavorites.setImageDrawable(d);
+
+                });
+            } else {
+                Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_black24);
+                activity.runOnUiThread(()->{
+                    addFavorites.setImageDrawable(d);
+
+                });            }
         }
     }
 }

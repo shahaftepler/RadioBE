@@ -23,7 +23,15 @@ public class RadioItem {
     private String durationString;
     private String vodName;
     private String mUid;
+    Boolean isFavorite;
 
+    public Boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setIsFavorite(Boolean favorite) {
+        isFavorite = favorite;
+    }
 
     //new fields
     private List<User> usersThatLiked = new ArrayList<>();
