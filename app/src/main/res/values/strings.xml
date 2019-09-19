@@ -95,6 +95,7 @@
     <string name="image_of_profile_in_the_toolbar">Image Of profile in the toolBar</string>
     <string name="profile">Profile</string>
     <string name="logout_in_toolbar">logout in toolbar</string>
+    <string name="tell_us_a_little_about_yourself">Tell us a little about yourself</string>
 
 
 </resources>

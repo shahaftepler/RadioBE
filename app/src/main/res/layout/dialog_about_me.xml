@@ -16,7 +16,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
-        android:hint="@string/change_the_about_me"
+        android:hint="@string/tell_us_a_little_about_yourself"
         android:importantForAutofill="no"
         android:inputType="text|textMultiLine"
         android:padding="8dp"

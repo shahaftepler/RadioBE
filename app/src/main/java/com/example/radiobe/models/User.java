@@ -41,6 +41,19 @@ public class User {
         this.fireBaseID = fireBaseID;
     }
 
+    //ctor with first name , last name , email , date of birth (being converted to string inside) , fire base id , no pass
+
+    public User(String fireBaseID , String firstName , String lastName , String email , long birthDate){
+        this.fireBaseID = fireBaseID;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.birthDate = birthDate;
+        String birth = DateFormat.format("dd/MM/yyyy", birthDate).toString();
+        setBirthDateString(birth);
+    }
+
+
     public String getDescription() {
         return description;
     }
@@ -114,10 +127,6 @@ public class User {
         this.fireBaseID = fireBaseID;
     }
 
-//
-//    public User(String firstName , String lastName , String email , long birthDate , String birthDateString){
-//
-//    }
 
     /*Getters and Setters*/
 

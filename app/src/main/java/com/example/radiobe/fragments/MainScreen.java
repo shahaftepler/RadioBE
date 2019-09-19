@@ -24,6 +24,7 @@ import com.example.radiobe.adapters.MainScreenAdapter;
 import com.example.radiobe.adapters.NotificationsAdapter;
 import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.database.RefreshNotificationsListener;
+import com.example.radiobe.database.RefreshUserName;
 import com.example.radiobe.generalScreens.Profile;
 import com.example.radiobe.generalScreens.Settings;
 import com.facebook.login.LoginManager;
@@ -48,7 +49,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainScreen extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainScreen extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener , RefreshUserName {
 
     FragmentManager fm;
     ViewPager viewPager;
@@ -195,6 +196,7 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
     }
 
     private void generalSetup() {
+        CurrentUser.getInstance().registerUsernameObserver(this);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 //        logOutBtn = findViewById(R.id.logOutBtn);
         navigation = findViewById(R.id.navigation);
@@ -264,6 +266,11 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
 
 //        throw new IllegalArgumentException("No such Button!");
         return false;
+    }
+
+    @Override
+    public void refresh() {
+        userNameTV.setText("Hello, "+CurrentUser.getInstance().getFirstName());
     }
 
 //    //    menu

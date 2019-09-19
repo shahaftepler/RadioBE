@@ -41,21 +41,6 @@
         tools:targetApi="26"
         android:inputType="text" />
 
-    <EditText
-        android:id="@+id/edit_email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="24dp"
-        android:hint="@string/change_email"
-        android:importantForAutofill="no"
-        android:inputType="text|textEmailAddress"
-        android:padding="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/edit_dialog_lastName"
-        tools:targetApi="26" />
 
     <EditText
         android:id="@+id/edit_password"
@@ -68,7 +53,7 @@
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_email"
+        app:layout_constraintTop_toBottomOf="@id/edit_dialog_lastName"
         android:importantForAutofill="no"
         tools:targetApi="26"
         android:inputType="textPassword" />

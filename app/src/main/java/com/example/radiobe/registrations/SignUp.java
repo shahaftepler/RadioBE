@@ -28,6 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class SignUp extends AppCompatActivity {
@@ -77,8 +79,12 @@ public class SignUp extends AppCompatActivity {
                 etFirst.setError("Enter your first name");
             if (lastName.length() < 1)
                 etLast.setError("Enter your last name");
-            if (userName.length() < 1)
-                etEmail.setError("Enter your user name");
+//            if (userName.length() < 1)
+//                etEmail.setError("Enter your user name");
+
+            if(!isEmailValid(userName)){
+                etEmail.setError("Your email must be according to a@a.com format!");
+            }
 
             System.out.println("user over 16?: " + (currentYear - year));
             if ((currentYear - year) < 16) {
@@ -151,6 +157,27 @@ public class SignUp extends AppCompatActivity {
 
         });
 
+    }
+
+    public boolean isEmailValid(String email)
+    {
+        String regExpn =
+                "^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+                        +"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                        +"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                        +"([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
+
+        CharSequence inputStr = email;
+
+        Pattern pattern = Pattern.compile(regExpn,Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(inputStr);
+
+        if(matcher.matches())
+            return true;
+        else
+            return false;
     }
 
 

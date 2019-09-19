@@ -28,7 +28,7 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class CurrentUser extends User implements NotificationsSubject , FavoritesSubject {
+public class CurrentUser extends User implements NotificationsSubject , FavoritesSubject , SubjectUsernameRefresh {
     private static CurrentUser instance;
     List<String> favoritesID;
     List<String> messagesID;
@@ -48,6 +48,7 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
     List<Boolean> photosUpload;
     private List<RefreshNotificationsListener> notificationsListeners;
     private List<RefreshFavorites> favoritesListeners;
+    private List<RefreshUserName> userNameListeners;
 
 
 
@@ -83,6 +84,7 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
         photosUpload = new ArrayList<>();
         notificationsListeners = new ArrayList<>();
         favoritesListeners = new ArrayList<>();
+        userNameListeners = new ArrayList<>();
     }
 
     public void setContext(Context context) {
@@ -210,7 +212,7 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
                             }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            instance.setCoverImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
+                            instance.setCoverImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.color_blue));
                             System.out.println("Got fake COVER");
                             photosUpload.add(true);
 
@@ -338,7 +340,7 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
 //    }
 
     public void loadDetailsFromMap(){
-        ref.child("users").child(instance.getFireBaseID()).addListenerForSingleValueEvent(new ValueEventListener() {
+        ref.child("users").child(instance.getFireBaseID()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null){
@@ -347,7 +349,9 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
                     instance.setLastName(user.getLastName());
                     instance.setBirthDate(user.getBirthDate());
                     instance.setBirthDateString(user.getBirthDateString());
+                    instance.setDescription(user.getDescription());
                     System.out.println(CurrentUser.getInstance().toString());
+                    notifyUsernameObservers();
                 } else{
                     System.out.println("NULL");
                 }            }
@@ -472,6 +476,28 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
     }
 
 
+    @Override
+    public void registerUsernameObserver(RefreshUserName refreshUserName) {
+        if(!userNameListeners.contains(refreshUserName)) {
+            System.out.println("username LISTENER ADDED");
+            userNameListeners.add(refreshUserName);
+        }
+    }
 
+    @Override
+    public void removeUsernameObserver(RefreshUserName refreshUserName) {
+        if(!userNameListeners.contains(refreshUserName)) {
+            System.out.println("username LISTENER ADDED");
+            userNameListeners.add(refreshUserName);
+        }
+    }
+
+    @Override
+    public void notifyUsernameObservers() {
+        for(RefreshUserName refreshUserName : userNameListeners){
+            System.out.println("USER NAME NOTIFIED");
+            refreshUserName.refresh();
+        }
+    }
 }
 
