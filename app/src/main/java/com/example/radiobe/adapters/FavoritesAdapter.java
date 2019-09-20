@@ -1,9 +1,11 @@
 package com.example.radiobe.adapters;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +44,16 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
     private Context context;
     Activity activity;
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+    RecyclerView recyclerView;
 //    RefreshFavorites refreshFavorites;
+
+    BroadcastReceiver mediaBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String streamId = intent.getStringExtra("stream_id");
+            changeToggles(streamId);
+        }
+    };
 
 
     /*Constructor*/
@@ -51,6 +62,9 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         this.context = activity;
         this.activity = activity;
         CurrentUser.getInstance().registerFavoriteObserver(this);
+        LocalBroadcastManager.getInstance(context).registerReceiver(mediaBroadcastReceiver, new IntentFilter("play_song"));
+
+
     }
 
     @NonNull
@@ -68,21 +82,29 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
     public void onBindViewHolder(@NonNull FavoritesViewHolder holder, int position) {
 
         RadioItem favoriteRecommendedItem = favoriteItemList.get(position);
-
+        holder.radioItem = favoriteRecommendedItem;
         holder.tvFavoriteTitle.setText(favoriteRecommendedItem.getItemName());
-        holder.toggleButtonFavorite.setOnCheckedChangeListener((v,b)->{
-            Intent intent = new Intent("play_song");
-            intent.putExtra("stream_name", favoriteRecommendedItem.getItemName());
-            intent.putExtra("stream_url", favoriteRecommendedItem.getFilePath());
-            intent.putExtra("play", b);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            if (b) {
-                FirebaseItemsDataSource.getInstance().addView(favoriteRecommendedItem);
-                System.out.println("Viewed");
-//                changeToggles();
+        holder.toggleButtonFavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean b = holder.toggleButtonFavorite.isChecked();
+                Intent intent = new Intent("play_song");
+                intent.putExtra("stream_name", favoriteRecommendedItem.getItemName());
+                intent.putExtra("stream_url", favoriteRecommendedItem.getFilePath());
+                intent.putExtra("stream_id" , favoriteRecommendedItem.getUid());
+                intent.putExtra("play", b);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
+                if (b) {
+                    FirebaseItemsDataSource.getInstance().addView(favoriteRecommendedItem);
+                    System.out.println("Viewed");
+
+                }
+                changeToggles(favoriteRecommendedItem.getUid());
+
             }
         });
-//        holder.tvFavoriteDescription.setText(favoriteRecommendedItem.getItemName());
+
 
 
         holder.deleteFavorite.setOnClickListener((v)->{
@@ -106,6 +128,50 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
     }
 
 
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        this.recyclerView = recyclerView;
+    }
+
+    private void changeToggles(String streamId){
+
+        if(recyclerView != null) {
+            for (int i = 0; i < recyclerView.getChildCount(); i++) {
+
+                FavoritesAdapter.FavoritesViewHolder holder = (FavoritesAdapter.FavoritesViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                if (holder != null) {
+                    if (!holder.radioItem.getUid().equals(streamId)) {
+                        if (holder.toggleButtonFavorite.isChecked()) {
+                            holder.toggleButtonFavorite.setChecked(false);
+                            System.out.println("CHANGED STATE" + holder.radioItem.getItemName());
+                        }
+                        System.out.println("NEW");
+                    }
+                    else {
+                        if(!holder.toggleButtonFavorite.isChecked())
+                            holder.toggleButtonFavorite.setChecked(true);
+
+                        else{
+                            holder.toggleButtonFavorite.setChecked(false);
+                        }
+                    }
+
+                }
+//            if (MainScreen.simpleExoPlayer.getPlaybackState() == Player.STATE_READY && holder != null &&
+//                    MainScreen.simpleExoPlayer.getCurrentTag() != holder.radioItem.getItemName()){
+//                System.out.println("NEW IF");
+//                if(holder.tb.isChecked()) {
+//                    holder.tb.setChecked(false);
+//                    System.out.println("ANOTHERTRY");
+//                }
+////                notifyItemChanged(i);
+//            }
+            }
+
+            notifyDataSetChanged();
+        }
+    }
 
     @Override
     public int getItemCount() {
@@ -151,6 +217,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         ToggleButton toggleButtonFavorite;
         TextView tvFavoriteTitle;
         ImageButton deleteFavorite;
+        RadioItem radioItem;
 
 
         /*Constructor*/

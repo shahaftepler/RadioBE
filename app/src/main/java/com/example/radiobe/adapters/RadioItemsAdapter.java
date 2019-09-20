@@ -2,8 +2,10 @@ package com.example.radiobe.adapters;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -51,15 +53,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.threeten.bp.LocalDate;
 
 public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.RadioViewHolder> implements Filterable , UpdateServer {
-    //    List<RadioItem> items;
     List<RadioItem> streams;
     RecyclerView recyclerView;
-//    ProgressBar progressBar;
     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     Context context;
     List<RadioItem> filteredStreams;
-    UpdateServer updateServer;
     Activity activity;
+    BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String streamId = intent.getStringExtra("stream_id");
+            changeToggles(streamId);
+        }
+    };
 
     public RadioItemsAdapter(List<RadioItem> streams, RecyclerView recyclerView, Context context, Activity activity) {
         this.streams = streams;
@@ -70,6 +76,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         this.context = context;
         this.activity = activity;
         FirebaseItemsDataSource.getInstance().registerServerObserver(this);
+        LocalBroadcastManager.getInstance(context).registerReceiver(receiver , new IntentFilter("play_song"));
     }
 
 
@@ -115,31 +122,8 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             holder.addFavorites.setImageDrawable(d);
         }
 
-//        holder.tvCloudID.setText(radioItem.get_id());
-
-        //holder.tb.setBackgroundResource(radioItem.getResImage());
-
-
         holder.addLike.setOnClickListener((v) -> {
-//            System.out.println("Clicked");
-//            holder.addLike.setOnClickListener(null);
-//            StreamDAO.getInstance().handleLikes(firebaseUser, radioItem, new ChangeLikesListener() {
-//                @Override
-//                public void done() {
-//                    holder.tvLikes.setText(String.valueOf(radioItem.getLikes()));
-//                    notifyItemChanged(position);
-//
-//                }
-//            });
-
             FirebaseItemsDataSource.getInstance().addLikes(radioItem);
-
-
-//            //TODO: firebaseitemsDatasource.getInstance().addLike();
-//            FirebaseItemsDataSource.getInstance().addLikes(radioItem,updateLikes);
-//            updateLikes();
-
-
         });
 
         holder.addComment.setOnClickListener((v) -> {
@@ -152,13 +136,6 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
                 String description = holder.addCommentEditText.getText().toString();
                 if (description.length() > 0) {
                     Comment comment = new Comment(firebaseUser.getUid(), new Date().getTime(), description);
-//                    StreamDAO.getInstance().handleComments(firebaseUser, radioItem, comment, new AddCommentListener() {
-//                        @Override
-//                        public void done() {
-//                            holder.tvComments.setText(String.valueOf(radioItem.getComments()));
-//                            notifyItemChanged(position);
-//                        }
-//                    });
                     FirebaseItemsDataSource.getInstance().addComment(comment, radioItem);
                     holder.addCommentEditText.setVisibility(View.GONE);
                     holder.addCommentEditText.setText("");
@@ -170,7 +147,6 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
                     holder.addCommentEditText.setError("Your comment must include more than 0 characters");
                 }
             });
-            //TODO open a input box for comment with button to send and to exit
 
             holder.closeCommentButton.setOnClickListener((b) -> {
                 holder.addCommentEditText.setVisibility(View.GONE);
@@ -203,25 +179,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             recyclerView.setAdapter(commentsAdapter);
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-            //todo: consider dialog fragment instead. for some reason the dialog is very small and doesn't contain the comments properly.
-//            Dialog dialog = new Dialog(context);
-//            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-//            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//            dialog.setContentView(R.layout.dialog_comment);
-//            dialog.setCanceledOnTouchOutside(true);
-//            dialog.setCancelable(true);
-//            dialog.show();
-
-
-
-//            ImageButton close = dialog.findViewById(R.id.idCloseComment);
-//            RecyclerView recyclerView = dialog.findViewById(R.id.idRecyclerViewComments);
-//            recyclerView.setHasFixedSize(true);
-//            CommentsAdapter commentsAdapter = new CommentsAdapter(radioItem.getCommentsArray(),radioItem.getCommentSenders(),context);
-//            recyclerView.setAdapter(commentsAdapter);
-//            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-
-
+            //todo: consider dialog fragment instead.
 
             close.setOnClickListener((v)->{
                 alertDialog.dismiss();
@@ -231,19 +189,27 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 
         }));
 
-        holder.tb.setOnCheckedChangeListener((v, b) -> {
-            Intent intent = new Intent("play_song");
-            intent.putExtra("stream_name", radioItem.getItemName());
-            intent.putExtra("stream_url", radioItem.getFilePath());
-            intent.putExtra("play", b);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            if (b) {
-                FirebaseItemsDataSource.getInstance().addView(radioItem);
-                System.out.println("Viewed");
-                changeToggles();
+        holder.tb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean b = holder.tb.isChecked();
+                Intent intent = new Intent("play_song");
+                intent.putExtra("stream_name", radioItem.getItemName());
+                intent.putExtra("stream_url", radioItem.getFilePath());
+                intent.putExtra("stream_id" , radioItem.getUid());
+                intent.putExtra("play", b);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+
+                if (b) {
+                    FirebaseItemsDataSource.getInstance().addView(radioItem);
+                    System.out.println("Viewed");
+
+                }
+                changeToggles(radioItem.getUid());
 
             }
         });
+
 
         holder.shareFacebook.setOnClickListener((v)->{
             Intent intent = new Intent("share_facebook");
@@ -262,75 +228,34 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 
 
     //TODO : Still need to figure out why i need to press twice for it to work again.
-    private void changeToggles(){
+    private void changeToggles(String streamId){
         for (int i = 0; i < recyclerView.getChildCount(); i++) {
 
             RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+            if(holder != null) {
+                if (!holder.radioItem.getUid().equals(streamId)) {
+                    if(holder.tb.isChecked()) {
+                        holder.tb.setChecked(false);
+                        System.out.println("CHANGED STATE"+holder.radioItem.getItemName());
+                    }
+                    System.out.println("NEW");
+                }
+                else {
+                    if(!holder.tb.isChecked())
+                        holder.tb.setChecked(true);
 
-            if (MainScreen.simpleExoPlayer.getPlaybackState() == Player.STATE_READY && holder != null &&
-                    MainScreen.simpleExoPlayer.getCurrentTag() != holder.tvFileName.getText().toString()){
-                System.out.println("NEW IF");
+                    else{
+                        holder.tb.setChecked(false);
+                    }
+                }
 
-                holder.tb.setChecked(false);
-                notifyItemChanged(i);
             }
         }
+
+        notifyDataSetChanged();
+
     }
 
-//    public void updateLikes(){
-//        updateServer = new UpdateServer() {
-//            @Override
-//            public void updateLikes(RadioItem item) {
-//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
-//
-//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-//                    //holder.radioItem.getItemName()
-//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
-//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
-//
-//                        holder.tvLikes.setText(String.valueOf(item.getLikes()));
-//                        holder.tvViews.setText(String.valueOf(item.getViews()));
-//                        notifyItemChanged(i);
-//                        return;
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void updateComments(RadioItem item) {
-//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
-//
-//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-//                    //holder.radioItem.getItemName()
-//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
-//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
-//                        holder.tvComments.setText(String.valueOf(item.getComments()));
-//                        notifyItemChanged(i);
-//                        return;
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void updateViews(RadioItem item) {
-//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
-//
-//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-//                    //holder.radioItem.getItemName()
-//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
-//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
-//                        holder.tvViews.setText(String.valueOf(item.getViews()));
-//                        notifyItemChanged(i);
-//                        return;
-//                    }
-//                }
-//            }
-//
-//
-//            };
-//
-//        FirebaseItemsDataSource.getInstance().setUpdateLikes(updateServer);
-//    }
 
 //change 3
     @Override
@@ -434,45 +359,9 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             }
         }
     }
-//
-//    @Override
-//    public void refresh(List<RadioItem> favorites) {
-//
-//
-//            for (int i = 0; i < recyclerView.getChildCount(); i++) {
-//                int finalI = i;
-//                RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-//                //holder.radioItem.getItemName()
-//                if ((holder != null) && favorites.contains(holder.radioItem)){
-//                    System.out.println("Item Changed VIEWS---->");
-//
-//                    Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_red);
-//                    activity.runOnUiThread(()->{
-//                        holder.addFavorites.setImageDrawable(d);
-//
-//                        //                    notifyItemChanged(finalI);
-//                        notifyDataSetChanged();
-//                    });
-//                    return;
-//
-//                } else {
-//                    if (holder != null) {
-//                        Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_black24);
-////                    holder.addFavorites.setImageDrawable(d);
-//                        activity.runOnUiThread(() -> {
-//                            holder.addFavorites.setImageDrawable(d);
-//
-//                            //                    notifyItemChanged(finalI);
-//                            notifyDataSetChanged();
-//                        });
-//                    }
-//                }
-//            }
-//        }
 
 
-    class RadioViewHolder extends RecyclerView.ViewHolder implements RefreshFavorites
-    {
+    class RadioViewHolder extends RecyclerView.ViewHolder implements RefreshFavorites {
         ToggleButton tb;
         TextView tvFileName;
         TextView tvDuration;
@@ -514,6 +403,8 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 //            tvCloudID = itemView.findViewById(R.id.tvCloudID);
         }
 
+
+
         @Override
         public void refresh(List<RadioItem> favorites) {
             if(favorites.contains(radioItem)){
@@ -527,8 +418,107 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
                 activity.runOnUiThread(()->{
                     addFavorites.setImageDrawable(d);
 
-                });            }
+                });
+            }
         }
     }
 }
 
+
+
+
+
+
+//
+//    @Override
+//    public void refresh(List<RadioItem> favorites) {
+//
+//
+//            for (int i = 0; i < recyclerView.getChildCount(); i++) {
+//                int finalI = i;
+//                RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+//                //holder.radioItem.getItemName()
+//                if ((holder != null) && favorites.contains(holder.radioItem)){
+//                    System.out.println("Item Changed VIEWS---->");
+//
+//                    Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_red);
+//                    activity.runOnUiThread(()->{
+//                        holder.addFavorites.setImageDrawable(d);
+//
+//                        //                    notifyItemChanged(finalI);
+//                        notifyDataSetChanged();
+//                    });
+//                    return;
+//
+//                } else {
+//                    if (holder != null) {
+//                        Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_black24);
+////                    holder.addFavorites.setImageDrawable(d);
+//                        activity.runOnUiThread(() -> {
+//                            holder.addFavorites.setImageDrawable(d);
+//
+//                            //                    notifyItemChanged(finalI);
+//                            notifyDataSetChanged();
+//                        });
+//                    }
+//                }
+//            }
+//        }
+
+
+
+
+//    public void updateLikes(){
+//        updateServer = new UpdateServer() {
+//            @Override
+//            public void updateLikes(RadioItem item) {
+//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+//
+//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+//                    //holder.radioItem.getItemName()
+//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
+//
+//                        holder.tvLikes.setText(String.valueOf(item.getLikes()));
+//                        holder.tvViews.setText(String.valueOf(item.getViews()));
+//                        notifyItemChanged(i);
+//                        return;
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void updateComments(RadioItem item) {
+//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+//
+//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+//                    //holder.radioItem.getItemName()
+//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
+//                        holder.tvComments.setText(String.valueOf(item.getComments()));
+//                        notifyItemChanged(i);
+//                        return;
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void updateViews(RadioItem item) {
+//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
+//
+//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+//                    //holder.radioItem.getItemName()
+//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
+//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
+//                        holder.tvViews.setText(String.valueOf(item.getViews()));
+//                        notifyItemChanged(i);
+//                        return;
+//                    }
+//                }
+//            }
+//
+//
+//            };
+//
+//        FirebaseItemsDataSource.getInstance().setUpdateLikes(updateServer);
+//    }

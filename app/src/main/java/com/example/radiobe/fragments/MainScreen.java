@@ -86,15 +86,17 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            System.out.println("Got Broadcast");
             fileName = intent.getStringExtra("stream_name");
             filePath = intent.getStringExtra("stream_url");
             boolean play = intent.getBooleanExtra("play", false);
-            if (play)
-                loadDataToplayer(fileName, filePath);
+            System.out.println("Got Broadcast" + play);
 
-            else {
+            if (play) {
+                loadDataToplayer(fileName, filePath);
+                System.out.println("PLAY");
+            }else {
                 simpleExoPlayer.stop();
+                System.out.println("STOP");
             }
 
         }
