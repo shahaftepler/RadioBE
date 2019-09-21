@@ -217,7 +217,7 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
                     }
                 });
 
-                ref.child("comments").child(item.getUid()).addValueEventListener(new ValueEventListener() {
+                ref.child("comments").child(item.getUid()).orderByChild("creationDate").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() != null) {
@@ -231,6 +231,8 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
                                 item.addComment(snap.getValue(Comment.class));
                                 System.out.println("Comment added!");
                             }
+
+
 
                             initComments(item.getCommentsArray() , item , changeProgress);
 

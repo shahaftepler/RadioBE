@@ -13,7 +13,15 @@ public class Comment {
     long creationDate;
     String description;
     String uid;
+    Date date;
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
 //    public Comment(String user, long creationDate, String description) {
 //        this.user = user;
 //        this.creationDate = creationDate;
@@ -29,7 +37,9 @@ public class Comment {
         this.description = description;
         this.creationDate = creationDate;
         convertCreationDateToString(creationDate);
-    }
+        Date d = new Date(creationDate);
+        setDate(d);
+}
 //SimpleDateFormat s1 = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 //    SimpleDateFormat s2 = new SimpleDateFormat("ddMMyyyyHHmm");
 //    Date d = s1.parse("02/11/2012 23:11");

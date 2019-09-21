@@ -2,6 +2,8 @@ package com.example.radiobe.models;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -274,6 +276,19 @@ public class RadioItem {
     }
 
     public List<Comment> getCommentsArray() {
+
+//        Collections.sort(commentsArray, new Comparator<Comment>() {
+//            public int compare(Comment o1, Comment o2) {
+//                if (o1.getDate() == null || o2.getDate() == null)
+//                    return 0;
+//
+//                if(o1.getCreationDate() > o2.getCreationDate()) return -1;
+//                else if(o1.getCreationDate() < o2.getCreationDate()) return 1;
+//                else return 0;
+//            }
+//        });
+
+        Collections.reverse(commentsArray);
         return commentsArray;
     }
 
