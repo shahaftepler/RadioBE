@@ -131,23 +131,7 @@ public class Profile extends AppCompatActivity implements RefreshUserName {
             setAboutMe();
 
         }));
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                .setDisplayName("Jane Q. User")
-                .setPhotoUri(Uri.parse("https://example.com/jane-q-user/profile.jpg"))
-                .build();
-
-        assert user != null;
-        user.updateProfile(profileUpdates)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            System.out.println("User profile updated.");
-                        }
-                    }
-                });
     }
 
     private void setupInfo() {
@@ -162,8 +146,13 @@ public class Profile extends AppCompatActivity implements RefreshUserName {
             profileDescription.setText("Hello my name is " + CurrentUser.getInstance().getFirstName() + " nice to meet you");
 
         }
-        //todo: are we going to add description to the user registration? if so, get it from current user too.
-        profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
+
+        if(CurrentUser.getInstance().getBirthDate() != 0) {
+            //todo: are we going to add description to the user registration? if so, get it from current user too.
+            profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
+        } else {
+            profileBirthDay.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override

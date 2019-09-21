@@ -1,9 +1,12 @@
 package com.example.radiobe.registrations;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -24,18 +27,25 @@ import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.annotations.Nullable;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.IOException;
 
 //import com.facebook.FacebookSdk;
 //import com.facebook.appevents.AppEventsLogger;
@@ -59,6 +69,8 @@ public class Login extends AppCompatActivity {
     private boolean isLoggedIn;
     private GoogleSignInOptions googleSignInbuilder;
     boolean isUserInDatabase = false;
+    private DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+    private StorageReference storageRef = FirebaseStorage.getInstance().getReference();
 
 
     //CallbackManager callbackManager;
@@ -197,13 +209,16 @@ public class Login extends AppCompatActivity {
                     public void onComplete(Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            firebaseUser = firebaseAuth.getCurrentUser();
-                            updateUI(firebaseUser);
+                            FirebaseUser fbuser = FirebaseAuth.getInstance().getCurrentUser();
+                            if(fbuser != null) {
+                                System.out.println("*********************"+fbuser.getDisplayName());
+                                checkFacebookUserInDatabase(fbuser);
+                            }
                         } else {
                             // If sign in fails, display a message to the user.
                             Toast.makeText(Login.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-                            updateUI(null);
+//                            updateUI(null);
                         }
 
                     }
@@ -211,10 +226,95 @@ public class Login extends AppCompatActivity {
     }
 
 
-    private void updateUI(FirebaseUser myFirebaseUser) {
-//        etName.setText(myFirebaseUser.getEmail());
-        Intent intent = new Intent(this, MainScreen.class);
-        startActivity(intent);
+//    private void updateUI(FirebaseUser myFirebaseUser) {
+////        etName.setText(myFirebaseUser.getEmail());
+//        Intent intent = new Intent(this, MainScreen.class);
+//        startActivity(intent);
+//    }
+
+    private void checkFacebookUserInDatabase(FirebaseUser fbuser){
+        ref.child("users").child(fbuser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    CurrentUser.getInstance().setContext(getApplicationContext());
+                    CurrentUser.getInstance().createUser(fbuser.getUid(), () -> {
+                        Intent intent = new Intent(Login.this, MainScreen.class);
+                        startActivity(intent);
+                    });
+                } else {
+                    boolean fromFacebook = false;
+                    //write this user to data base he came from facebook.
+
+                        for (UserInfo userInfo : fbuser.getProviderData()) {
+                            if (userInfo.getProviderId().equals("facebook.com")) {
+                                Log.d("TAG", "User is signed in with Facebook");
+                                fromFacebook = true;
+                            }
+                        }
+
+                        User user = new User(fbuser.getEmail());
+                        if (fromFacebook) {
+                            String displayName = fbuser.getDisplayName();
+                            System.out.println("+++++++++++++++++" +displayName);
+                            String lastName = "";
+                            String firstName = "";
+                            if (displayName.split("\\w+").length > 1) {
+
+                                lastName = displayName.substring(displayName.lastIndexOf(" ") + 1);
+                                firstName = displayName.substring(0, displayName.lastIndexOf(' '));
+                            } else {
+                                firstName = displayName;
+                            }
+
+                            user.setFirstName(firstName);
+                            user.setLastName(lastName);
+                            user.setFireBaseID(firebaseUser.getUid());
+                            if(fbuser.getPhotoUrl() != null) {
+//                            user.setProfileImage(firebaseUser.getPhotoUrl());
+                                storageRef.child("profile").child(fbuser.getUid()).putFile(fbuser.getPhotoUrl())
+                                        .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+
+                                                if (!task.isSuccessful()) {
+                                                    System.out.println("WASN'T ABLE TO");
+                                                }
+
+                                                //continue even if task is not successful. worst case, no photo.
+                                                ref.child("users").child(fbuser.getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        CurrentUser.getInstance().setContext(getApplicationContext());
+                                                        CurrentUser.getInstance().createUser(fbuser.getUid(), () -> {
+                                                            Intent intent = new Intent(Login.this, MainScreen.class);
+                                                            startActivity(intent);
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        });
+                            } else{
+                                ref.child("users").child(fbuser.getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        CurrentUser.getInstance().setContext(getApplicationContext());
+                                        CurrentUser.getInstance().createUser(fbuser.getUid(), () -> {
+                                            Intent intent = new Intent(Login.this, MainScreen.class);
+                                            startActivity(intent);
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override

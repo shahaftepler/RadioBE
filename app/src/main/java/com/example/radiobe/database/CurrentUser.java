@@ -1,17 +1,27 @@
 package com.example.radiobe.database;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.example.radiobe.R;
+import com.example.radiobe.generalScreens.Profile;
 import com.example.radiobe.models.NotificationItem;
 import com.example.radiobe.models.RadioItem;
 import com.example.radiobe.models.User;
 import com.google.android.exoplayer2.ui.PlayerNotificationManager;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -19,7 +29,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -220,6 +233,7 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
                     });
 
                 }
+
                 t.scheduleAtFixedRate(new TimerTask() {
                     @Override
                     public void run() {

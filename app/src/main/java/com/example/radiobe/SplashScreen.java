@@ -9,8 +9,11 @@ import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
 import com.example.radiobe.database.ChangeProgress;
+import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.database.FireBaseParseJson;
+import com.example.radiobe.fragments.MainScreen;
 import com.facebook.AccessToken;
+import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -30,6 +33,7 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
         progressBar = findViewById(R.id.progressBar);
+
 
         ImageView gifImageView = findViewById(R.id.ivLoadingGif);
         Glide.with(this).
@@ -54,9 +58,20 @@ public class SplashScreen extends AppCompatActivity {
 //        );
 
         new FireBaseParseJson(() -> {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
+            firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (firebaseUser != null) {   //TODO : try to understand why it didn't work from the splash screen itself.
+                System.out.println("URLLLLLLLLLLLLLLLLLLLLL"+firebaseUser.getPhotoUrl());
+                CurrentUser.getInstance().setContext(getApplicationContext());
+                CurrentUser.getInstance().createUser(firebaseUser.getUid(), ()->{
+                    Intent intent = new Intent(this, MainScreen.class);
+                    startActivity(intent);
+                }); // todo: create a listener for that.
+
+            } else {
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
         }, new ChangeProgress() {
             @Override
             public void change() {
