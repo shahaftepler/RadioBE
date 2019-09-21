@@ -57,8 +57,6 @@ public class Login extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
     private EditText etName;
     private EditText etPassword;
-    private CheckBox cbRemember;
-    private TextView tvForgotPassword;
     private Button btnLogin;
     private Button btnSignUp;
     private Button btnInstagram;
@@ -310,8 +308,6 @@ public class Login extends AppCompatActivity {
     private void setupView() {
         etName = findViewById(R.id.etName);
         etPassword = findViewById(R.id.etPassword);
-        cbRemember = findViewById(R.id.cbRemember);
-        tvForgotPassword = findViewById(R.id.tvForgotPassword);
         btnLogin = findViewById(R.id.btnLogin);
         btnSignUp = findViewById(R.id.btnSignUp);
         loginButtonFacebook = findViewById(R.id.login_button);

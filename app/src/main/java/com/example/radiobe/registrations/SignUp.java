@@ -6,6 +6,9 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -52,6 +55,8 @@ public class SignUp extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up);
 
         findView();
+
+
 
         btnSignUp.setOnClickListener(v -> {
 
@@ -189,6 +194,23 @@ public class SignUp extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         etPassAgain = findViewById(R.id.etPassAgain);
         btnSignUp = findViewById(R.id.btnSignUp);
+
+        View view = findViewById(R.id.container);
+
+        if(view != null) {
+            view.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    if(getCurrentFocus() != null) {
+                        if (imm.isAcceptingText()) { // verify if the soft keyboard is open
+                            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                        }
+                    }
+                    return false;
+                }
+            });
+        }
     }
 }
 

@@ -23,7 +23,7 @@ public class DownloadFacebookProfileImage extends AsyncTask<Void, Void, Bitmap> 
     @Override
     protected Bitmap doInBackground(Void... voids) {
         Bitmap bitmap = null;
-        Uri uri = Uri.parse(uriString);
+        Uri uri = Uri.parse(uriString+"?type=large");
         try {
 
 //            URL imgUrl = new URL("https://graph.facebook.com/{user-id}/picture?type=large");

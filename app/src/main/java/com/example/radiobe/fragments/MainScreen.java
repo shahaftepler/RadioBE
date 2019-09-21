@@ -68,7 +68,7 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
     String fileName;
     String filePath;
     private PlayerView playerView;
-    public static SimpleExoPlayer simpleExoPlayer;
+    public SimpleExoPlayer simpleExoPlayer;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
