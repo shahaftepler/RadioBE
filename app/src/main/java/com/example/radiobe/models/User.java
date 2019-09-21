@@ -2,6 +2,7 @@ package com.example.radiobe.models;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.text.format.DateFormat;
 
@@ -30,6 +31,25 @@ public class User {
     //    private Date birthDate;
     private long birthDate;
     String description;
+
+    String facebookURL;
+
+    public String getFacebookURL() {
+        return facebookURL;
+    }
+
+    public void setFacebookURL(String facebookURL) {
+        this.facebookURL = facebookURL;
+    }
+    //    Uri facebookURL;
+//
+//    public Uri getFacebookURL() {
+//        return facebookURL;
+//    }
+//
+//    public void setFacebookURL(Uri facebookURL) {
+//        this.facebookURL = facebookURL;
+//    }
 
     public User(String name, String lastName, String email, long birthDate , String birthDateString, String password, String fireBaseID) {
         this.firstName = name;

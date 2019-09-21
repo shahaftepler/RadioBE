@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -34,6 +35,8 @@ public class SplashScreen extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
         progressBar = findViewById(R.id.progressBar);
 
+        LoginManager.getInstance().logOut();
+        FirebaseAuth.getInstance().signOut();
 
         ImageView gifImageView = findViewById(R.id.ivLoadingGif);
         Glide.with(this).
@@ -60,6 +63,7 @@ public class SplashScreen extends AppCompatActivity {
         new FireBaseParseJson(() -> {
             firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
             if (firebaseUser != null) {   //TODO : try to understand why it didn't work from the splash screen itself.
+                System.out.println("DISPLAY"+firebaseUser.getDisplayName());
                 System.out.println("URLLLLLLLLLLLLLLLLLLLLL"+firebaseUser.getPhotoUrl());
                 CurrentUser.getInstance().setContext(getApplicationContext());
                 CurrentUser.getInstance().createUser(firebaseUser.getUid(), ()->{
@@ -128,13 +132,4 @@ public class SplashScreen extends AppCompatActivity {
 //}
 
 
-//     TODO: try to understand why it didn't work here in the jsonToDatabase execution.
-//              firebaseAuth = FirebaseAuth.getInstance();
-//            firebaseUser = firebaseAuth.getCurrentUser();
-//            if (firebaseUser != null) {
-//                checkFacebookUserIsLoggedIn();
-//                Intent intent = new Intent(this, MainScreen.class);
-//                startActivity(intent);
-//                finish();
-//            }
 

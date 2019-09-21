@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 import com.example.radiobe.R;
 import com.example.radiobe.database.CurrentUser;
+import com.example.radiobe.database.DownloadFacebookProfileImage;
+import com.example.radiobe.database.FacebookProfilePictureDownloadedListener;
 import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.User;
 import com.facebook.AccessToken;
@@ -269,32 +271,13 @@ public class Login extends AppCompatActivity {
 
                             user.setFirstName(firstName);
                             user.setLastName(lastName);
-                            user.setFireBaseID(firebaseUser.getUid());
+                            user.setFireBaseID(fbuser.getUid());
                             if(fbuser.getPhotoUrl() != null) {
-//                            user.setProfileImage(firebaseUser.getPhotoUrl());
-                                storageRef.child("profile").child(fbuser.getUid()).putFile(fbuser.getPhotoUrl())
-                                        .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                user.setFacebookURL(fbuser.getPhotoUrl().toString());
+                                System.out.println(user.getFacebookURL());
+                                //todo: download the photo to the phone and then upload the uri.
+                            }
 
-                                                if (!task.isSuccessful()) {
-                                                    System.out.println("WASN'T ABLE TO");
-                                                }
-
-                                                //continue even if task is not successful. worst case, no photo.
-                                                ref.child("users").child(fbuser.getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                    @Override
-                                                    public void onSuccess(Void aVoid) {
-                                                        CurrentUser.getInstance().setContext(getApplicationContext());
-                                                        CurrentUser.getInstance().createUser(fbuser.getUid(), () -> {
-                                                            Intent intent = new Intent(Login.this, MainScreen.class);
-                                                            startActivity(intent);
-                                                        });
-                                                    }
-                                                });
-                                            }
-                                        });
-                            } else{
                                 ref.child("users").child(fbuser.getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
@@ -305,7 +288,7 @@ public class Login extends AppCompatActivity {
                                         });
                                     }
                                 });
-                            }
+
                         }
                     }
                 }

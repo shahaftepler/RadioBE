@@ -53,10 +53,12 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     public void onBindViewHolder(@NonNull CommentsViewHolder holder, int position) {
         Comment comment = commentList.get(position);
         User user = commentSenders.get(comment.getUid());
-        holder.tvUserNameComment.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
-        holder.imageUserComment.setImageBitmap(user.getProfileImage());
-        holder.tvCommentText.setText(comment.getDescription());
-        holder.tvCommentTime.setText(comment.getCreationDateString());
+        if(user != null) {
+            holder.tvUserNameComment.setText(String.format("%s %s", user.getFirstName(), user.getLastName()));
+            holder.imageUserComment.setImageBitmap(user.getProfileImage());
+            holder.tvCommentText.setText(comment.getDescription());
+            holder.tvCommentTime.setText(comment.getCreationDateString());
+        }
     }
 
     @Override
