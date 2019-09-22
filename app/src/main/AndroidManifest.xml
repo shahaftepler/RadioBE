@@ -16,12 +16,12 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ic_radio_red_300_48dp"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar"
-        android:fullBackupContent="true">
+        android:fullBackupContent="true"
+        android:icon="@drawable/ic_radio_red_300_48dp">
         <activity
             android:name=".generalScreens.ActivityRadio"
             android:label="@string/title_activity_radio"

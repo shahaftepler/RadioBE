@@ -1,15 +1,7 @@
 package com.example.radiobe.models;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.net.Uri;
-import android.os.Build;
 import android.text.format.DateFormat;
-
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +18,11 @@ public class User {
     private String _rev;
     private String fireBaseID;
     private List<String> favoritesID;
-    Bitmap profileImage;
-    Bitmap coverImage;
-    //    private Date birthDate;
+    private Bitmap profileImage;
+    private Bitmap coverImage;
     private long birthDate;
-    String description;
-
-    String facebookURL;
+    private String description;
+    private String facebookURL;
 
     public String getFacebookURL() {
         return facebookURL;
@@ -41,15 +31,6 @@ public class User {
     public void setFacebookURL(String facebookURL) {
         this.facebookURL = facebookURL;
     }
-    //    Uri facebookURL;
-//
-//    public Uri getFacebookURL() {
-//        return facebookURL;
-//    }
-//
-//    public void setFacebookURL(Uri facebookURL) {
-//        this.facebookURL = facebookURL;
-//    }
 
     public User(String name, String lastName, String email, long birthDate , String birthDateString, String password, String fireBaseID) {
         this.firstName = name;
@@ -62,7 +43,6 @@ public class User {
     }
 
     //ctor with first name , last name , email , date of birth (being converted to string inside) , fire base id , no pass
-
     public User(String fireBaseID , String firstName , String lastName , String email , long birthDate){
         this.fireBaseID = fireBaseID;
         this.firstName = firstName;

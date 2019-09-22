@@ -81,8 +81,8 @@
     <string name="desc_edit_profile_details">edit profile details</string>
     <string name="string_change_email">+@string/change_email</string>
     <string name="change_email">Change Email</string>
-    <string name="new_password">New password...</string>
-    <string name="confirm_new_password">Confirm new password...</string>
+    <string name="new_password">New password…</string>
+    <string name="confirm_new_password">Confirm new password…</string>
     <string name="the_comment_of_the_user">User comment</string>
     <string name="user_name">User name</string>
     <string name="comments">Comments</string>

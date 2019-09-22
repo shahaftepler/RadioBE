@@ -77,7 +77,16 @@
     <string name="description_about_me">קצת עלי</string>
     <string name="about_me">קצת עלי</string>
     <string name="change_the_about_me">שינוי קצת עלי</string>
-
+    <string name="string_change_email">שנה אימייל</string>
+    <string name="change_email">שנה אימייל</string>
+    <string name="new_password">סיסמה חדשה…</string>
+    <string name="confirm_new_password">אמת סיסמה חדשה…</string>
+    <string name="email">מייל</string>
+    <string name="full_name">שם מלא</string>
+    <string name="image_of_profile_in_the_toolbar">Image Of profile in the toolBar</string>
+    <string name="profile">פרופיל</string>
+    <string name="logout_in_toolbar">logout in toolbar</string>
+    <string name="tell_us_a_little_about_yourself">ספר לנו על עצמך</string>
 
 
 </resources>

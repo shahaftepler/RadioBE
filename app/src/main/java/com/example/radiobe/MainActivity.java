@@ -1,21 +1,13 @@
 package com.example.radiobe;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toolbar;
-
 import com.bumptech.glide.Glide;
-import com.example.radiobe.database.CurrentUser;
-import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.generalScreens.ActivityRadio;
 import com.example.radiobe.registrations.Login;
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,7 +15,6 @@ public class MainActivity extends AppCompatActivity {
     private Button btnLogin;
     FirebaseUser firebaseUser;
 
-    //new change test - deleted func
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

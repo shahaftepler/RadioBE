@@ -3,7 +3,6 @@ package com.example.radiobe.models;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ public class RadioItem {
     private String durationString;
     private String vodName;
     private String mUid;
-    Boolean isFavorite;
+    private Boolean isFavorite;
 
     public Boolean isFavorite() {
         return isFavorite;
@@ -277,17 +276,6 @@ public class RadioItem {
 
     public List<Comment> getCommentsArray() {
 
-//        Collections.sort(commentsArray, new Comparator<Comment>() {
-//            public int compare(Comment o1, Comment o2) {
-//                if (o1.getDate() == null || o2.getDate() == null)
-//                    return 0;
-//
-//                if(o1.getCreationDate() > o2.getCreationDate()) return -1;
-//                else if(o1.getCreationDate() < o2.getCreationDate()) return 1;
-//                else return 0;
-//            }
-//        });
-
         Collections.reverse(commentsArray);
         return commentsArray;
     }
@@ -323,10 +311,6 @@ public class RadioItem {
     static int count = 0;
     public static RadioItem getItemFromHashMap(HashMap<String, Object> snapshot){
         count++;
-//        int comments = (int) snapshot.get("comments");
-//        int likes = (Integer) snapshot.get("likes");
-//        int resImage = (Integer) snapshot.get("resImage");
-//        int views = (Integer) snapshot.get("views");
         long creationDate = (long) snapshot.get("creationDate");
         String creationDateString = (String) snapshot.get("creationDateString");
         long duration = (long) snapshot.get("duration");
@@ -338,7 +322,6 @@ public class RadioItem {
 
         System.out.println("NEW STATIC METHOD---> "+String.valueOf(count)+ itemName);
         return  new RadioItem(duration, vodName, itemName, creationDate, creationDateString, filePath,durationString, mUid);
-//        return new RadioItem(duration, creationDateString, likes, views, comments, resImage , null, itemName, filePath, durationString);
     }
 
 
@@ -358,10 +341,3 @@ public class RadioItem {
                 '}';
     }
 }
-
-//1) boolean isFavorite in model
-//2) listener in radio adapter
-//3) update boolean in change favorites
-//4) change ui in listener method
-
-// maybe only listener?

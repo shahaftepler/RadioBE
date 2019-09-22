@@ -1,19 +1,15 @@
 package com.example.radiobe.models;
 
 import android.text.format.DateFormat;
-
-import org.threeten.bp.LocalDate;
-import org.threeten.bp.ZoneId;
-
 import java.util.Date;
 
 public class Comment {
-    String user;
-    String creationDateString;
-    long creationDate;
-    String description;
-    String uid;
-    Date date;
+    private String user;
+    private String creationDateString;
+    private long creationDate;
+    private String description;
+    private String uid;
+    private Date date;
 
     public Date getDate() {
         return date;
@@ -22,12 +18,6 @@ public class Comment {
     public void setDate(Date date) {
         this.date = date;
     }
-//    public Comment(String user, long creationDate, String description) {
-//        this.user = user;
-//        this.creationDate = creationDate;
-//        this.description = description;
-//        this.creationDateString =  DateFormat.format("dd/MM/yyyy", new Date(creationDate)).toString();
-//    }
 
     public Comment(){}
 
@@ -40,15 +30,6 @@ public class Comment {
         Date d = new Date(creationDate);
         setDate(d);
 }
-//SimpleDateFormat s1 = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-//    SimpleDateFormat s2 = new SimpleDateFormat("ddMMyyyyHHmm");
-//    Date d = s1.parse("02/11/2012 23:11");
-//    String s3 = s2.format(d);
-//    System.out.println(s3);
-//    long l = Long.parseLong(s3);
-//    System.out.println(l);
-
-
 
     public String getUid() {
         return uid;
@@ -75,12 +56,12 @@ public class Comment {
         return creationDateString;
     }
 
-    public void setCreationDateString(String creationDateString) {
+    private void setCreationDateString(String creationDateString) {
         this.creationDateString = creationDateString;
 
     }
 
-    public void convertCreationDateToString(long creationDate){
+    private void convertCreationDateToString(long creationDate){
         String newDate = DateFormat.format("dd/MM/yyyy", new Date(creationDate)).toString();
         setCreationDateString(newDate);
     }
