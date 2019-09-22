@@ -28,36 +28,27 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -85,14 +76,12 @@ public class Profile extends AppCompatActivity implements RefreshUserName {
     private TextView email;
     private TextView profileDescription;
     private TextView profileBirthDay;
-    private TextView descriptionTitle;
     //dialog
     private EditText editDialogName;
     private EditText editDialogLastName;
-    //    private EditText editDialogDescription;
-//    private EditText editEmail;
     private EditText editPassword;
     private EditText editConfirmPassword;
+
     private View viewForAlert;
     private View viewForAlertAboutMe;
     private String uid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
@@ -137,17 +126,17 @@ public class Profile extends AppCompatActivity implements RefreshUserName {
     private void setupInfo() {
         profileImage.setImageBitmap(CurrentUser.getInstance().getProfileImage());
         coverImage.setImageBitmap(CurrentUser.getInstance().getCoverImage());
-        profileName.setText(CurrentUser.getInstance().getFirstName() + " " + CurrentUser.getInstance().getLastName());
+        profileName.setText(String.format("%s %s", CurrentUser.getInstance().getFirstName(), CurrentUser.getInstance().getLastName()));
         email.setText(CurrentUser.getInstance().getEmail());
 
         if (CurrentUser.getInstance().getDescription() != null) {
             profileDescription.setText(CurrentUser.getInstance().getDescription());
         } else {
-            profileDescription.setText("Hello my name is " + CurrentUser.getInstance().getFirstName() + " nice to meet you");
+            profileDescription.setText(String.format("Hello my name is %s nice to meet you", CurrentUser.getInstance().getFirstName()));
 
         }
 
-        if(CurrentUser.getInstance().getBirthDate() != 0) {
+        if (CurrentUser.getInstance().getBirthDate() != 0) {
             //todo: are we going to add description to the user registration? if so, get it from current user too.
             profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
         } else {
@@ -162,11 +151,7 @@ public class Profile extends AppCompatActivity implements RefreshUserName {
         switch (requestCode) {
             case PICK_COVER_IMAGE:
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
-                    //get data as uri
                     filePath = data.getData();
-                    //set the profileImage to the uri data. transferred it to onSuccess of the upload, cause otherwise it doesn't worth it.
-//                    coverImage.setImageURI(filePath);
-                    //upload the image to firebase storage im cover/ folder
                     uploadImage("cover", coverImage);
                 } else {
                     Toast.makeText(this, "Something wasn't done right.", Toast.LENGTH_SHORT).show();
@@ -175,11 +160,7 @@ public class Profile extends AppCompatActivity implements RefreshUserName {
                 break;
             case PICK_PROFILE_IMAGE:
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
-                    //get data as uri
                     filePath = data.getData();
-                    //set the profileImage to the uri data
-//                    profileImage.setImageURI(filePath);
-                    //upload the image to firebase storage im profile/ folder
                     uploadImage("profile", profileImage);
                 } else {
                     Toast.makeText(this, "Something wasn't done right.", Toast.LENGTH_SHORT).show();
@@ -207,25 +188,19 @@ public class Profile extends AppCompatActivity implements RefreshUserName {
 
             StorageReference ref = storageReference.child(folder).child(uid);
             ref.putFile(filePath)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            //only after the photo was uploaded successfully to the server im setting in the UI
-                            imagePlace.setImageURI(filePath);
+                    .addOnSuccessListener(taskSnapshot -> {
+                        //only after the photo was uploaded successfully to the server im setting in the UI
+                        imagePlace.setImageURI(filePath);
 
-                            //set the current user photo too.
-                            updateCurrentUserPhotoChange(folder);
+                        //set the current user photo too.
+                        updateCurrentUserPhotoChange(folder);
 
-                            progressDialog.dismiss();
-                            Toast.makeText(Profile.this, "Your photo was uploaded successfully!", Toast.LENGTH_LONG).show();
-                        }
+                        progressDialog.dismiss();
+                        Toast.makeText(Profile.this, "Your photo was uploaded successfully!", Toast.LENGTH_LONG).show();
                     })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            progressDialog.dismiss();
-                            Toast.makeText(Profile.this, "Failed " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
+                    .addOnFailureListener(e -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(Profile.this, "Failed " + e.getMessage(), Toast.LENGTH_LONG).show();
                     })
                     .addOnProgressListener(taskSnapshot -> {
                         double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
@@ -320,23 +295,19 @@ public class Profile extends AppCompatActivity implements RefreshUserName {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(CurrentUser.getInstance().getBirthDate()));
         datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH), new DatePicker.OnDateChangedListener() {
-                    @Override
-                    public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                calendar.get(Calendar.DAY_OF_MONTH), (view, year, monthOfYear, dayOfMonth) -> {
 
-                        Calendar dateOfBirth = Calendar.getInstance();
-                        int dayOfYear = dateOfBirth.DAY_OF_YEAR;
-                        dateOfBirth.set(year, monthOfYear, dayOfMonth, 0, 0, 0);
-                        dateOfBirth.set(Calendar.MILLISECOND, 0);
+                    Calendar dateOfBirth = Calendar.getInstance();
+                    dateOfBirth.set(year, monthOfYear, dayOfMonth, 0, 0, 0);
+                    dateOfBirth.set(Calendar.MILLISECOND, 0);
 
-                        Calendar minAdultAge = Calendar.getInstance();
-                        minAdultAge.add(Calendar.YEAR , -16);
-                        if(minAdultAge.before(dateOfBirth)){
-                            Toast.makeText(Profile.this, "You must be over 16 years old to use Radio BE", Toast.LENGTH_SHORT).show();
-                            datePicker.updateDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                                    calendar.get(Calendar.DAY_OF_MONTH));
+                    Calendar minAdultAge = Calendar.getInstance();
+                    minAdultAge.add(Calendar.YEAR, -16);
+                    if (minAdultAge.before(dateOfBirth)) {
+                        Toast.makeText(Profile.this, "You must be over 16 years old to use Radio BE", Toast.LENGTH_SHORT).show();
+                        datePicker.updateDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                                calendar.get(Calendar.DAY_OF_MONTH));
 
-                        }
                     }
                 });
 
@@ -349,616 +320,312 @@ public class Profile extends AppCompatActivity implements RefreshUserName {
 
 
         positiveButton.setOnClickListener((v) -> {
-                    String name = editDialogName.getText().toString();
-                    String lastName = editDialogLastName.getText().toString();
-                    String password = editPassword.getText().toString();
-                    String confirmPassword = editConfirmPassword.getText().toString();
-                    Calendar dateOfBirth = Calendar.getInstance();
-                    dateOfBirth.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth(), 0, 0, 0);
-                    dateOfBirth.set(Calendar.MILLISECOND, 0);
-
-
-            //if no changes, dismiss dialog
-                    if (checkForChanges(name, lastName, dateOfBirth, password, confirmPassword)) {
-                        System.out.println("IN NEW IF ???");
-                        Toast.makeText(this, "No changes were made!", Toast.LENGTH_SHORT).show();
-                        alert.dismiss();
-
-                    }
-
-                    // pass and cofirm empty
-
-                    if (password.length() < 1 && confirmPassword.length() < 1) {
-
-                        if (name.length() < 1) {
-                            editDialogName.setError("Your name must be longer than 0 characters");
-                        } else if(!name.equals(CurrentUser.getInstance().getFirstName())){
-                            if(!editedDetails.contains(FIRST_NAME))
-                                editedDetails.add(FIRST_NAME);
-                        }
-
-                        if (lastName.length() < 1) {
-                            editDialogLastName.setError("Your last name must be longer than 0 characters");
-                        } else if(!lastName.equals(CurrentUser.getInstance().getLastName())){
-                            if(!editedDetails.contains(LAST_NAME))
-                                editedDetails.add(LAST_NAME);
-                        }
-
-                        if(dateOfBirth.getTimeInMillis() != CurrentUser.getInstance().getBirthDate()){
-                            if(!editedDetails.contains(DATE_OF_BIRTH))
-                                editedDetails.add(DATE_OF_BIRTH);
-                        }
-
-
-                        if (editDialogName.getError() != null || editDialogLastName.getError() != null) {
-                            Toast.makeText(Profile.this, "Check Errors", Toast.LENGTH_SHORT).show();
-
-                        } else {
-
-                            User user = new User (CurrentUser.getInstance().getFireBaseID() , name , lastName , CurrentUser.getInstance().getEmail(), dateOfBirth.getTimeInMillis());
-//                            User user = new User(name, lastName, CurrentUser.getInstance().getEmail(), dateOfBirth.getTimeInMillis(), CurrentUser.getInstance().getBirthDateString(), null, CurrentUser.getInstance().getFireBaseID());
-                            ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    CurrentUser.getInstance().loadDetailsFromMap();
-//                                    profileName.setText(CurrentUser.getInstance().getFirstName() + " " + CurrentUser.getInstance().getLastName());
-//                                    profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
-                                    alert.dismiss();
-                                }
-                            });
-//                            CurrentUser.getInstance().loadDetailsFromMap();
-//                            profileName.setText(CurrentUser.getInstance().getFirstName() + " " + CurrentUser.getInstance().getLastName());
-
-
-
-                            if(editedDetails.size() > 0) {
-                                StringBuilder message = new StringBuilder();
-                                for (String editedDetail : editedDetails) {
-                                    message.append(editedDetail);
-                                }
-                                Toast.makeText(this, "You have changed your "+message+"successfully!", Toast.LENGTH_SHORT).show();
-
-                            }
-
-//
-//                            profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
-//                            alert.dismiss();
-                        }
-                    } else {
-
-                        //not empty and equal -- V
-                        if (password.equals(confirmPassword)) {
-
-                            //name and last
-                            if (name.length() < 1) {
-                                editDialogName.setError("Your name must be longer than 0 characters");
-                            } else if(!name.equals(CurrentUser.getInstance().getFirstName())){
-                                if(!editedDetails.contains(FIRST_NAME))
-                                    editedDetails.add(FIRST_NAME);
-                            }
-
-                            if (lastName.length() < 1) {
-                                editDialogLastName.setError("Your last name must be longer than 0 characters");
-                            } else if(!lastName.equals(CurrentUser.getInstance().getLastName())){
-                                if(!editedDetails.contains(LAST_NAME))
-                                    editedDetails.add(LAST_NAME);
-                            }
-
-                            if(dateOfBirth.getTimeInMillis() != CurrentUser.getInstance().getBirthDate()){
-                                if(!editedDetails.contains(DATE_OF_BIRTH))
-                                    editedDetails.add(DATE_OF_BIRTH);
-                            }
-
-
-
-                            if (editDialogName.getError() == null && editDialogLastName.getError() == null) {
-
-
-                                //updade pass
-                                FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                                firebaseUser.updatePassword(password).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            editedDetails.add(PASSWORD);
-//                                            Toast.makeText(Profile.this, "Your password was changed successfully!", Toast.LENGTH_SHORT).show();
-//                                            User user = new User(name, lastName, CurrentUser.getInstance().getEmail(), CurrentUser.getInstance().getBirthDate(), CurrentUser.getInstance().getBirthDateString(), null, CurrentUser.getInstance().getFireBaseID());
-
-                                            User user = new User (CurrentUser.getInstance().getFireBaseID() , name , lastName , CurrentUser.getInstance().getEmail(), dateOfBirth.getTimeInMillis());
-
-                                            ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    CurrentUser.getInstance().loadDetailsFromMap();
-//                                                    profileName.setText(CurrentUser.getInstance().getFirstName() + " " + CurrentUser.getInstance().getLastName());
-//                                                    profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
-                                                    alert.dismiss();
-                                                }
-                                            });
-
-
-                                            if(editedDetails.size() > 0) {
-                                                StringBuilder message = new StringBuilder();
-                                                for (String editedDetail : editedDetails) {
-                                                    message.append(editedDetail);
-                                                }
-                                                Toast.makeText(Profile.this, "You have changed the following details: "+message, Toast.LENGTH_SHORT).show();
-
-                                            }
-
-
-//                                            CurrentUser.getInstance().loadDetailsFromMap();
-//                                            profileName.setText(CurrentUser.getInstance().getFirstName() + " " + CurrentUser.getInstance().getLastName());
-//                                            profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
-//                                            alert.dismiss();
-                                        } else {
-                                            System.out.println("WEIRD");
-                                            try {
-                                                throw task.getException();
-                                            } catch (FirebaseAuthWeakPasswordException e) {
-                                                editPassword.setError("הסיסמה חלשה מדי, אנא הכנס סיסמה עם 6 תווים ומעלה");
-                                                editPassword.requestFocus();
-                                                System.out.println("WEAK PASS");
-                                            } catch (FirebaseAuthRecentLoginRequiredException e) {
-                                                editPassword.setError("Re-confirmation of your details is required");
-                                                AlertDialog.Builder builderApprove = new AlertDialog.Builder(Profile.this);
-                                                builderApprove.setTitle("Re-confirmation Details");
-                                                builderApprove.setMessage("Please re-confirm your soon to be changed details");
-                                                View newViewForAlert = LayoutInflater.from(Profile.this).inflate(R.layout.change_email_dialog, null);
-                                                EditText authEmail = newViewForAlert.findViewById(R.id.editEmailText);
-                                                EditText authPassword = newViewForAlert.findViewById(R.id.editPasswordText);
-                                                builderApprove.setPositiveButton("Done", (d, v) -> {
-
-                                                    AuthCredential credential = EmailAuthProvider.getCredential(authEmail.getText().toString(), authPassword.getText().toString());
-                                                    firebaseUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                        @Override
-                                                        public void onSuccess(Void aVoid) {
-                                                            firebaseUser.updatePassword(password).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                    if (task.isSuccessful()) {
-                                                                        System.out.println("PASS SUPPOSE TO CHANGE");
-                                                                        editPassword.setError(null);
-                                                                        User user = new User (CurrentUser.getInstance().getFireBaseID() , name , lastName , CurrentUser.getInstance().getEmail(), dateOfBirth.getTimeInMillis());
-                                                                        ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap());
-                                                                        editedDetails.add(PASSWORD);
-
-
-                                                                        if(editedDetails.size() > 0) {
-                                                                            StringBuilder message = new StringBuilder();
-                                                                            for (String editedDetail : editedDetails) {
-                                                                                message.append(editedDetail);
-                                                                            }
-                                                                            Toast.makeText(Profile.this, "You have changed the following details: "+message, Toast.LENGTH_SHORT).show();
-
-                                                                        }
-
-                                                                        CurrentUser.getInstance().loadDetailsFromMap();
-//                                                                        profileName.setText(CurrentUser.getInstance().getFirstName() + " " + CurrentUser.getInstance().getLastName());
-//                                                                        profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
-                                                                        alert.dismiss();
-                                                                    } else {
-                                                                        try {
-                                                                            throw task.getException();
-                                                                        } catch (FirebaseAuthWeakPasswordException e) {
-                                                                            editPassword.setError("הסיסמה חלשה מדי, אנא הכנס סיסמה עם 6 תווים ומעלה");
-                                                                            editPassword.requestFocus();
-                                                                        } catch (Exception ex) {
-                                                                            System.out.println(ex.getMessage());
-                                                                        }
-                                                                    }
-                                                                }
-                                                            });
-
-                                                        }
-                                                    }).addOnFailureListener(new OnFailureListener() {
-                                                        @Override
-                                                        public void onFailure(@NonNull Exception e) {
-                                                            Toast.makeText(Profile.this, "Re-authentication failed!", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    });
-
-
-                                                });
-
-                                                builderApprove.setView(newViewForAlert);
-                                                builderApprove.show();
-                                            } catch (Exception ex) {
-                                                System.out.println(ex.getMessage());
-                                            }
-                                        }
-                                    }
-
-                                });
-
-                            } else{
-                                Toast.makeText(Profile.this, "Check Errors", Toast.LENGTH_SHORT).show();
-
-                            }
-
-                        } else{
-                            //not empty and not equal
-                            editConfirmPassword.setError("Your passwords must be the same");
-                        }
-                    }
-
-                        });
-
-                        negativeButton.setOnClickListener((v) -> {
-                            alert.dismiss();
-                            Toast.makeText(this, "No change were made!", Toast.LENGTH_SHORT).show();
-                        });
-
-                    }
-
-                    public void setAboutMe () {
-
-                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                        builder.setTitle("Enter your new About Me");
-                        viewForAlertAboutMe = LayoutInflater.from(this).inflate(R.layout.dialog_about_me, null);
-                        dialogAboutMeEditText = viewForAlertAboutMe.findViewById(R.id.edit_about_me);
-                        positiveButton = viewForAlertAboutMe.findViewById(R.id.positiveButton);
-                        negativeButton = viewForAlertAboutMe.findViewById(R.id.negativeButton);
-
-                        viewForAlertAboutMe.setOnTouchListener(new View.OnTouchListener() {
-                            @Override
-                            public boolean onTouch(View v, MotionEvent event) {
-                                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-
-                                if (imm.isAcceptingText()) { // verify if the soft keyboard is open
-                                    imm.hideSoftInputFromWindow(viewForAlertAboutMe.getWindowToken(), 0);
-                                }
-                                return false;
-                            }
-                        });
-                        builder.setView(viewForAlertAboutMe);
-                        builder.setIcon(R.drawable.pan_edit);
-                        AlertDialog alertDialog = builder.create();
-
-                        alertDialog.show();
-
-
-                        if (CurrentUser.getInstance().getDescription() != null) {
-                            dialogAboutMeEditText.setText(CurrentUser.getInstance().getDescription());
-                        } else {
-                            dialogAboutMeEditText.setText("Hello my name is " + CurrentUser.getInstance().getFirstName() + " nice to meet you");
-                        }
-
-                        dialogAboutMeEditText.addTextChangedListener(new TextWatcher() {
-                            @Override
-                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                            }
-
-                            @Override
-                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                                if (charSequence.length() >= 300) {
-                                    dialogAboutMeEditText.setError("Max limit 300 characters");
-                                }
-                            }
-
-                            @Override
-                            public void afterTextChanged(Editable editable) {
-
-                            }
-                        });
-
-                        positiveButton.setOnClickListener((v) -> {
-                            String aboutMe = dialogAboutMeEditText.getText().toString();
-
-                            if (aboutMe.length() < 1) {
-                                dialogAboutMeEditText.setError("Your description must be longer than 0 characters");
-                            }
-//
-//            if(aboutMe.length() > 300) {
-//                int aboutMeLength = aboutMe.length();
-//                int needToDelete = aboutMeLength - 300;
-//                dialogAboutMeEditText.setError("Your comment is big then 300 characters please delete at least: "+needToDelete+"characters");
-//
-//            }else if (aboutMe.length() == 0){
-//                dialogAboutMeEditText.setError("Enter Some words About You");
-//            }else {
-//                profileDescription.setText(dialogAboutMeEditText.getText());
-//                alertDialog.dismiss();
-//            }
-
-                            if (dialogAboutMeEditText.getError() != null) {
-                                Toast.makeText(this, dialogAboutMeEditText.getError().toString(), Toast.LENGTH_SHORT).show();
-                            } else {
-                                ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).child("description").setValue(aboutMe);
-                                CurrentUser.getInstance().setDescription(aboutMe);
-                                profileDescription.setText(aboutMe);
-                                Toast.makeText(this, "Your description was updated successfully!", Toast.LENGTH_SHORT).show();
-                                System.out.println(CurrentUser.getInstance().getDescription());
-                                alertDialog.dismiss();
-                            }
-                        });
-
-                        negativeButton.setOnClickListener((v) -> {
-                            alertDialog.dismiss();
-                            Toast.makeText(this, "No change!", Toast.LENGTH_SHORT).show();
-                        });
-
-                    }
-
-                    /**
-                     * setup all the Views on Profile be equals them to there ID's
-                     */
-                    private void setupViews () {
-                        editImageProfile = findViewById(R.id.idProfileEditImage);
-                        profileImage = findViewById(R.id.idImageViewProfile);
-                        editCoverImage = findViewById(R.id.idCoverEditImage);
-                        coverImage = findViewById(R.id.idCoverTopProfile);
-                        profileName = findViewById(R.id.idFullNameProfile);
-                        profileDescription = findViewById(R.id.idDescriptionProfile);
-                        profileBirthDay = findViewById(R.id.idBirthDayProfile);
-                        editDetails = findViewById(R.id.idEditDetails);
-                        email = findViewById(R.id.idEmail);
-//        descriptionTitle = findViewById(R.id.idAboutMe);
-                        editAboutMeButton = findViewById(R.id.idEditDetailsDescription);
-                        dialogAboutMeEditText = findViewById(R.id.edit_about_me);
-
-
-                    }
-
-                    //check if there was any change to the details.
-                    private boolean checkForChanges (String firstName, String lastName, Calendar
-                    dateOfBirth, String password, String confirmPassword){
-                        return (firstName.equals(CurrentUser.getInstance().getFirstName()) &&
-                                lastName.equals(CurrentUser.getInstance().getLastName()) &&
-                                dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate() &&
-                                password.isEmpty() &&
-                                (confirmPassword.equals(password) || confirmPassword.isEmpty()));
-
-
-                        //dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate().getTime()
-                    }
-
-    @Override
-    public void refresh() {
-        profileName.setText(CurrentUser.getInstance().getFirstName() + " " + CurrentUser.getInstance().getLastName());
-        profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
-    }
-
-//    public boolean isEmailValid(String email)
-//    {
-//        String regExpn =
-//                "^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
-//                        +"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
-//                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
-//                        +"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
-//                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
-//                        +"([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
-//
-//        CharSequence inputStr = email;
-//
-//        Pattern pattern = Pattern.compile(regExpn,Pattern.CASE_INSENSITIVE);
-//        Matcher matcher = pattern.matcher(inputStr);
-//
-//        if(matcher.matches())
-//            return true;
-//        else
-//            return false;
-//    }
-
+            String name = editDialogName.getText().toString();
+            String lastName = editDialogLastName.getText().toString();
+            String password = editPassword.getText().toString();
+            String confirmPassword = editConfirmPassword.getText().toString();
+            Calendar dateOfBirth = Calendar.getInstance();
+            dateOfBirth.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth(), 0, 0, 0);
+            dateOfBirth.set(Calendar.MILLISECOND, 0);
+
+
+            if (checkForChanges(name, lastName, dateOfBirth, password, confirmPassword)) {
+                System.out.println("IN NEW IF ???");
+                Toast.makeText(this, "No changes were made!", Toast.LENGTH_SHORT).show();
+                alert.dismiss();
+
+            }
+
+            if (password.length() < 1 && confirmPassword.length() < 1) {
+
+                if (name.length() < 1) {
+                    editDialogName.setError("Your name must be longer than 0 characters");
+                } else if (!name.equals(CurrentUser.getInstance().getFirstName())) {
+                    if (!editedDetails.contains(FIRST_NAME))
+                        editedDetails.add(FIRST_NAME);
+                }
+
+                if (lastName.length() < 1) {
+                    editDialogLastName.setError("Your last name must be longer than 0 characters");
+                } else if (!lastName.equals(CurrentUser.getInstance().getLastName())) {
+                    if (!editedDetails.contains(LAST_NAME))
+                        editedDetails.add(LAST_NAME);
+                }
+
+                if (dateOfBirth.getTimeInMillis() != CurrentUser.getInstance().getBirthDate()) {
+                    if (!editedDetails.contains(DATE_OF_BIRTH))
+                        editedDetails.add(DATE_OF_BIRTH);
                 }
 
 
-//if(!isEmailValid(email)){
-//        editEmail.setError("Your email must be according to a@a.com format");
-//        }
-//
-//        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-//
-//        if (!email.equals(CurrentUser.getInstance().getEmail())) {
-//        if (firebaseUser != null) {
-//        firebaseUser.updateEmail(email)
-//        .addOnCompleteListener(new OnCompleteListener<Void>() {
-//@Override
-//public void onComplete(@NonNull Task<Void> task) {
-//        if (task.isSuccessful()) {
-//        Toast.makeText(Profile.this, "Your e-mail was successfully changed to " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
-//        CurrentUser.getInstance().setEmail(email);
-//        } else {
-//        try {
-//        throw task.getException();
-//        } catch(FirebaseAuthWeakPasswordException e) {
-//        editPassword.setError("הסיסמה חלשה מדי, אנא הכנס סיסמה עם 6 תווים ומעלה");
-//        editPassword.requestFocus();
-//        } catch(FirebaseAuthInvalidCredentialsException e) {
-//        editEmail.setError("הפרטים אינם חוקיים");
-//        editEmail.requestFocus();
-//        } catch(FirebaseAuthUserCollisionException e) {
-//        editEmail.setError("המייל כבר נמצא במערכת");
-//        editEmail.requestFocus();
-//        Toast.makeText(Profile.this, "המייל כבר נמצא במערכת", Toast.LENGTH_SHORT).show();
-//        } catch (FirebaseAuthRecentLoginRequiredException e){
-//        editEmail.setError("Please re-confirm your email");
-//        AlertDialog.Builder builderApprove = new AlertDialog.Builder(Profile.this);
-//        builderApprove.setTitle("Re-confirmation Details");
-//        builderApprove.setMessage("Please re-confirm your soon to be changed details");
-//        View newViewForAlert = LayoutInflater.from(Profile.this).inflate(R.layout.change_email_dialog, null);
-//        EditText authEmail = newViewForAlert.findViewById(R.id.editEmailText);
-//        EditText authPassword = newViewForAlert.findViewById(R.id.editPasswordText);
-//        builderApprove.setPositiveButton("Done" , (d , v) ->{
-//
-//        AuthCredential credential = EmailAuthProvider.getCredential(authEmail.getText().toString(), authPassword.getText().toString());
-//        firebaseUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
-//@Override
-//public void onSuccess(Void aVoid) {
-//        firebaseUser.updateEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
-//@Override
-//public void onComplete(@NonNull Task<Void> task) {
-//        if(task.isSuccessful()){
-//        System.out.println("EMAIL SUPPOSE TO CHANGE" + firebaseUser.getEmail());
-//        Toast.makeText(Profile.this, "Your e-mail was successfully changed to " + firebaseUser.getEmail(), Toast.LENGTH_SHORT).show();
-//        CurrentUser.getInstance().setEmail(email);
-//        editEmail.setError(null);
-//        } else{
-//        try {
-//        throw task.getException();
-//        } catch(FirebaseAuthInvalidCredentialsException e) {
-//        Toast.makeText(Profile.this, "Illegal", Toast.LENGTH_SHORT).show();
-//        editEmail.setError("הפרטים אינם חוקיים");
-//        editEmail.requestFocus();
-//        } catch(FirebaseAuthUserCollisionException e) {
-//        Toast.makeText(Profile.this, "המייל כבר נמצא במערכת", Toast.LENGTH_SHORT).show();
-//        editEmail.setError("המייל כבר נמצא במערכת");
-//        editEmail.requestFocus();
-//        } catch (Exception ex) {
-//        System.out.println(ex.getMessage());
-//        }
-//        System.out.println("JUST TEST FOR NOW");
-//        }
-//        }
-//        });
-//
-//        }
-//        });
-//        });
-//        builderApprove.setView(newViewForAlert);
-//        builderApprove.show();
-//        } catch(Exception e) {
-//        System.out.println(e.getMessage());
-//        }
-//
-//
-//
-//
-//
-//
-//        System.out.println(task.getException().toString());
-//
-//        }
-//
-//        if (editDialogName.getError() != null || editDialogLastName.getError() != null  || editEmail.getError() != null){
-//        Toast.makeText(Profile.this, "Check Errors", Toast.LENGTH_SHORT).show();
-//
-//        } else{
-//        User user = new User(name , lastName , CurrentUser.getInstance().getEmail(), CurrentUser.getInstance().getBirthDate() , CurrentUser.getInstance().getBirthDateString() ,  null , CurrentUser.getInstance().getFireBaseID());
-//        ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap());
-//        CurrentUser.getInstance().loadDetailsFromMap();
-//        profileName.setText(CurrentUser.getInstance().getFirstName() +" "+ CurrentUser.getInstance().getLastName());
-//        Profile.this.email.setText(CurrentUser.getInstance().getEmail());
-//        profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
-//        alert.dismiss();
-//        }
-//
-//        }
-//        });
-//        }
+                if (editDialogName.getError() != null || editDialogLastName.getError() != null) {
+                    Toast.makeText(Profile.this, "Check Errors", Toast.LENGTH_SHORT).show();
+
+                } else {
+
+                    User user = new User(CurrentUser.getInstance().getFireBaseID(), name, lastName, CurrentUser.getInstance().getEmail(), dateOfBirth.getTimeInMillis());
+                    ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            CurrentUser.getInstance().loadDetailsFromMap();
+                            alert.dismiss();
+                        }
+                    });
+
+                    if (editedDetails.size() > 0) {
+                        StringBuilder message = new StringBuilder();
+                        for (String editedDetail : editedDetails) {
+                            message.append(editedDetail);
+                        }
+                        Toast.makeText(this, "You have changed your " + message + "successfully!", Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+            } else {
+
+                //not empty and equal -- V
+                if (password.equals(confirmPassword)) {
+
+                    if (name.length() < 1) {
+                        editDialogName.setError("Your name must be longer than 0 characters");
+                    } else if (!name.equals(CurrentUser.getInstance().getFirstName())) {
+                        if (!editedDetails.contains(FIRST_NAME))
+                            editedDetails.add(FIRST_NAME);
+                    }
+
+                    if (lastName.length() < 1) {
+                        editDialogLastName.setError("Your last name must be longer than 0 characters");
+                    } else if (!lastName.equals(CurrentUser.getInstance().getLastName())) {
+                        if (!editedDetails.contains(LAST_NAME))
+                            editedDetails.add(LAST_NAME);
+                    }
+
+                    if (dateOfBirth.getTimeInMillis() != CurrentUser.getInstance().getBirthDate()) {
+                        if (!editedDetails.contains(DATE_OF_BIRTH))
+                            editedDetails.add(DATE_OF_BIRTH);
+                    }
 
 
-//update details
+                    if (editDialogName.getError() == null && editDialogLastName.getError() == null) {
 
-//                            if (name.length() < 1) {
-//                                editDialogName.setError("Your name must be longer than 0 characters");
-//                            }
-//
-//                            if (lastName.length() < 1) {
-//                                editDialogLastName.setError("Your last name must be longer than 0 characters");
-//                            }
-//
-//
-//                            if (password.length() >= 1 && editDialogName.getError() == null && editDialogLastName.getError() == null) {
-//
-//                                if (confirmPassword.equals(password)) {
-//                                    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-//                                    firebaseUser.updatePassword(password).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                        @Override
-//                                        public void onComplete(@NonNull Task<Void> task) {
-//                                            if (task.isSuccessful()) {
-//                                                Toast.makeText(Profile.this, "Your password was changed successfully!", Toast.LENGTH_SHORT).show();
-//                                            } else {
-//                                                System.out.println("WEIRD");
-//                                                try {
-//                                                    throw task.getException();
-//                                                } catch (FirebaseAuthWeakPasswordException e) {
-//                                                    editPassword.setError("הסיסמה חלשה מדי, אנא הכנס סיסמה עם 6 תווים ומעלה");
-//                                                    editPassword.requestFocus();
-//                                                    System.out.println("WEAK PASS");
-//                                                } catch (FirebaseAuthRecentLoginRequiredException e) {
-//                                                    editPassword.setError("Re-confirmation of your details is required");
-//                                                    AlertDialog.Builder builderApprove = new AlertDialog.Builder(Profile.this);
-//                                                    builderApprove.setTitle("Re-confirmation Details");
-//                                                    builderApprove.setMessage("Please re-confirm your soon to be changed details");
-//                                                    View newViewForAlert = LayoutInflater.from(Profile.this).inflate(R.layout.change_email_dialog, null);
-//                                                    EditText authEmail = newViewForAlert.findViewById(R.id.editEmailText);
-//                                                    EditText authPassword = newViewForAlert.findViewById(R.id.editPasswordText);
-//                                                    builderApprove.setPositiveButton("Done", (d, v) -> {
-//
-//                                                        AuthCredential credential = EmailAuthProvider.getCredential(authEmail.getText().toString(), authPassword.getText().toString());
-//                                                        firebaseUser.reauthenticate(credential).addOnSuccessListener(new OnSuccessListener<Void>() {
-//                                                            @Override
-//                                                            public void onSuccess(Void aVoid) {
-//                                                                firebaseUser.updatePassword(password).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                                                    @Override
-//                                                                    public void onComplete(@NonNull Task<Void> task) {
-//                                                                        if (task.isSuccessful()) {
-//                                                                            System.out.println("PASS SUPPOSE TO CHANGE");
-//                                                                            Toast.makeText(Profile.this, "Your password was changed successfully!", Toast.LENGTH_SHORT).show();
-//                                                                            editPassword.setError(null);
-//                                                                        } else {
-//                                                                            try {
-//                                                                                throw task.getException();
-//                                                                            } catch (FirebaseAuthWeakPasswordException e) {
-//                                                                                editPassword.setError("הסיסמה חלשה מדי, אנא הכנס סיסמה עם 6 תווים ומעלה");
-//                                                                                editPassword.requestFocus();
-//                                                                            } catch (Exception ex) {
-//                                                                                System.out.println(ex.getMessage());
-//                                                                            }
-//                                                                        }
-//                                                                    }
-//                                                                });
-//
-//                                                            }
-//                                                        }).addOnFailureListener(new OnFailureListener() {
-//                                                            @Override
-//                                                            public void onFailure(@NonNull Exception e) {
-//                                                                Toast.makeText(Profile.this, "Re-authentication failed!", Toast.LENGTH_SHORT).show();
-//                                                            }
-//                                                        });
-//
-//
-//                                                    });
-//
-//                                                    builderApprove.setView(newViewForAlert);
-//                                                    builderApprove.show();
-//                                                } catch (Exception ex) {
-//                                                    System.out.println(ex.getMessage());
-//                                                }
-//                                            }
-//
-//                                            if (editDialogName.getError() != null || editDialogLastName.getError() != null || editPassword.getError() != null || editConfirmPassword.getError() != null) {
-//                                                Toast.makeText(Profile.this, "Check Errors", Toast.LENGTH_SHORT).show();
-//
-//                                            } else {
-//                                                User user = new User(name, lastName, CurrentUser.getInstance().getEmail(), CurrentUser.getInstance().getBirthDate(), CurrentUser.getInstance().getBirthDateString(), null, CurrentUser.getInstance().getFireBaseID());
-//                                                ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap());
-//                                                CurrentUser.getInstance().loadDetailsFromMap();
-//                                                profileName.setText(CurrentUser.getInstance().getFirstName() + " " + CurrentUser.getInstance().getLastName());
-////                    this.email.setText(CurrentUser.getInstance().getEmail());
-//                                                profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
-//                                                alert.dismiss();
-//                                            }
-//                                        }
-//                                    });
-//
-//                                } else {
-//                                    editConfirmPassword.setError("Your passwords must be equal!");
-//                                }
-//                            }
-//
-//
-//                            if (editDialogName.getError() != null || editDialogLastName.getError() != null || editPassword.getError() != null || editConfirmPassword.getError() != null) {
-//                                Toast.makeText(Profile.this, "Check Errors", Toast.LENGTH_SHORT).show();
-//
-//                            } else {
-//                                User user = new User(name, lastName, CurrentUser.getInstance().getEmail(), CurrentUser.getInstance().getBirthDate(), CurrentUser.getInstance().getBirthDateString(), null, CurrentUser.getInstance().getFireBaseID());
-//                                ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap());
-//                                CurrentUser.getInstance().loadDetailsFromMap();
-//                                profileName.setText(CurrentUser.getInstance().getFirstName() + " " + CurrentUser.getInstance().getLastName());
-////                    this.email.setText(CurrentUser.getInstance().getEmail());
-//                                profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
-//                                alert.dismiss();
-//                            }
+
+                        //updade pass
+                        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                        firebaseUser.updatePassword(password).addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                editedDetails.add(PASSWORD);
+                                User user = new User(CurrentUser.getInstance().getFireBaseID(), name, lastName, CurrentUser.getInstance().getEmail(), dateOfBirth.getTimeInMillis());
+
+                                ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        CurrentUser.getInstance().loadDetailsFromMap();
+                                        alert.dismiss();
+                                    }
+                                });
+
+
+                                if (editedDetails.size() > 0) {
+                                    StringBuilder message = new StringBuilder();
+                                    for (String editedDetail : editedDetails) {
+                                        message.append(editedDetail);
+                                    }
+                                    Toast.makeText(Profile.this, "You have changed the following details: " + message, Toast.LENGTH_SHORT).show();
+
+                                }
+
+                            } else {
+                                System.out.println("WEIRD");
+                                try {
+                                    throw task.getException();
+                                } catch (FirebaseAuthWeakPasswordException e) {
+                                    editPassword.setError("הסיסמה חלשה מדי, אנא הכנס סיסמה עם 6 תווים ומעלה");
+                                    editPassword.requestFocus();
+                                    System.out.println("WEAK PASS");
+                                } catch (FirebaseAuthRecentLoginRequiredException e) {
+                                    editPassword.setError("Re-confirmation of your details is required");
+                                    AlertDialog.Builder builderApprove = new AlertDialog.Builder(Profile.this);
+                                    builderApprove.setTitle("Re-confirmation Details");
+                                    builderApprove.setMessage("Please re-confirm your soon to be changed details");
+                                    View newViewForAlert = LayoutInflater.from(Profile.this).inflate(R.layout.change_email_dialog, null);
+                                    EditText authEmail = newViewForAlert.findViewById(R.id.editEmailText);
+                                    EditText authPassword = newViewForAlert.findViewById(R.id.editPasswordText);
+                                    builderApprove.setPositiveButton("Done", (d, v1) -> {
+
+                                        AuthCredential credential = EmailAuthProvider.getCredential(authEmail.getText().toString(), authPassword.getText().toString());
+                                        firebaseUser.reauthenticate(credential).addOnSuccessListener(aVoid -> firebaseUser.updatePassword(password).addOnCompleteListener(task1 -> {
+                                            if (task1.isSuccessful()) {
+                                                System.out.println("PASS SUPPOSE TO CHANGE");
+                                                editPassword.setError(null);
+                                                User user = new User(CurrentUser.getInstance().getFireBaseID(), name, lastName, CurrentUser.getInstance().getEmail(), dateOfBirth.getTimeInMillis());
+                                                ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).updateChildren(user.toMap());
+                                                editedDetails.add(PASSWORD);
+
+
+                                                if (editedDetails.size() > 0) {
+                                                    StringBuilder message = new StringBuilder();
+                                                    for (String editedDetail : editedDetails) {
+                                                        message.append(editedDetail);
+                                                    }
+                                                    Toast.makeText(Profile.this, "You have changed the following details: " + message, Toast.LENGTH_SHORT).show();
+
+                                                }
+
+                                                CurrentUser.getInstance().loadDetailsFromMap();
+                                                alert.dismiss();
+                                            } else {
+                                                try {
+                                                    throw Objects.requireNonNull(task1.getException());
+                                                } catch (FirebaseAuthWeakPasswordException e1) {
+                                                    editPassword.setError("הסיסמה חלשה מדי, אנא הכנס סיסמה עם 6 תווים ומעלה");
+                                                    editPassword.requestFocus();
+                                                } catch (Exception ex) {
+                                                    System.out.println(ex.getMessage());
+                                                }
+                                            }
+                                        })).addOnFailureListener(e12 -> Toast.makeText(Profile.this, "Re-authentication failed!", Toast.LENGTH_SHORT).show());
+
+
+                                    });
+
+                                    builderApprove.setView(newViewForAlert);
+                                    builderApprove.show();
+                                } catch (Exception ex) {
+                                    System.out.println(ex.getMessage());
+                                }
+                            }
+                        });
+
+                    } else {
+                        Toast.makeText(Profile.this, "Check Errors", Toast.LENGTH_SHORT).show();
+
+                    }
+
+                } else {
+                    //not empty and not equal
+                    editConfirmPassword.setError("Your passwords must be the same");
+                }
+            }
+
+        });
+
+        negativeButton.setOnClickListener((v) -> {
+            alert.dismiss();
+            Toast.makeText(this, "No change were made!", Toast.LENGTH_SHORT).show();
+        });
+
+    }
+
+    public void setAboutMe() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter your new About Me");
+        viewForAlertAboutMe = LayoutInflater.from(this).inflate(R.layout.dialog_about_me, null);
+        dialogAboutMeEditText = viewForAlertAboutMe.findViewById(R.id.edit_about_me);
+        positiveButton = viewForAlertAboutMe.findViewById(R.id.positiveButton);
+        negativeButton = viewForAlertAboutMe.findViewById(R.id.negativeButton);
+
+        viewForAlertAboutMe.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+
+                if (imm.isAcceptingText()) { // verify if the soft keyboard is open
+                    imm.hideSoftInputFromWindow(viewForAlertAboutMe.getWindowToken(), 0);
+                }
+                return false;
+            }
+        });
+        builder.setView(viewForAlertAboutMe);
+        builder.setIcon(R.drawable.pan_edit);
+        AlertDialog alertDialog = builder.create();
+
+        alertDialog.show();
+
+
+        if (CurrentUser.getInstance().getDescription() != null) {
+            dialogAboutMeEditText.setText(CurrentUser.getInstance().getDescription());
+        } else {
+            dialogAboutMeEditText.setText(String.format("Hello my name is %s nice to meet you", CurrentUser.getInstance().getFirstName()));
+        }
+
+        dialogAboutMeEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (charSequence.length() >= 300) {
+                    dialogAboutMeEditText.setError("Max limit 300 characters");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+        positiveButton.setOnClickListener((v) -> {
+            String aboutMe = dialogAboutMeEditText.getText().toString();
+
+            if (aboutMe.length() < 1) {
+                dialogAboutMeEditText.setError("Your description must be longer than 0 characters");
+            }
+
+            if (dialogAboutMeEditText.getError() != null) {
+                Toast.makeText(this, dialogAboutMeEditText.getError().toString(), Toast.LENGTH_SHORT).show();
+            } else {
+                ref.child("users").child(CurrentUser.getInstance().getFireBaseID()).child("description").setValue(aboutMe);
+                CurrentUser.getInstance().setDescription(aboutMe);
+                profileDescription.setText(aboutMe);
+                Toast.makeText(this, "Your description was updated successfully!", Toast.LENGTH_SHORT).show();
+                System.out.println(CurrentUser.getInstance().getDescription());
+                alertDialog.dismiss();
+            }
+        });
+
+        negativeButton.setOnClickListener((v) -> {
+            alertDialog.dismiss();
+            Toast.makeText(this, "No change!", Toast.LENGTH_SHORT).show();
+        });
+
+    }
+
+    /**
+     * setup all the Views on Profile be equals them to there ID's
+     */
+    private void setupViews() {
+        editImageProfile = findViewById(R.id.idProfileEditImage);
+        profileImage = findViewById(R.id.idImageViewProfile);
+        editCoverImage = findViewById(R.id.idCoverEditImage);
+        coverImage = findViewById(R.id.idCoverTopProfile);
+        profileName = findViewById(R.id.idFullNameProfile);
+        profileDescription = findViewById(R.id.idDescriptionProfile);
+        profileBirthDay = findViewById(R.id.idBirthDayProfile);
+        editDetails = findViewById(R.id.idEditDetails);
+        email = findViewById(R.id.idEmail);
+        editAboutMeButton = findViewById(R.id.idEditDetailsDescription);
+        dialogAboutMeEditText = findViewById(R.id.edit_about_me);
+
+
+    }
+
+    //check if there was any change to the details.
+    private boolean checkForChanges(String firstName, String lastName, Calendar
+            dateOfBirth, String password, String confirmPassword) {
+        return (firstName.equals(CurrentUser.getInstance().getFirstName()) &&
+                lastName.equals(CurrentUser.getInstance().getLastName()) &&
+                dateOfBirth.getTimeInMillis() == CurrentUser.getInstance().getBirthDate() &&
+                password.isEmpty() &&
+                (confirmPassword.equals(password) || confirmPassword.isEmpty()));
+    }
+
+    @Override
+    public void refresh() {
+        profileName.setText(String.format("%s %s", CurrentUser.getInstance().getFirstName(), CurrentUser.getInstance().getLastName()));
+        profileBirthDay.setText(CurrentUser.getInstance().getBirthDateString());
+    }
+}
