@@ -6,29 +6,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import com.example.radiobe.R;
 import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.adapters.FavoritesAdapter;
 import com.example.radiobe.database.RefreshFavorites;
 import com.example.radiobe.models.RadioItem;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
+import java.util.Objects;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class Favorites extends Fragment implements RefreshFavorites {
-    RecyclerView recyclerView;
-    FavoritesAdapter favoritesAdapter;
-    TextView noFavorites;
+    private RecyclerView recyclerView;
+    private FavoritesAdapter favoritesAdapter;
+    private TextView noFavorites;
 
     public Favorites() {
         // Required empty public constructor
@@ -43,7 +38,6 @@ public class Favorites extends Fragment implements RefreshFavorites {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_favorites, container, false);
     }
 
@@ -61,7 +55,6 @@ public class Favorites extends Fragment implements RefreshFavorites {
 
         recyclerView.setLayoutManager(layoutManagerTop);
         recyclerView.setAdapter(favoritesAdapter);
-//        favoritesAdapter.initRefreshListener(getActivity());
 
         CurrentUser.getInstance().registerFavoriteObserver(this);
 
@@ -78,11 +71,11 @@ public class Favorites extends Fragment implements RefreshFavorites {
     @Override
     public void refresh(List<RadioItem> favorites) {
         if(favorites.size() > 0){
-            getActivity().runOnUiThread(()->{
+            Objects.requireNonNull(getActivity()).runOnUiThread(()->{
                 noFavorites.setVisibility(View.GONE);
             });
         } else {
-            getActivity().runOnUiThread(()->{
+            Objects.requireNonNull(getActivity()).runOnUiThread(()->{
                 noFavorites.setVisibility(View.VISIBLE);
             });
         }
