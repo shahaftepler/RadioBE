@@ -269,7 +269,7 @@ public class Login extends AppCompatActivity {
 
                             user.setFirstName(firstName);
                             user.setLastName(lastName);
-                            user.setFireBaseID(firebaseUser.getUid());
+                            user.setFireBaseID(fbuser.getUid());
                             if(fbuser.getPhotoUrl() != null) {
 //                            user.setProfileImage(firebaseUser.getPhotoUrl());
                                 storageRef.child("profile").child(fbuser.getUid()).putFile(fbuser.getPhotoUrl())

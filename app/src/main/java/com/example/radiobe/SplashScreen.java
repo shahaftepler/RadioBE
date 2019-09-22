@@ -34,6 +34,8 @@ public class SplashScreen extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
         progressBar = findViewById(R.id.progressBar);
 
+//        LoginManager.getInstance().logOut();
+//        FirebaseAuth.getInstance().signOut();
 
         ImageView gifImageView = findViewById(R.id.ivLoadingGif);
         Glide.with(this).
