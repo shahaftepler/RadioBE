@@ -12,12 +12,13 @@
         android:id="@+id/ivLoadingGif"
         android:layout_width="wrap_content"
         android:layout_height="420dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="32dp"
+        android:contentDescription="@string/logo_radio_gif"
+        android:paddingTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:srcCompat="@drawable/loading_radio"
-        android:contentDescription="@string/logo_radio_gif" />
+        app:srcCompat="@drawable/loading_radio" />
 
     <TextView
         android:id="@+id/textView"

@@ -24,6 +24,7 @@ import com.example.radiobe.adapters.MainScreenAdapter;
 import com.example.radiobe.adapters.NotificationsAdapter;
 import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.database.RefreshNotificationsListener;
+import com.example.radiobe.database.RefreshProfilePicture;
 import com.example.radiobe.database.RefreshUserName;
 import com.example.radiobe.generalScreens.Profile;
 import com.example.radiobe.generalScreens.Settings;
@@ -49,7 +50,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainScreen extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener , RefreshUserName {
+public class MainScreen extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener , RefreshUserName , RefreshProfilePicture {
 
     FragmentManager fm;
     ViewPager viewPager;
@@ -67,7 +68,7 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
     String fileName;
     String filePath;
     private PlayerView playerView;
-    public static SimpleExoPlayer simpleExoPlayer;
+    public SimpleExoPlayer simpleExoPlayer;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -115,6 +116,7 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
         super.onCreate(savedInstanceState);
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter("share_facebook"));
         LocalBroadcastManager.getInstance(this).registerReceiver(mediaBroadcastReceiver, new IntentFilter("play_song"));
+        CurrentUser.getInstance().registerProfilePictureObserver(this);
 
         setContentView(R.layout.activity_mainscreen);
         generalSetup();
@@ -273,6 +275,12 @@ public class MainScreen extends AppCompatActivity implements BottomNavigationVie
     @Override
     public void refresh() {
         userNameTV.setText("Hello, "+CurrentUser.getInstance().getFirstName());
+    }
+
+    @Override
+    public void refreshPicture() {
+        Bitmap img = CurrentUser.getInstance().getProfileImage();
+        imageProfileTBar.setImageBitmap(img);
     }
 
 //    //    menu

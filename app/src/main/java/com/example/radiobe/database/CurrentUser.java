@@ -41,7 +41,7 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class CurrentUser extends User implements NotificationsSubject , FavoritesSubject , SubjectUsernameRefresh {
+public class CurrentUser extends User implements NotificationsSubject , FavoritesSubject , SubjectUsernameRefresh , SubjectProfilePictureRefresh {
     private static CurrentUser instance;
     List<String> favoritesID;
     List<String> messagesID;
@@ -62,7 +62,7 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
     private List<RefreshNotificationsListener> notificationsListeners;
     private List<RefreshFavorites> favoritesListeners;
     private List<RefreshUserName> userNameListeners;
-
+    private List<RefreshProfilePicture> profilePictureListeners;
 
 
 
@@ -98,6 +98,7 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
         notificationsListeners = new ArrayList<>();
         favoritesListeners = new ArrayList<>();
         userNameListeners = new ArrayList<>();
+        profilePictureListeners = new ArrayList<>();
     }
 
     public void setContext(Context context) {
@@ -206,9 +207,31 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
                             }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            instance.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
-                            System.out.println("Got fake profile picture");
-                            photosUpload.add(true);
+
+                            //try facebook image if not put fake.
+                            if(instance.getFacebookURL() != null){
+                                System.out.println("**** instance facebook"+instance.getFacebookURL());
+                                new DownloadFacebookProfileImage(instance.getFacebookURL(), (bitmap)-> {
+                                    if(bitmap!= null) {
+                                        System.out.println("BITMAP IS NOT NULL");
+                                        instance.setProfileImage(bitmap);
+                                        photosUpload.add(true);
+                                    } else {
+                                        System.out.println("BITMAP IS NULL");
+                                        instance.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
+                                        System.out.println("Got fake profile picture");
+                                        photosUpload.add(true);
+                                    }
+                                }).execute();
+
+                            }
+
+                            else {
+                                instance.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
+                                System.out.println("Got fake profile picture");
+                                photosUpload.add(true);
+                            }
+
                         }
                     });
 
@@ -324,7 +347,8 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
 
 
     public void checkLoadingComplete(FinishedCurrentUserInit finishedCurrentUserInit) {
-        System.out.println(instance.photosUpload.size() + "BOOLEAN");
+        System.out.println(photosUpload.size() + "BOOLEAN");
+
 //        if(instance.notifications.size() > 0) {
 
             System.out.println(instance.favorites.size() + "FAVORITES SIZe");
@@ -500,9 +524,9 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
 
     @Override
     public void removeUsernameObserver(RefreshUserName refreshUserName) {
-        if(!userNameListeners.contains(refreshUserName)) {
+        if(userNameListeners.contains(refreshUserName)) {
             System.out.println("username LISTENER ADDED");
-            userNameListeners.add(refreshUserName);
+            userNameListeners.remove(refreshUserName);
         }
     }
 
@@ -511,6 +535,29 @@ public class CurrentUser extends User implements NotificationsSubject , Favorite
         for(RefreshUserName refreshUserName : userNameListeners){
             System.out.println("USER NAME NOTIFIED");
             refreshUserName.refresh();
+        }
+    }
+
+    @Override
+    public void registerProfilePictureObserver(RefreshProfilePicture refreshProfilePicture) {
+        if(!profilePictureListeners.contains(refreshProfilePicture)){
+            System.out.println("PROFILE LISTENER ADDED");
+            profilePictureListeners.add(refreshProfilePicture);
+        }
+    }
+
+    @Override
+    public void removeProfilePictureObserver(RefreshProfilePicture refreshProfilePicture) {
+        if(profilePictureListeners.contains(refreshProfilePicture)){
+            System.out.println("PROFILE LISTENER ADDED");
+            profilePictureListeners.remove(refreshProfilePicture);
+        }
+    }
+
+    @Override
+    public void notifyProfilePictureObservers() {
+        for (RefreshProfilePicture refreshProfilePicture : profilePictureListeners) {
+            refreshProfilePicture.refreshPicture();
         }
     }
 }

@@ -158,15 +158,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
                     }
 
                 }
-//            if (MainScreen.simpleExoPlayer.getPlaybackState() == Player.STATE_READY && holder != null &&
-//                    MainScreen.simpleExoPlayer.getCurrentTag() != holder.radioItem.getItemName()){
-//                System.out.println("NEW IF");
-//                if(holder.tb.isChecked()) {
-//                    holder.tb.setChecked(false);
-//                    System.out.println("ANOTHERTRY");
-//                }
-////                notifyItemChanged(i);
-//            }
+
             }
 
             notifyDataSetChanged();

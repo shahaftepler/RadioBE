@@ -162,7 +162,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         holder.tvComments.setOnClickListener((view -> {
             System.out.println(radioItem.getCommentsArray());
             System.out.println(radioItem.getCommentSenders());
-            androidx.appcompat.app.AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
             View viewForAlert = LayoutInflater.from(context).inflate(R.layout.dialog_comment, null);
             ImageButton close = (ImageButton) viewForAlert.findViewById(R.id.idCloseComment);
 

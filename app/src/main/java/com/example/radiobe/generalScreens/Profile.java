@@ -247,6 +247,9 @@ public class Profile extends AppCompatActivity implements RefreshUserName {
             case "profile":
                 try {
                     CurrentUser.getInstance().setProfileImage(MediaStore.Images.Media.getBitmap(this.getContentResolver(), filePath));
+
+                    //Todo: notify observers.
+                    CurrentUser.getInstance().notifyProfilePictureObservers();
                     System.out.println(CurrentUser.getInstance().getProfileImage());
                 } catch (IOException e) {
                     e.printStackTrace();
