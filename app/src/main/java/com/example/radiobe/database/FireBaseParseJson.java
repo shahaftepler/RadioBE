@@ -3,51 +3,43 @@ package com.example.radiobe.database;
 import android.content.Context;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.text.format.DateFormat;
-
 import androidx.annotation.NonNull;
-
 import com.example.radiobe.models.RadioItem;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
 
-    DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
+    private DatabaseReference myDatabase = FirebaseDatabase.getInstance().getReference();
     private List<RadioItem> streams = new ArrayList<>();
-    ParseJsonListener listener;
-    int idCount = 0;
-    ChangeProgress changeProgress;
+    private ParseJsonListener listener;
+    private int idCount = 0;
+    private ChangeProgress changeProgress;
     private List<RadioItem> serverStreams = new ArrayList<>();
-    long newDuration = -1;
-    Context context;
+    private long newDuration = -1;
+    private Context context;
 
     public FireBaseParseJson(ParseJsonListener listener, ChangeProgress changeProgress , Context context) {
         this.listener = listener;
         this.changeProgress = changeProgress;
         this.context = context;
-//        idCount = 0;
     }
 
     @Override
@@ -77,17 +69,12 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
                     String vodName = radioItem.getString("vodName");
                     String change = vodName.replace('_', ' ');
                     String itemName = change.replace(".mp4", "");
-//                    long creationDate = radioItem.getLong("creationDate");
                     Long creationDate = radioItem.getLong("creationDate");
                     String creationDateString = DateFormat.format("dd/MM/yyyy", new Date(creationDate)).toString();
 
-
-
-//                    String filePath = "http://be.repoai.com:5080/WebRTCAppEE/streams/home/" + vodName;
                     String filePath = "https://be.repoai.com:5443/LiveApp/streams/vod/" + vodName;
 
                     String mUid = radioItem.getString("vodId");
-//                    RadioItem item = new RadioItem(duration, vodName, itemName, creationDate, creationDateString, filePath, durationString, mUid);
                     RadioItem item = new RadioItem(vodName , itemName, creationDate , creationDateString , filePath , mUid);
                     streams.add(item);
 
@@ -132,8 +119,6 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
 
 
     private void saveItemsToDataBase(List<RadioItem> jsonStreams) {
-//        myDatabase.child("streams").setValue(jsonStreams);
-
         myDatabase.child("streams").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -144,24 +129,17 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
                             boolean shouldWrite = true;
 
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//                                RadioItem item = RadioItem.getItemFromHashMap((HashMap<String, Object>) snapshot.getValue());
-//                                    RadioItem item = snapshot.getValue(RadioItem.class);
                                 if (jsonStream.getUid().equals(snapshot.getValue(RadioItem.class).getUid())) {
                                     shouldWrite = false;
-//                                    RadioItem item = snapshot.getValue(RadioItem.class);
-////                                    serverStreams.add(item);
                                     newDuration = snapshot.getValue(RadioItem.class).getDuration();
                                     System.out.println("Don't Save the item.");
                                     idCount++;
-//                                    break;
                                 }
                             }
 
                         if (shouldWrite){
                             System.out.println("Save the item!");
-//                            jsonStream.setUid(key);
                             setDurationFromFile(jsonStream);
-//                            serverStreams.add(jsonStream);
                             myDatabase.child("streams").child(jsonStream.getUid()).setValue(jsonStream);
                         } else {
                             if (newDuration != -1) {
@@ -169,18 +147,15 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
                             }
                         }
 
-
                     }
                 }
                     else{
                         setDurationsForList(jsonStreams);
                         for (RadioItem jsonStream : jsonStreams) {
-//                            setDurationFromFile(jsonStream);
                             serverStreams.add(jsonStream);
                             myDatabase.child("streams").child(jsonStream.getUid()).setValue(jsonStream);
                         }
                     }
-
                 }
 
             @Override
@@ -188,8 +163,6 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
                 System.out.println("ERROR");
             }
         });
-
-
     }
 
     private void setDurationsForList(List<RadioItem> streams){
@@ -197,9 +170,7 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
         for (RadioItem stream : streams) {
             newRetriever.setDataSource(stream.getFilePath() , new HashMap<>());
             stream.setDuration(Long.parseLong(newRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)));
-
         }
-
         newRetriever.release();
     }
 
@@ -210,7 +181,6 @@ public class FireBaseParseJson extends AsyncTask<Void, Void, List<RadioItem>> {
         radioItem.setDuration(duration);
         retriever.release();
     }
-
 
 }
 

@@ -1,26 +1,19 @@
 package com.example.radiobe.database;
 
-import android.app.AlertDialog;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
-import android.provider.MediaStore;
-import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-//import com.example.radiobe.StreamDAO;
 import com.example.radiobe.R;
 import com.example.radiobe.adapters.RadioItemsAdapter;
-import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.Comment;
 import com.example.radiobe.models.RadioItem;
 import com.example.radiobe.models.User;
-import com.google.android.exoplayer2.Player;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,45 +35,40 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class FirebaseItemsDataSource implements SubjectServerUpdates{
-
+public class FirebaseItemsDataSource implements SubjectServerUpdates {
+    //Properties
+    @SuppressLint("StaticFieldLeak")
+    private static FirebaseItemsDataSource instance;
     private WeakReference<RecyclerView> rvRadioItems;
     private WeakReference<ProgressBar> progressBar;
-    List<RadioItem> fireBaseStreams;
-    List<Boolean> isDoneAll = new ArrayList<>();
-    Timer t;
-    boolean once = true;
-    public RecyclerView recyclerView = null;
-    public RadioItemsAdapter adapter = null;
-    private static FirebaseItemsDataSource instance;
-    UpdateServer updateServer;
-    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-    DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-    FirebaseUser firebaseUser;
-    List<Comment> comments;
-    Context context;
-    Map<String, User> commentSenders;
-    long commentsCount = -1;
-    Timer commentsTimer;
-    List<UpdateServer> updateServerListeners;
-    final String UPDATE_LIKES = "updateLikes";
-    final String UPDATE_COMMENTS = "updateComments";
-    final String UPDATE_VIEWS = "updateViews";
-
-
+    private List<RadioItem> fireBaseStreams;
+    private List<Boolean> isDoneAll = new ArrayList<>();
+    private Timer t;
+    private boolean once = true;
+    private RecyclerView recyclerView = null;
+    private UpdateServer updateServer;
+    private StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+    private DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+    private FirebaseUser firebaseUser;
+    private List<Comment> comments;
+    private Context context;
+    private Map<String, User> commentSenders;
+    private long commentsCount = -1;
+    private Timer commentsTimer;
+    private List<UpdateServer> updateServerListeners;
+    private final String UPDATE_LIKES = "updateLikes";
+    private final String UPDATE_COMMENTS = "updateComments";
+    private final String UPDATE_VIEWS = "updateViews";
 
 
     public static FirebaseItemsDataSource getInstance() {
         if (instance == null)
             instance = new FirebaseItemsDataSource();
-
-//        else
-//            instance.listener = null;
         return instance;
     }
 
 
-    private FirebaseItemsDataSource(){
+    private FirebaseItemsDataSource() {
         t = new Timer();
         fireBaseStreams = new ArrayList<>();
         comments = new ArrayList<>();
@@ -89,45 +77,28 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     }
 
-    public void setUpdateLikes(UpdateServer updateServer){
+    public void setUpdateLikes(UpdateServer updateServer) {
         this.updateServer = updateServer;
     }
 
-//    public FirebaseItemsDataSource(RecyclerView rvRadioItems, ProgressBar progressBar, List<RadioItem> fireBaseStreams) {
-//        this.rvRadioItems = new WeakReference<>(rvRadioItems);
-//        this.progressBar = new WeakReference<>(progressBar);
-//        this.fireBaseStreams = fireBaseStreams;
-//        this.loadData();
-//        t = new Timer();
-//    }
 
-
-//    public void initGeneral(RecyclerView rvRadioItems, ProgressBar progressBar){
-//        this.rvRadioItems = new WeakReference<>(rvRadioItems);
-//        this.progressBar = new WeakReference<>(progressBar);
-//        this.loadData();
-//        t = new Timer();
-//    }
-
-    public void setStreams(List<RadioItem> jsonStreams){
+    public void setStreams(List<RadioItem> jsonStreams) {
         fireBaseStreams = jsonStreams;
     }
 
-    public List<RadioItem> getFireBaseStreams(){
+    public List<RadioItem> getFireBaseStreams() {
         return this.fireBaseStreams;
     }
 
-    public void setRecyclerView(RecyclerView recyclerView){
+    public void setRecyclerView(RecyclerView recyclerView) {
         this.recyclerView = recyclerView;
 
     }
 
-    public void loadData(DoneUpdatingLikes doneUpdatingLikes , ChangeProgress changeProgress){
-        //boolean once = true;
+    public void loadData(DoneUpdatingLikes doneUpdatingLikes, ChangeProgress changeProgress) {
         if (fireBaseStreams.size() > 0) {
             for (int i = 0; i < fireBaseStreams.size(); i++) {
                 RadioItem item = fireBaseStreams.get(i);
-                //still empty. so won't crash but don't recognize.
                 System.out.println("--------------------->" + item.getUid());
                 ref.child("likes").child(item.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
@@ -142,25 +113,19 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
                                 isDoneAll.add(true);
                                 changeProgress.change();
                             } else {
-//                                if (updateServer != null) {
-//                                    updateServer.updateLikes(item);
-                                    notifyServerObservers(item , UPDATE_LIKES);
-//                                }
+                                notifyServerObservers(item, UPDATE_LIKES);
                             }
 
                         } else {
                             item.setLikes(0);
                             ref.child("streams").child(item.getUid()).child("likes").setValue(item.getLikes());
 
-                            if(once) {
+                            if (once) {
                                 isDoneAll.add(true);
                                 changeProgress.change();
 
-                            }   else{
-//                                if(updateServer != null){
-//                                    updateServer.updateLikes(item);
-                                    notifyServerObservers(item , UPDATE_LIKES);
-//                                }
+                            } else {
+                                notifyServerObservers(item, UPDATE_LIKES);
                             }
                         }
                     }
@@ -169,6 +134,7 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                         System.out.println("ERROR");
+                        Toast.makeText(context, "Cancel: " + databaseError, Toast.LENGTH_SHORT).show();
 
                     }
                 });
@@ -188,25 +154,19 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
                                 changeProgress.change();
 
                             } else {
-//                                if (updateServer != null) {
-//                                    updateServer.updateViews(item);
-                                    notifyServerObservers(item , UPDATE_VIEWS);
-//                                }
+                                notifyServerObservers(item, UPDATE_VIEWS);
                             }
 
                         } else {
                             item.setViews(0);
                             ref.child("streams").child(item.getUid()).child("views").setValue(item.getViews());
 
-                            if(once) {
+                            if (once) {
                                 isDoneAll.add(true);
                                 changeProgress.change();
 
-                            }   else{
-//                                if(updateServer != null){
-//                                    updateServer.updateViews(item);
-                                    notifyServerObservers(item , UPDATE_VIEWS);
-//                                }
+                            } else {
+                                notifyServerObservers(item, UPDATE_VIEWS);
                             }
                         }
                     }
@@ -227,28 +187,24 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
 
                             item.removeCommentSenders();
                             item.removeAllComments();
-                            for (DataSnapshot snap : dataSnapshot.getChildren()){
+                            for (DataSnapshot snap : dataSnapshot.getChildren()) {
                                 item.addComment(snap.getValue(Comment.class));
                                 System.out.println("Comment added!");
                             }
 
 
-
-                            initComments(item.getCommentsArray() , item , changeProgress);
+                            initComments(item.getCommentsArray(), item, changeProgress);
 
 
                         } else {
                             item.setComments(0);
                             ref.child("streams").child(item.getUid()).child("comments").setValue(item.getComments());
-                            if(once) {
+                            if (once) {
                                 isDoneAll.add(true);
                                 changeProgress.change();
 
-                            }   else{
-//                                if(updateServer != null){
-//                                    updateServer.updateComments(item);
-                                    notifyServerObservers(item , UPDATE_COMMENTS);
-//                                }
+                            } else {
+                                notifyServerObservers(item, UPDATE_COMMENTS);
                             }
                         }
                     }
@@ -263,19 +219,17 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
             }
 
 
-
-
             t.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     checkLoadingComplete(doneUpdatingLikes);
                 }
-            }, 0 , 250);
+            }, 0, 250);
         }
 
     }
 
-    private void initComments(List<Comment> itemCommentsList , RadioItem item , ChangeProgress changeProgress) {
+    private void initComments(List<Comment> itemCommentsList, RadioItem item, ChangeProgress changeProgress) {
 
         if (!once) {
             commentsTimer = new Timer();
@@ -289,8 +243,8 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
 
         }
 
-        if(itemCommentsList.size() > 0){
-            for(Comment comment : itemCommentsList){
+        if (itemCommentsList.size() > 0) {
+            for (Comment comment : itemCommentsList) {
                 System.out.println("********************************************" + comment.getUser());
                 ref.child("users").child(comment.getUser()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -300,45 +254,32 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
                             System.out.println("Sender created!" + sender.getFirstName());
                             storageRef.child("profile").child(sender.getFireBaseID()).
                                     getBytes(2048 * 2048).
-                                    addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                        @Override
-                                        public void onSuccess(byte[] bytes) {
-                                            sender.setProfileImage(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-                                            System.out.println("GOT SENDER PROFILE IMAGE");
+                                    addOnSuccessListener(bytes -> {
+                                        sender.setProfileImage(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+                                        System.out.println("GOT SENDER PROFILE IMAGE");
+                                    }).addOnFailureListener(e -> {
+
+                                if (sender.getFacebookURL() != null) {
+                                    System.out.println("**** instance facebook" + sender.getFacebookURL());
+                                    new DownloadFacebookProfileImage(sender.getFacebookURL(), (bitmap) -> {
+                                        if (bitmap != null) {
+                                            System.out.println("BITMAP IS NOT NULL");
+                                            sender.setProfileImage(bitmap);
+                                        } else {
+                                            System.out.println("BITMAP IS NULL");
+                                            sender.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
+                                            System.out.println("Got fake profile picture");
                                         }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
+                                    }).execute();
 
-                                    if(sender.getFacebookURL() != null){
-                                        System.out.println("**** instance facebook"+sender.getFacebookURL());
-                                        new DownloadFacebookProfileImage(sender.getFacebookURL(), (bitmap)-> {
-                                            if(bitmap!= null) {
-                                                System.out.println("BITMAP IS NOT NULL");
-                                                sender.setProfileImage(bitmap);
-                                            } else {
-                                                System.out.println("BITMAP IS NULL");
-                                                sender.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
-                                                System.out.println("Got fake profile picture");
-                                            }
-                                        }).execute();
-
-                                    } else {
-                                        sender.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
-                                        System.out.println("Got fake picture");
-                                    }
-
-
-
-
-
-//
-//
-
+                                } else {
+                                    sender.setProfileImage(BitmapFactory.decodeResource(context.getResources(), R.drawable.profile_image));
+                                    System.out.println("Got fake picture");
                                 }
+
                             });
 
-                            item.addSender(comment.getUid() , sender);
+                            item.addSender(comment.getUid(), sender);
                             System.out.println(commentSenders.keySet().size());
                             System.out.println("USER ADDED TO DIC");
 
@@ -365,18 +306,18 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
         }
     }
 
-    private void checkCommentsLoading(RadioItem item , List<Comment> comments , ChangeProgress changeProgress) {
+    private void checkCommentsLoading(RadioItem item, List<Comment> comments, ChangeProgress changeProgress) {
         System.out.println("INSIDE COMMENTS TIMER");
         System.out.println(item.getCommentsArray().size() + "COMMENTS SIZE FOR ITEM");
         System.out.println(item.getCommentSenders().size() + "SENDERS SIZE");
         System.out.println(item.getComments() + "COUNT");
 
-        if(item.getCommentsArray().size() == item.getCommentSenders().size() &&
-            item.getCommentsArray().size() == item.getComments()){
+        if (item.getCommentsArray().size() == item.getCommentSenders().size() &&
+                item.getCommentsArray().size() == item.getComments()) {
             commentsTimer.cancel();
             commentsTimer.purge();
 
-
+    //TODO: shahaf check that one empty
             if (once) {
                 //update adapter
 //                isDoneAll.add(true);
@@ -384,19 +325,16 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
 
             } else {
                 System.out.println("INSIDE ELSE");
-//                if (updateServer != null) {
-//                    updateServer.updateComments(item);
-                    notifyServerObservers(item, UPDATE_COMMENTS);
-//                }
+                notifyServerObservers(item, UPDATE_COMMENTS);
             }
 
         }
     }
 
 
-    public void addFavorites(RadioItem radioItem){
+    public void addFavorites(RadioItem radioItem) {
         FirebaseUser newUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(newUser != null) {
+        if (newUser != null) {
             ref.child("favorites").child(newUser.getUid()).child(radioItem.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -419,24 +357,20 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
     }
 
 
-    public void addView(RadioItem radioItem){
+    public void addView(RadioItem radioItem) {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         ref.child("views").child(radioItem.getUid()).child(firebaseUser.getUid()).setValue(ServerValue.TIMESTAMP);
-//        ref.child("streams").child(radioItem.getUid()).child("views").setValue(radioItem.getViews());
-
     }
 
-    public void addComment(Comment comment, RadioItem radioItem){
+    public void addComment(Comment comment, RadioItem radioItem) {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         String key = ref.child("comments").child(radioItem.getUid()).child(firebaseUser.getUid()).push().getKey();
         comment.setUid(key);
         ref.child("comments").child(radioItem.getUid()).child(comment.getUid()).setValue(comment);
-//        ref.child("streams").child(radioItem.getUid()).child("comments").setValue(radioItem.getComments());
-
     }
 
-    public void addLikes(RadioItem radioItem){
+    public void addLikes(RadioItem radioItem) {
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -453,11 +387,9 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                         //at the moment it updates only minus, no plus for likes. need to figure out.
-                        if (dataSnapshot.getValue() != null){
+                        if (dataSnapshot.getValue() != null) {
                             radioItem.setLikes(radioItem.getLikes() - 1);
-                            //remove from likes
                             ref.child("likes").child(radioItem.getUid()).child(firebaseUser.getUid()).removeValue();
-//                        ref.child("likes").child(radioItem.getUid()).child(firebaseUser.getUid()).setValue(ServerValue.TIMESTAMP);
                             System.out.println("Suppose to take off like");
                             //update the stream
                             ref.child("streams").child(radioItem.getUid()).child("likes").setValue(radioItem.getLikes());
@@ -476,21 +408,19 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
                         System.out.println("DATA ERROR LIKES");
                     }
                 });
-            }  else {
-                    System.out.println("THE ID is null!");
-                }
+            } else {
+                System.out.println("THE ID is null!");
+            }
         }
     }
 
-    public void checkLoadingComplete(DoneUpdatingLikes doneUpdatingLikes){
+    public void checkLoadingComplete(DoneUpdatingLikes doneUpdatingLikes) {
         if (isDoneAll.size() == (fireBaseStreams.size() * 3)) {
 
-            //stop timer
             t.cancel();
             t.purge();
             once = false;
             doneUpdatingLikes.done();
-
 
         }
     }
@@ -501,7 +431,7 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
 
     @Override
     public void registerServerObserver(UpdateServer updateServerObserver) {
-        if(!updateServerListeners.contains(updateServerObserver)) {
+        if (!updateServerListeners.contains(updateServerObserver)) {
             System.out.println("SERVER LISTENER ADDED");
             updateServerListeners.add(updateServerObserver);
         }
@@ -509,19 +439,19 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
 
     @Override
     public void removeServerObserver(UpdateServer updateServerObserver) {
-        if(updateServerListeners.contains(updateServerObserver)) {
+        if (updateServerListeners.contains(updateServerObserver)) {
             System.out.println("SERVER LISTENER REMOVED");
             updateServerListeners.remove(updateServerObserver);
         }
     }
 
     @Override
-    public void notifyServerObservers(RadioItem item , String method) {
+    public void notifyServerObservers(RadioItem item, String method) {
 
         for (UpdateServer serverListener : updateServerListeners) {
             System.out.println("NOTIFY SERVER OBSERVER");
 
-            switch (method){
+            switch (method) {
                 case UPDATE_LIKES:
                     serverListener.updateLikes(item);
                     break;
@@ -539,9 +469,9 @@ public class FirebaseItemsDataSource implements SubjectServerUpdates{
     }
 }
 
-    interface DoneUpdatingLikes{
+interface DoneUpdatingLikes {
     void done();
-        }
+}
 
 
 

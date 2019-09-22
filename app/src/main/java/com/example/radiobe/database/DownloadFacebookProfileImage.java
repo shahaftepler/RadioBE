@@ -2,40 +2,25 @@ package com.example.radiobe.database;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
-
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 
 public class DownloadFacebookProfileImage extends AsyncTask<Void, Void, Bitmap> {
-    String uriString;
-    FacebookProfilePictureDownloadedListener listener;
+    private String uriString;
+    private FacebookProfilePictureDownloadedListener listener;
 
 
-    public DownloadFacebookProfileImage(String uriString , FacebookProfilePictureDownloadedListener listener){
+    DownloadFacebookProfileImage(String uriString, FacebookProfilePictureDownloadedListener listener){
         this.uriString = uriString;
         this.listener = listener;
     }
     @Override
     protected Bitmap doInBackground(Void... voids) {
         Bitmap bitmap = null;
-        Uri uri = Uri.parse(uriString+"?type=large");
         try {
-
-//            URL imgUrl = new URL("https://graph.facebook.com/{user-id}/picture?type=large");
-//            InputStream in = (InputStream) imgUrl.getContent();
-//            Bitmap  bitmap = BitmapFactory.decodeStream(in);
-
-
             URL url = new URL(uriString);
-//            URLConnection con = url.openConnection();
-
-//            InputStream in = con.getInputStream();
-
             InputStream in = (InputStream) url.getContent();
             bitmap = BitmapFactory.decodeStream(in);
         } catch (Exception e) {
