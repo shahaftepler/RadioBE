@@ -4,8 +4,6 @@ package com.example.radiobe.adapters;
 import com.example.radiobe.fragments.AllPrograms;
 import com.example.radiobe.fragments.Favorites;
 import com.example.radiobe.fragments.Notifications;
-
-
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -24,9 +22,6 @@ import androidx.fragment.app.FragmentPagerAdapter;
         public Fragment getItem(int position) {
 
             switch(position) {
-//                case 0:
-//                    return new ExoPlayerView();
-//                    return new AllPrograms();
                 case 0:
                     return new Notifications();
                 case 1:
@@ -39,7 +34,6 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
             return 3;
         }
     }

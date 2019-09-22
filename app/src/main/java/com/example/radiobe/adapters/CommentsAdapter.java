@@ -7,29 +7,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.radiobe.R;
 import com.example.radiobe.database.FirebaseItemsDataSource;
 import com.example.radiobe.database.UpdateServer;
 import com.example.radiobe.models.Comment;
 import com.example.radiobe.models.RadioItem;
 import com.example.radiobe.models.User;
-
 import java.util.List;
 import java.util.Map;
 
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.CommentsViewHolder> implements UpdateServer {
-
-    List<Comment> commentList;
-    Context context;
-    Map<String , User> commentSenders;
-    Activity activity;
+    //properties
+    private List<Comment> commentList;
+    private Context context;
+    private Map<String , User> commentSenders;
+    private Activity activity;
 
     //constructor
-    public CommentsAdapter(List<Comment> commentList, Map<String , User> commentSenders, Context context, Activity activity){
+    CommentsAdapter(List<Comment> commentList, Map<String, User> commentSenders, Context context, Activity activity){
         this.commentList = commentList;
         this.context = context;
         this.commentSenders = commentSenders;
@@ -38,15 +35,15 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         System.out.println("----+++++"+commentList);
     }
 
+
     @NonNull
     @Override
     public CommentsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View view = layoutInflater.inflate(R.layout.item_comment_user
         , parent, false);
-        CommentsViewHolder commentsViewHolder = new CommentsViewHolder(view);
 
-        return commentsViewHolder;
+        return new CommentsViewHolder(view);
     }
 
     @Override
@@ -94,7 +91,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         TextView tvCommentText;
         TextView tvCommentTime;
 
-        public CommentsViewHolder(@NonNull View itemView) {
+        CommentsViewHolder(@NonNull View itemView) {
             super(itemView);
             imageUserComment = itemView.findViewById(R.id.ivImageComment);
             tvUserNameComment = itemView.findViewById(R.id.tvUserName);

@@ -1,82 +1,63 @@
 package com.example.radiobe.adapters;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-
 import com.example.radiobe.R;
-//import com.example.radiobe.StreamDAO;
-
 import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.database.FirebaseItemsDataSource;
 import com.example.radiobe.database.RefreshFavorites;
 import com.example.radiobe.database.UpdateServer;
-import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.Comment;
 import com.example.radiobe.models.RadioItem;
-import com.google.android.exoplayer2.Player;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.threeten.bp.LocalDate;
-
 public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.RadioViewHolder> implements Filterable , UpdateServer {
-    List<RadioItem> streams;
-    RecyclerView recyclerView;
-    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-    Context context;
-    List<RadioItem> filteredStreams;
-    Activity activity;
-    BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String streamId = intent.getStringExtra("stream_id");
-            changeToggles(streamId);
-        }
-    };
+    private List<RadioItem> streams;
+    private RecyclerView recyclerView;
+    private FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+    private Context context;
+    private List<RadioItem> filteredStreams;
+    private Activity activity;
 
     public RadioItemsAdapter(List<RadioItem> streams, RecyclerView recyclerView, Context context, Activity activity) {
         this.streams = streams;
-        //change 1
         this.filteredStreams = streams;
         this.recyclerView = recyclerView;
-//        this.progressBar = pb;
         this.context = context;
         this.activity = activity;
         FirebaseItemsDataSource.getInstance().registerServerObserver(this);
-        LocalBroadcastManager.getInstance(context).registerReceiver(receiver , new IntentFilter("play_song"));
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String streamId = intent.getStringExtra("stream_id");
+                changeToggles(streamId);
+            }
+        };
+        LocalBroadcastManager.getInstance(context).registerReceiver(receiver, new IntentFilter("play_song"));
     }
 
 
@@ -89,9 +70,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 
         View viewItem = inflater.inflate(R.layout.item_radio, parent, false);
 
-        RadioViewHolder holder = new RadioViewHolder(viewItem);
-
-        return holder;
+        return new RadioViewHolder(viewItem);
 
     }
 
@@ -100,19 +79,14 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 
     @Override
     public void onBindViewHolder(@NonNull RadioViewHolder holder, int position) {
-        //change 2
-
         RadioItem radioItem = filteredStreams.get(position);
         holder.radioItem = radioItem;
-//        RadioItem radioItem = streams.get(position);
         holder.tvFileName.setText(radioItem.getItemName());
-//        holder.tvDuration.setText(String.valueOf(radioItem.getDuration()));
         holder.tvDuration.setText(radioItem.getDurationString());
         holder.tvAdded.setText(String.valueOf(radioItem.getCreationDateString()));
         holder.tvViews.setText(String.valueOf(radioItem.getViews()));
         holder.tvComments.setText(String.valueOf(radioItem.getComments()));
         holder.tvLikes.setText(String.valueOf(radioItem.getLikes()));
-
 
         if(CurrentUser.getInstance().getFavorites().contains(radioItem)){
             Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_red);
@@ -122,9 +96,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             holder.addFavorites.setImageDrawable(d);
         }
 
-        holder.addLike.setOnClickListener((v) -> {
-            FirebaseItemsDataSource.getInstance().addLikes(radioItem);
-        });
+        holder.addLike.setOnClickListener((v) -> FirebaseItemsDataSource.getInstance().addLikes(radioItem));
 
         holder.addComment.setOnClickListener((v) -> {
             holder.addCommentEditText.setEnabled(true);
@@ -152,7 +124,6 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
                 holder.addCommentEditText.setVisibility(View.GONE);
                 holder.sendButton.setVisibility(View.GONE);
                 holder.closeCommentButton.setVisibility(View.GONE);
-
                 holder.addCommentEditText.setText("");
                 holder.addCommentEditText.setEnabled(false);
             });
@@ -164,8 +135,7 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             System.out.println(radioItem.getCommentSenders());
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             View viewForAlert = LayoutInflater.from(context).inflate(R.layout.dialog_comment, null);
-            ImageButton close = (ImageButton) viewForAlert.findViewById(R.id.idCloseComment);
-
+            ImageButton close = viewForAlert.findViewById(R.id.idCloseComment);
 
             builder.setView(viewForAlert);
 
@@ -189,25 +159,22 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
 
         }));
 
-        holder.tb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean b = holder.tb.isChecked();
-                Intent intent = new Intent("play_song");
-                intent.putExtra("stream_name", radioItem.getItemName());
-                intent.putExtra("stream_url", radioItem.getFilePath());
-                intent.putExtra("stream_id" , radioItem.getUid());
-                intent.putExtra("play", b);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        holder.tb.setOnClickListener(v -> {
+            boolean b = holder.tb.isChecked();
+            Intent intent = new Intent("play_song");
+            intent.putExtra("stream_name", radioItem.getItemName());
+            intent.putExtra("stream_url", radioItem.getFilePath());
+            intent.putExtra("stream_id" , radioItem.getUid());
+            intent.putExtra("play", b);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
-                if (b) {
-                    FirebaseItemsDataSource.getInstance().addView(radioItem);
-                    System.out.println("Viewed");
-
-                }
-                changeToggles(radioItem.getUid());
+            if (b) {
+                FirebaseItemsDataSource.getInstance().addView(radioItem);
+                System.out.println("Viewed");
 
             }
+            changeToggles(radioItem.getUid());
+
         });
 
 
@@ -216,9 +183,6 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
             intent.putExtra("stream_url", radioItem.getFilePath());
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         });
-
-        //holder.tb.setBackgroundResource(radioItem.getResImage());
-
 
         holder.addFavorites.setOnClickListener((v)->{
             FirebaseItemsDataSource.getInstance().addFavorites(radioItem);
@@ -274,7 +238,6 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
                     } else {
                         List<RadioItem> filteredList = new ArrayList<>();
                         for (RadioItem row : streams) {
-
                             // name match condition. this might differ depending on your requirement
                             // here we are looking for name or phone number match
                             if (row.getVodName().toLowerCase().contains(charString.toLowerCase())) {
@@ -293,7 +256,6 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
                 @Override
                 protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
                     filteredStreams = (ArrayList<RadioItem>) filterResults.values;
-
                     // refresh the list with filtered data
                     notifyDataSetChanged();
                 }
@@ -324,13 +286,11 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         for (int i = 0; i < recyclerView.getChildCount(); i++) {
             int finalI = i;
             RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-            //holder.radioItem.getItemName()
             if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
                 System.out.println("Item Changed COMMENTS---->"+holder.radioItem.getItemName());
 
                 activity.runOnUiThread(()->{
                     holder.tvComments.setText(String.valueOf(item.getComments()));
-//                    notifyItemChanged(finalI);
                     notifyDataSetChanged();
                 });
                 return;
@@ -344,14 +304,12 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         for (int i = 0; i < recyclerView.getChildCount(); i++) {
             int finalI = i;
             RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-            //holder.radioItem.getItemName()
             if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
                 System.out.println("Item Changed VIEWS---->"+holder.radioItem.getItemName());
 
 
                 activity.runOnUiThread(()->{
                     holder.tvViews.setText(String.valueOf(item.getViews()));
-//                    notifyItemChanged(finalI);
                     notifyDataSetChanged();
                 });
                 return;
@@ -378,10 +336,9 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         ImageButton sendButton;
         ImageButton closeCommentButton;
         RadioItem radioItem;
-//        TextView tvCloudID;
 
 
-        public RadioViewHolder(@NonNull View itemView) {
+        RadioViewHolder(@NonNull View itemView) {
             super(itemView);
             CurrentUser.getInstance().registerFavoriteObserver(this);
             tb = itemView.findViewById(R.id.tbPlayStop);
@@ -423,102 +380,3 @@ public class RadioItemsAdapter extends RecyclerView.Adapter<RadioItemsAdapter.Ra
         }
     }
 }
-
-
-
-
-
-
-//
-//    @Override
-//    public void refresh(List<RadioItem> favorites) {
-//
-//
-//            for (int i = 0; i < recyclerView.getChildCount(); i++) {
-//                int finalI = i;
-//                RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-//                //holder.radioItem.getItemName()
-//                if ((holder != null) && favorites.contains(holder.radioItem)){
-//                    System.out.println("Item Changed VIEWS---->");
-//
-//                    Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_red);
-//                    activity.runOnUiThread(()->{
-//                        holder.addFavorites.setImageDrawable(d);
-//
-//                        //                    notifyItemChanged(finalI);
-//                        notifyDataSetChanged();
-//                    });
-//                    return;
-//
-//                } else {
-//                    if (holder != null) {
-//                        Drawable d = context.getResources().getDrawable(R.drawable.icons8_heart_black24);
-////                    holder.addFavorites.setImageDrawable(d);
-//                        activity.runOnUiThread(() -> {
-//                            holder.addFavorites.setImageDrawable(d);
-//
-//                            //                    notifyItemChanged(finalI);
-//                            notifyDataSetChanged();
-//                        });
-//                    }
-//                }
-//            }
-//        }
-
-
-
-
-//    public void updateLikes(){
-//        updateServer = new UpdateServer() {
-//            @Override
-//            public void updateLikes(RadioItem item) {
-//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
-//
-//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-//                    //holder.radioItem.getItemName()
-//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
-//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
-//
-//                        holder.tvLikes.setText(String.valueOf(item.getLikes()));
-//                        holder.tvViews.setText(String.valueOf(item.getViews()));
-//                        notifyItemChanged(i);
-//                        return;
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void updateComments(RadioItem item) {
-//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
-//
-//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-//                    //holder.radioItem.getItemName()
-//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
-//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
-//                        holder.tvComments.setText(String.valueOf(item.getComments()));
-//                        notifyItemChanged(i);
-//                        return;
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void updateViews(RadioItem item) {
-//                for (int i = 0; i < recyclerView.getChildCount(); i++) {
-//
-//                    RadioViewHolder holder = (RadioViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-//                    //holder.radioItem.getItemName()
-//                    if ((holder != null) && (holder.radioItem.getUid().equals(item.getUid()))){
-//                        System.out.println("Item Changed---->"+holder.radioItem.getItemName());
-//                        holder.tvViews.setText(String.valueOf(item.getViews()));
-//                        notifyItemChanged(i);
-//                        return;
-//                    }
-//                }
-//            }
-//
-//
-//            };
-//
-//        FirebaseItemsDataSource.getInstance().setUpdateLikes(updateServer);
-//    }

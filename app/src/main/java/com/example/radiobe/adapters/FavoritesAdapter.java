@@ -6,54 +6,36 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.example.radiobe.MainActivity;
 import com.example.radiobe.R;
 import com.example.radiobe.database.CurrentUser;
 import com.example.radiobe.database.FirebaseItemsDataSource;
 import com.example.radiobe.database.RefreshFavorites;
-import com.example.radiobe.fragments.MainScreen;
 import com.example.radiobe.models.RadioItem;
-import com.facebook.login.LoginManager;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.lang.reflect.Array;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.FavoritesViewHolder> implements RefreshFavorites{
-    /*Properties*/
+public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.FavoritesViewHolder> implements RefreshFavorites {
+    //Properties
     private List<RadioItem> favoriteItemList;
     private Context context;
-    Activity activity;
-    DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-    RecyclerView recyclerView;
-//    RefreshFavorites refreshFavorites;
-
-    BroadcastReceiver mediaBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String streamId = intent.getStringExtra("stream_id");
-            changeToggles(streamId);
-        }
-    };
+    private Activity activity;
+    private DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+    private RecyclerView recyclerView;
 
 
     /*Constructor*/
@@ -62,9 +44,14 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         this.context = activity;
         this.activity = activity;
         CurrentUser.getInstance().registerFavoriteObserver(this);
+        BroadcastReceiver mediaBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String streamId = intent.getStringExtra("stream_id");
+                changeToggles(streamId);
+            }
+        };
         LocalBroadcastManager.getInstance(context).registerReceiver(mediaBroadcastReceiver, new IntentFilter("play_song"));
-
-
     }
 
     @NonNull
@@ -84,43 +71,33 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         RadioItem favoriteRecommendedItem = favoriteItemList.get(position);
         holder.radioItem = favoriteRecommendedItem;
         holder.tvFavoriteTitle.setText(favoriteRecommendedItem.getItemName());
-        holder.toggleButtonFavorite.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean b = holder.toggleButtonFavorite.isChecked();
-                Intent intent = new Intent("play_song");
-                intent.putExtra("stream_name", favoriteRecommendedItem.getItemName());
-                intent.putExtra("stream_url", favoriteRecommendedItem.getFilePath());
-                intent.putExtra("stream_id" , favoriteRecommendedItem.getUid());
-                intent.putExtra("play", b);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        holder.toggleButtonFavorite.setOnClickListener(v -> {
+            boolean b = holder.toggleButtonFavorite.isChecked();
+            Intent intent = new Intent("play_song");
+            intent.putExtra("stream_name", favoriteRecommendedItem.getItemName());
+            intent.putExtra("stream_url", favoriteRecommendedItem.getFilePath());
+            intent.putExtra("stream_id", favoriteRecommendedItem.getUid());
+            intent.putExtra("play", b);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
-                if (b) {
-                    FirebaseItemsDataSource.getInstance().addView(favoriteRecommendedItem);
-                    System.out.println("Viewed");
-
-                }
-                changeToggles(favoriteRecommendedItem.getUid());
+            if (b) {
+                FirebaseItemsDataSource.getInstance().addView(favoriteRecommendedItem);
+                System.out.println("Viewed");
 
             }
+            changeToggles(favoriteRecommendedItem.getUid());
+
         });
 
 
-
-        holder.deleteFavorite.setOnClickListener((v)->{
+        holder.deleteFavorite.setOnClickListener((v) -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setMessage("Are you sure you want to delete " + favoriteRecommendedItem.getItemName() + " from your favorites?")
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            ref.child("favorites").child(CurrentUser.getInstance().getFireBaseID()).child(favoriteRecommendedItem.getUid()).removeValue();
-                            Toast.makeText(context, favoriteRecommendedItem.getItemName() + " Deleted from favorites!", Toast.LENGTH_SHORT).show();
-                        }
+                    .setPositiveButton("Yes", (dialog, id) -> {
+                        ref.child("favorites").child(CurrentUser.getInstance().getFireBaseID()).child(favoriteRecommendedItem.getUid()).removeValue();
+                        Toast.makeText(context, favoriteRecommendedItem.getItemName() + " Deleted from favorites!", Toast.LENGTH_SHORT).show();
                     })
-                    .setNegativeButton("Nope", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            Toast.makeText(context, "No change!", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    .setNegativeButton("Nope", (dialog, id) -> Toast.makeText(context, "No change!", Toast.LENGTH_SHORT).show());
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
         });
@@ -134,9 +111,9 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         this.recyclerView = recyclerView;
     }
 
-    private void changeToggles(String streamId){
+    private void changeToggles(String streamId) {
 
-        if(recyclerView != null) {
+        if (recyclerView != null) {
             for (int i = 0; i < recyclerView.getChildCount(); i++) {
 
                 FavoritesAdapter.FavoritesViewHolder holder = (FavoritesAdapter.FavoritesViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
@@ -147,12 +124,11 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
                             System.out.println("CHANGED STATE" + holder.radioItem.getItemName());
                         }
                         System.out.println("NEW");
-                    }
-                    else {
-                        if(!holder.toggleButtonFavorite.isChecked())
+                    } else {
+                        if (!holder.toggleButtonFavorite.isChecked())
                             holder.toggleButtonFavorite.setChecked(true);
 
-                        else{
+                        else {
                             holder.toggleButtonFavorite.setChecked(false);
                         }
                     }
@@ -173,36 +149,15 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
     @Override
     public void refresh(List<RadioItem> favorites) {
         favoriteItemList = favorites;
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        System.out.println("Suppose to update");
-                        notifyDataSetChanged();
-                    }
-                });
-
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Suppose to update");
+                notifyDataSetChanged();
             }
+        });
 
-
-
-//    public void initRefreshListener(Activity activity){
-//        refreshFavorites = new RefreshFavorites() {
-//            @Override
-//            public void refresh(List<RadioItem> favorites) {
-//                favoriteItemList = favorites;
-//                activity.runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        System.out.println("Suppose to update");
-//                        notifyDataSetChanged();
-//                    }
-//                });
-//
-//            }
-//        };
-//        System.out.println(refreshFavorites + "LISTENER");
-//        CurrentUser.getInstance().setRefreshFavoritesListener(refreshFavorites);
-//    }
+    }
 
     class FavoritesViewHolder extends RecyclerView.ViewHolder {
         /*Properties*/
@@ -219,12 +174,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
             tvFavoriteTitle = itemView.findViewById(R.id.tvItemFavoriteTitle);
             deleteFavorite = itemView.findViewById(R.id.deleteFavorite);
 
-
         }
-
-
-
-
 
     }
 
