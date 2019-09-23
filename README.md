@@ -18,7 +18,7 @@ App was created in android course as final project.
 ## Acknowledgments
 
 - HackerU College [hackerU](https://hackeru.co.il).
-- Tomer Abo - our lecturer.
+- Tomer Buzaglo - Our lecturer.
 
 
 ### Authors
