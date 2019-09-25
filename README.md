@@ -1,9 +1,9 @@
 # RadioBe - Radio Beit Ekstein
 
-RadioBe was created in Hackathon competition for *Beit Ekshtein*, School with radio station class, that activate by the childrens.\
-We ask to give them the abillty to expend the radio to other people like family and friends.\
-RadioBe is designed to give the user a simple and easy to get the best user experience, thay can listen to there friends broadcasting, comment ,like ,share and save the shows thay like in the favorite saction.\
-App was created in android course as final project.
+RadioBe was created in a Hackathon competition for *Beit Ekshtein* School located in Israel's north. This school has a radio station for youngsters, operated by them, called *Radio Kol Etzion*.\
+We were asked to give them the abillty to expand the radio station to other people like their family and friends.\
+RadioBe is designed quite simple and easy to provide the best user experience. The users can listen to their friends broadcasting, comment ,like ,share and save the shows they like in the personal favorite section.\
+The App was created in android development course as the final project.
 
 ## RadioBe Photos
 <img src="https://github.com/shahaftepler/RadioBE/blob/master/app/src/main/res/drawable-v24/screen_shot_login2.png" height="270" width="170">  <img src="https://github.com/shahaftepler/RadioBE/blob/master/app/src/main/res/drawable-v24/screen_shot_login1.png" height="270" width="170"> <img src="https://github.com/shahaftepler/RadioBE/blob/master/app/src/main/res/drawable-v24/screen_shot_main.png" height="270" width="170">  <img src="https://github.com/shahaftepler/RadioBE/blob/master/app/src/main/res/drawable-v24/screen_shot_favorite.png" height="270" width="170">
