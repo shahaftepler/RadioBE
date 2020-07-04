@@ -1,6 +1,6 @@
 # RadioBe - Radio Beit Ekstein
 
-RadioBe was created in a Hackathon competition for *Beit Ekshtein* School located in Israel's north. This school has a radio station for youngsters, operated by them, called *Radio Kol Etzion*.\
+RadioBe was created in a Hackathon competition for *Beit Ekshtein* School located in Israel's northern area. This school has a radio station for youngsters, operated by them, called *Radio Kol Etzion*.\
 We were asked to give them the abillty to expand the radio station to other people like their family and friends.\
 RadioBe is designed quite simple and easy to provide the best user experience. The users can listen to their friends broadcasting, comment, like, share and save the broadcasts they like in the personal favorite section.\
 The App was created as the final project for our android development course.
